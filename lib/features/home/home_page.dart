@@ -1,0 +1,926 @@
+import 'dart:async';
+import 'dart:math';
+
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:ionicons/ionicons.dart';
+import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+
+import '../../core/theme/app_theme.dart';
+import 'home_controller.dart';
+
+class HomePage extends StatelessWidget {
+  const HomePage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = Get.put(HomeController());
+
+    return Scaffold(
+      body: Stack(
+        children: [
+          // 背景渐变
+          Obx(() => AnimatedContainer(
+            duration: const Duration(milliseconds: 800),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: controller.isDrinking.value
+                    ? [
+                        const Color(0xFF00D4FF).withOpacity(0.3),
+                        const Color(0xFF0099CC).withOpacity(0.5),
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ]
+                    : [
+                        Theme.of(context).scaffoldBackgroundColor,
+                        Theme.of(context).scaffoldBackgroundColor,
+                      ],
+                stops: controller.isDrinking.value
+                    ? const [0.0, 0.5, 1.0]
+                    : const [0.0, 1.0],
+              ),
+            ),
+          )),
+
+          // 气泡动画
+          Obx(() => controller.isDrinking.value
+              ? const _BubbleAnimation()
+              : const SizedBox.shrink()),
+
+          // 主要内容
+          SafeArea(
+            child: Column(
+              children: [
+                _buildAppBar(context, controller),
+                Expanded(
+                  child: Obx(() {
+                    if (controller.isLoading.value) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return _buildContent(context, controller);
+                  }),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 顶部导航栏
+  Widget _buildAppBar(BuildContext context, HomeController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(
+                  Icons.water_drop_rounded,
+                  color: AppTheme.primaryColor,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                '智能饮水',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          Row(
+            children: [
+              IconButton(
+                onPressed: controller.loadDevices,
+                icon: const Icon(Ionicons.refresh_outline),
+                tooltip: '刷新',
+              ),
+              IconButton(
+                onPressed: () => _showSettingsSheet(context, controller),
+                icon: const Icon(Ionicons.settings_outline),
+                tooltip: '设置',
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 主要内容
+  Widget _buildContent(BuildContext context, HomeController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          
+          // 状态显示
+          _buildStatusCard(context, controller),
+          
+          const SizedBox(height: 24),
+          
+          // 设备选择区域
+          _buildDeviceSection(context, controller),
+          
+          const Spacer(),
+          
+          // 操作按钮
+          _buildActionButton(context, controller),
+          
+          const SizedBox(height: 20),
+          
+          // 底部功能按钮
+          _buildBottomActions(context, controller),
+          
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  /// 状态卡片
+  Widget _buildStatusCard(BuildContext context, HomeController controller) {
+    return Obx(() {
+      final isDrinking = controller.isDrinking.value;
+      
+      return AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          gradient: isDrinking
+              ? const LinearGradient(
+                  colors: [Color(0xFF00D4FF), Color(0xFF0099CC)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                )
+              : null,
+          color: isDrinking ? null : Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: isDrinking
+                  ? AppTheme.primaryColor.withOpacity(0.3)
+                  : Colors.black.withOpacity(0.05),
+              blurRadius: 20,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: isDrinking
+                        ? Colors.white.withOpacity(0.2)
+                        : AppTheme.primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    isDrinking
+                        ? Ionicons.water
+                        : Ionicons.water_outline,
+                    color: isDrinking ? Colors.white : AppTheme.primaryColor,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      isDrinking ? '正在接水中' : '准备就绪',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: isDrinking ? Colors.white : null,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      isDrinking ? '接完后点击结算' : '选择设备开始接水',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: isDrinking
+                            ? Colors.white.withOpacity(0.8)
+                            : Colors.grey[600],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            if (isDrinking) ...[
+              const SizedBox(height: 20),
+              LinearProgressIndicator(
+                backgroundColor: Colors.white.withOpacity(0.2),
+                valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            ],
+          ],
+        ),
+      );
+    });
+  }
+
+  /// 设备选择区域
+  Widget _buildDeviceSection(BuildContext context, HomeController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text(
+              '我的设备',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            TextButton.icon(
+              onPressed: controller.scanAndAddDevice,
+              icon: const Icon(Ionicons.add_circle_outline, size: 20),
+              label: const Text('添加'),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Obx(() {
+          if (controller.deviceList.isEmpty) {
+            return _buildEmptyDeviceCard(context, controller);
+          }
+          return _buildDeviceCard(context, controller);
+        }),
+      ],
+    );
+  }
+
+  /// 空设备卡片
+  Widget _buildEmptyDeviceCard(BuildContext context, HomeController controller) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: Theme.of(context).cardColor,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.grey.withOpacity(0.2),
+          style: BorderStyle.solid,
+        ),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            Ionicons.hardware_chip_outline,
+            size: 48,
+            color: Colors.grey[400],
+          ),
+          const SizedBox(height: 16),
+          const Text(
+            '暂无设备',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            '扫描设备上的二维码添加',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: controller.scanAndAddDevice,
+            icon: const Icon(Ionicons.scan_outline),
+            label: const Text('扫码添加'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 设备卡片
+  Widget _buildDeviceCard(BuildContext context, HomeController controller) {
+    return GestureDetector(
+      onTap: () => _showDeviceSheet(context, controller),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
+        ),
+        child: Obx(() {
+          final device = controller.currentDevice;
+          return Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: const Icon(
+                  Ionicons.hardware_chip_outline,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      '当前设备',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      device?.formattedName ?? '未选择',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${controller.deviceList.length}个设备',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      Ionicons.chevron_forward,
+                      size: 14,
+                      color: Colors.grey[600],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }),
+      ),
+    );
+  }
+
+  /// 操作按钮
+  Widget _buildActionButton(BuildContext context, HomeController controller) {
+    return Obx(() {
+      final isDrinking = controller.isDrinking.value;
+      final hasDevice = controller.currentDevice != null;
+      
+      return SizedBox(
+        width: double.infinity,
+        height: 64,
+        child: FilledButton(
+          onPressed: hasDevice
+              ? (isDrinking ? controller.stopDrinking : controller.startDrinking)
+              : null,
+          style: FilledButton.styleFrom(
+            backgroundColor: isDrinking ? Colors.orange : AppTheme.primaryColor,
+            disabledBackgroundColor: Colors.grey[300],
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+            ),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                isDrinking ? Ionicons.stop_circle : Ionicons.play_circle,
+                size: 28,
+              ),
+              const SizedBox(width: 12),
+              Text(
+                isDrinking ? '结算' : '开始接水',
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  /// 底部功能按钮
+  Widget _buildBottomActions(BuildContext context, HomeController controller) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        TextButton.icon(
+          onPressed: () => _showDeviceManageSheet(context, controller),
+          icon: const Icon(Ionicons.grid_outline, size: 18),
+          label: const Text('管理设备'),
+        ),
+        const SizedBox(width: 20),
+        TextButton.icon(
+          onPressed: controller.scanAndAddDevice,
+          icon: const Icon(Ionicons.scan_outline, size: 18),
+          label: const Text('扫码添加'),
+        ),
+      ],
+    );
+  }
+
+  /// 显示设备选择弹窗
+  void _showDeviceSheet(BuildContext context, HomeController controller) {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Material(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '选择设备',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Obx(() => ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: MediaQuery.of(context).size.height * 0.4,
+                ),
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: controller.deviceList.length,
+                  itemBuilder: (context, index) {
+                    final device = controller.deviceList[index];
+                    final isSelected = controller.selectedDeviceIndex.value == index;
+                    
+                    return ListTile(
+                      leading: Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? AppTheme.primaryColor.withOpacity(0.1)
+                              : Colors.grey[100],
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          Ionicons.hardware_chip_outline,
+                          color: isSelected ? AppTheme.primaryColor : Colors.grey,
+                        ),
+                      ),
+                      title: Text(
+                        device.formattedName,
+                        style: TextStyle(
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                      ),
+                      subtitle: Text('ID: ${device.id}'),
+                      trailing: isSelected
+                          ? const Icon(
+                              Ionicons.checkmark_circle,
+                              color: AppTheme.primaryColor,
+                            )
+                          : null,
+                      onTap: () {
+                        controller.selectDevice(index);
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              )),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 显示设备管理弹窗
+  void _showDeviceManageSheet(BuildContext context, HomeController controller) {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Material(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '设备管理',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Obx(() {
+                if (controller.deviceList.isEmpty) {
+                  return Padding(
+                    padding: const EdgeInsets.all(40),
+                    child: Column(
+                      children: [
+                        Icon(
+                          Ionicons.hardware_chip_outline,
+                          size: 48,
+                          color: Colors.grey[400],
+                        ),
+                        const SizedBox(height: 16),
+                        const Text('暂无设备'),
+                      ],
+                    ),
+                  );
+                }
+                
+                return ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxHeight: MediaQuery.of(context).size.height * 0.4,
+                  ),
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: controller.deviceList.length,
+                    itemBuilder: (context, index) {
+                      final device = controller.deviceList[index];
+                      
+                      return ListTile(
+                        leading: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey[100],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Ionicons.hardware_chip_outline,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        title: Text(device.formattedName),
+                        subtitle: Text('ID: ${device.id}'),
+                        trailing: IconButton(
+                          icon: const Icon(
+                            Ionicons.trash_outline,
+                            color: Colors.red,
+                          ),
+                          onPressed: () {
+                            _showDeleteConfirm(context, controller, device);
+                          },
+                        ),
+                      );
+                    },
+                  ),
+                );
+              }),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: FilledButton.icon(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    controller.scanAndAddDevice();
+                  },
+                  icon: const Icon(Ionicons.add),
+                  label: const Text('添加新设备'),
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 删除确认
+  void _showDeleteConfirm(BuildContext context, HomeController controller, device) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认删除'),
+        content: Text('确定要删除设备 "${device.formattedName}" 吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              controller.removeDevice(device);
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('删除'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 显示设置弹窗
+  void _showSettingsSheet(BuildContext context, HomeController controller) {
+    showCupertinoModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Material(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20),
+          topRight: Radius.circular(20),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 12),
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 20),
+              const Text(
+                '设置',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 16),
+              ListTile(
+                leading: const Icon(Ionicons.information_circle_outline),
+                title: const Text('关于'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showAboutDialog(context);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Ionicons.log_out_outline, color: Colors.red),
+                title: const Text('退出登录', style: TextStyle(color: Colors.red)),
+                onTap: () {
+                  Navigator.pop(context);
+                  _showLogoutConfirm(context, controller);
+                },
+              ),
+              const SizedBox(height: 20),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// 关于对话框
+  void _showAboutDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Icon(
+                Icons.water_drop_rounded,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(width: 12),
+            const Text('智能饮水'),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('版本: 1.0.0'),
+            SizedBox(height: 8),
+            Text('一款简洁美观的智能饮水APP'),
+            SizedBox(height: 8),
+            Text('快速接水，轻松生活'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('确定'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// 退出登录确认
+  void _showLogoutConfirm(BuildContext context, HomeController controller) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('确认退出'),
+        content: const Text('确定要退出登录吗？'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              controller.logout();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('退出'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// 气泡动画组件
+class _BubbleAnimation extends StatefulWidget {
+  const _BubbleAnimation();
+
+  @override
+  State<_BubbleAnimation> createState() => _BubbleAnimationState();
+}
+
+class _BubbleAnimationState extends State<_BubbleAnimation>
+    with TickerProviderStateMixin {
+  final List<_Bubble> _bubbles = [];
+  Timer? _timer;
+  final Random _random = Random();
+
+  @override
+  void initState() {
+    super.initState();
+    _startAnimation();
+  }
+
+  void _startAnimation() {
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (timer) {
+      if (mounted && _bubbles.length < 30) {
+        setState(() {
+          _bubbles.add(_Bubble(
+            x: _random.nextDouble() * (MediaQuery.of(context).size.width - 50),
+            size: _random.nextDouble() * 30 + 10,
+            speed: _random.nextDouble() * 2 + 1,
+            controller: AnimationController(
+              duration: Duration(seconds: (_random.nextInt(3) + 2)),
+              vsync: this,
+            )..forward(),
+          ));
+        });
+
+        // 移除已完成的气泡
+        _bubbles.removeWhere((bubble) {
+          if (bubble.controller.isCompleted) {
+            bubble.controller.dispose();
+            return true;
+          }
+          return false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    for (var bubble in _bubbles) {
+      bubble.controller.dispose();
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      children: _bubbles.map((bubble) {
+        return AnimatedBuilder(
+          animation: bubble.controller,
+          builder: (context, child) {
+            final progress = bubble.controller.value;
+            return Positioned(
+              left: bubble.x + sin(progress * 4 * pi) * 20,
+              bottom: progress * MediaQuery.of(context).size.height,
+              child: Opacity(
+                opacity: 1 - progress,
+                child: Container(
+                  width: bubble.size,
+                  height: bubble.size,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    gradient: RadialGradient(
+                      colors: [
+                        Colors.white.withOpacity(0.3),
+                        AppTheme.primaryColor.withOpacity(0.2),
+                      ],
+                    ),
+                    border: Border.all(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      width: 1,
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _Bubble {
+  final double x;
+  final double size;
+  final double speed;
+  final AnimationController controller;
+
+  _Bubble({
+    required this.x,
+    required this.size,
+    required this.speed,
+    required this.controller,
+  });
+}

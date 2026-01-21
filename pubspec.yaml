@@ -1,0 +1,51 @@
+name: drink_water_app
+description: "一款简洁美观的智能饮水APP - 快速接水，轻松生活"
+publish_to: 'none'
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  
+  # UI
+  cupertino_icons: ^1.0.8
+  ionicons: ^0.2.2
+  flutter_svg: ^2.0.17
+  google_fonts: ^6.2.1
+  lottie: ^3.3.1
+  
+  # 状态管理
+  get: ^4.7.2
+  
+  # 网络
+  dio: ^5.8.0+1
+  
+  # 本地存储
+  shared_preferences: ^2.5.2
+  
+  # 工具
+  enhanced_future_builder: ^2.0.0
+  modal_bottom_sheet: ^3.0.0
+  
+  # 扫码
+  qr_code_scanner:
+    git: https://github.com/wizmea/qr_code_scanner.git
+  
+  # 权限
+  permission_handler: ^12.0.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+  
+  assets:
+    - assets/images/
+    - assets/icons/
