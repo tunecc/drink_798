@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/theme/app_theme.dart';
 import 'home_controller.dart';
@@ -769,15 +770,38 @@ class HomePage extends StatelessWidget {
             const Text('智能饮水'),
           ],
         ),
-        content: const Column(
+        content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('版本: 1.0.0'),
-            SizedBox(height: 8),
-            Text('一款简洁美观的智能饮水APP'),
-            SizedBox(height: 8),
-            Text('快速接水，轻松生活'),
+            const Text('版本: 1.0.0'),
+            const SizedBox(height: 8),
+            const Text('惠生活798喝水功能的第三方客户端'),
+            const SizedBox(height: 4),
+            Text(
+              '官方广告太多，所以做了这个简洁版',
+              style: TextStyle(
+                fontSize: 12,
+                color: Colors.grey[600],
+              ),
+            ),
+            const SizedBox(height: 16),
+            InkWell(
+              onTap: () => _launchUrl('https://github.com/tunecc/drink_798'),
+              child: Row(
+                children: [
+                  Icon(Ionicons.logo_github, size: 18, color: Colors.grey[700]),
+                  const SizedBox(width: 8),
+                  const Text(
+                    'GitHub 开源地址',
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
         actions: [
@@ -788,6 +812,14 @@ class HomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 打开URL
+  Future<void> _launchUrl(String url) async {
+    final uri = Uri.parse(url);
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    }
   }
 
   /// 退出登录确认

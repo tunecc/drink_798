@@ -37,6 +37,9 @@ dependencies:
   
   # 权限
   permission_handler: ^12.0.1
+  
+  # URL 打开
+  url_launcher: ^6.2.5
 
 dev_dependencies:
   flutter_test:
