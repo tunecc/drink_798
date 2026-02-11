@@ -1,0 +1,38 @@
+<svg width="1024" height="1024" viewBox="0 0 1024 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg_gradient" x1="0" y1="0" x2="1024" y2="1024" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#E0F2FE"/>
+      <stop offset="100%" stop-color="#BAE6FD"/>
+    </linearGradient>
+    <linearGradient id="drop_gradient" x1="512" y1="180" x2="512" y2="956" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#60A5FA"/>
+      <stop offset="100%" stop-color="#2563EB"/>
+    </linearGradient>
+    <filter id="dropshadow" x="200" y="150" width="624" height="850" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">
+      <feFlood flood-opacity="0" result="BackgroundImageFix"/>
+      <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha"/>
+      <feOffset dy="20"/>
+      <feGaussianBlur stdDeviation="20"/>
+      <feComposite in2="hardAlpha" operator="out"/>
+      <feColorMatrix type="matrix" values="0 0 0 0 0.145 0 0 0 0 0.388 0 0 0 0 0.922 0 0 0 0.3 0"/>
+      <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow"/>
+      <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow" result="shape"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1024" height="1024" rx="220" fill="url(#bg_gradient)"/>
+  
+  <!-- Decorative Bubbles/Circles -->
+  <circle cx="200" cy="200" r="120" fill="white" fill-opacity="0.3"/>
+  <circle cx="850" cy="850" r="150" fill="white" fill-opacity="0.2"/>
+  <circle cx="800" cy="250" r="80" fill="white" fill-opacity="0.2"/>
+  <circle cx="150" cy="800" r="60" fill="white" fill-opacity="0.2"/>
+  
+  <!-- Main Drop -->
+  <g filter="url(#dropshadow)">
+    <path d="M512 180C512 180 256 540 256 700C256 841.4 370.6 956 512 956C653.4 956 768 841.4 768 700C768 540 512 180 512 180Z" fill="url(#drop_gradient)"/>
+    <!-- Shine highlight on drop -->
+    <path d="M600 350C600 350 400 600 400 700C400 750 420 800 450 830" stroke="white" stroke-width="20" stroke-linecap="round" stroke-opacity="0.3"/>
+  </g>
+</svg>
