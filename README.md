@@ -83,13 +83,22 @@ flutter run
 # 静态检查
 flutter analyze
 
-# 构建 Android APK（按 ABI 拆分）
+# 构建 Android APK + iOS 未签名 .app/.ipa
 ./scripts/build_android_release.sh
 
-# 等价的 Flutter 原生命令
+# 只构建 Android APK（按 ABI 拆分）
+./scripts/build_android_release.sh android
+
+# 只构建 iOS 未签名 .app/.ipa
+./scripts/build_android_release.sh ios
+
+# 等价的 Flutter 原生命令（Android）
 flutter build apk --release --split-per-abi
 
-# 构建 iOS IPA
+# 等价的 Flutter 原生命令（iOS，无签名）
+flutter build ios --release --no-codesign
+
+# 构建已签名 iOS IPA
 flutter build ipa --release --export-method=development
 ```
 
@@ -100,6 +109,31 @@ flutter build ipa --release --export-method=development
 - `app-armeabi-v7a-release.apk`：兼容较老的 32 位设备
 - `app-x86_64-release.apk`：主要给模拟器或少量 x86_64 设备
 - 如果未来改为应用商店分发，优先使用 `flutter build appbundle --release`
+
+### iOS 发布
+
+- `./scripts/build_android_release.sh` 默认也会构建 iOS 未签名产物
+- 无签名 iOS 构建使用 `flutter build ios --release --no-codesign`
+- 脚本会基于无签名 `Runner.app` 额外打一个 `Runner-unsigned.ipa`
+- `Runner.app` 位于 `build/ios/` 下，`Runner-unsigned.ipa` 位于 `build/ios/unsigned-ipa/`
+- 如果需要对外分发的 `.ipa`，仍需后续签名并导出
+
+### iOS 无签名打包踩坑记录
+
+- 症状：执行 `flutter build ios --release --no-codesign` 时，Xcode 可能报 `resource fork, Finder information, or similar detritus not allowed`
+- 这次排查下来，真正卡住的不是业务代码，也不是证书配置，而是 Flutter 在 `--no-codesign` 场景下仍会对 `Flutter.framework/Flutter` 做一次额外的 ad-hoc 签名
+- 如果本机 Flutter SDK 的 iOS engine 缓存带有 macOS 扩展属性，这一步就可能失败。我们这次碰到的是 `com.apple.quarantine` 和 `com.apple.provenance`
+- 第一优先级处理方式：清理 Flutter SDK engine 缓存上的扩展属性，然后重试
+
+```bash
+xattr -dr com.apple.quarantine /你的FlutterSDK/bin/cache/artifacts/engine
+xattr -dr com.apple.provenance /你的FlutterSDK/bin/cache/artifacts/engine
+```
+
+- 如果清理扩展属性后仍然失败，可以继续检查 `Flutter.framework/Flutter` 上是否还有残留 `xattr`
+- 这次在本机最终采用的兜底方案是：修改本地 Flutter SDK 中 `packages/flutter_tools/lib/src/build_system/targets/ios.dart` 的 `_signFramework`，在没有 codesign identity 时直接跳过这一步
+- 这个兜底方案是本机 Flutter SDK 的本地补丁，不属于仓库代码，Flutter 升级后可能会被覆盖
+- 结论：`--no-codesign` 只代表不做正式签名，不代表 Flutter 内部一定不会再碰 `codesign`
 
 ## 核心流程
 
