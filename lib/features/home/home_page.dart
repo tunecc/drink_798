@@ -774,7 +774,7 @@ class HomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('版本: 1.0.0'),
+            const Text('版本: 1.0.2'),
             const SizedBox(height: 8),
             const Text('惠生活798喝水功能的第三方客户端'),
             const SizedBox(height: 4),

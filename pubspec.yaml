@@ -2,7 +2,7 @@ name: drink_water_app
 description: "一款简洁美观的智能饮水APP - 快速接水，轻松生活"
 publish_to: 'none'
 
-version: 1.0.0+1
+version: 1.0.2+2
 
 environment:
   sdk: ^3.7.0
@@ -71,4 +71,3 @@ flutter_launcher_icons:
   macos:
     generate: true
     image_path: "assets/icons/app_icon_new.png"
-

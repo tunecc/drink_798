@@ -1,5 +1,11 @@
 # 智能饮水 (drink_798)
 
+参考项目来自：
+
+1. https://github.com/YiQiuYes/schedule
+
+
+
 惠生活798饮水功能的第三方客户端。
 
 这个项目的目标很直接：去掉官方 App 里和喝水无关的内容，只保留登录、选设备、扫码、开始接水、结算这一条核心流程。
@@ -26,7 +32,10 @@
 发布版本见 [Releases](https://github.com/tunecc/drink_798/releases)。
 
 - iOS: 下载 `.ipa`，需要自行签名或具备可安装 IPA 的环境
-- Android: 下载 `.apk` 直接安装
+- Android: 下载与你设备 CPU 架构匹配的 `.apk`
+- Android `arm64-v8a`: 大多数真机，推荐优先下载
+- Android `armeabi-v7a`: 较老的 32 位 Android 设备
+- Android `x86_64`: Android 模拟器或少量 x86_64 设备
 
 ## 项目说明
 
@@ -74,12 +83,23 @@ flutter run
 # 静态检查
 flutter analyze
 
-# 构建 Android APK
-flutter build apk --release
+# 构建 Android APK（按 ABI 拆分）
+./scripts/build_android_release.sh
+
+# 等价的 Flutter 原生命令
+flutter build apk --release --split-per-abi
 
 # 构建 iOS IPA
 flutter build ipa --release --export-method=development
 ```
+
+### Android 发布
+
+- Android 发布默认产出 3 个 APK，位于 `build/app/outputs/flutter-apk/`
+- `app-arm64-v8a-release.apk`：大多数真机，优先上传到 Release
+- `app-armeabi-v7a-release.apk`：兼容较老的 32 位设备
+- `app-x86_64-release.apk`：主要给模拟器或少量 x86_64 设备
+- 如果未来改为应用商店分发，优先使用 `flutter build appbundle --release`
 
 ## 核心流程
 
