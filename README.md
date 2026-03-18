@@ -1,45 +1,78 @@
-# 💧 智能饮水 (drink_798)
+# 智能饮水 (drink_798)
 
-**慧生活798喝水功能的第三方客户端**
+惠生活798饮水功能的第三方客户端。
 
-因为官方 APP 广告太多、启动慢，所以做了这个简洁版，只保留核心的喝水功能。
+这个项目的目标很直接：去掉官方 App 里和喝水无关的内容，只保留登录、选设备、扫码、开始接水、结算这一条核心流程。
 
-## ✨ 功能特性
+## 功能特性
 
-- 📱 **手机号登录** - 使用惠生活798账号登录
-- 📷 **扫码添加设备** - 扫描设备二维码快速绑定
-- 🔄 **设备切换** - 支持多设备管理，一键切换
-- 💧 **一键出水** - 长按出水，松手停止
-- 🌙 **深色模式** - 自动适配系统主题
-- 🚀 **无广告** - 简洁纯净，启动飞快
+- 手机号登录，支持图形验证码 + 短信验证码
+- 登录态本地保存，启动后自动判断是否已登录
+- 扫码添加设备，支持收藏设备管理
+- 多设备切换，可删除已收藏设备
+- 一键开始接水，再次点击结算
+- 自动检测设备状态，登录失效时自动回到登录页
+- 跟随系统亮色 / 暗色主题
+- 无广告，界面尽量保持简洁
 
-## 📥 下载安装
+## 适用场景
 
-前往 [Releases](https://github.com/tunecc/drink_798/releases) 页面下载最新版本：
+- 你只想用惠生活798的喝水功能
+- 你不想在官方 App 里找入口
+- 你更在意启动速度和界面简洁度
 
-- **iOS**: 下载 `.ipa` 文件（需要自签或越狱安装）
-- **Android**: 下载 `.apk` 文件直接安装
+## 安装
 
-## 🛠 技术栈
+发布版本见 [Releases](https://github.com/tunecc/drink_798/releases)。
 
-- **Flutter 3.7+** - 跨平台 UI 框架
-- **GetX** - 状态管理 & 路由导航
-- **Dio** - HTTP 网络请求
-- **qr_code_scanner** - 二维码扫描
+- iOS: 下载 `.ipa`，需要自行签名或具备可安装 IPA 的环境
+- Android: 下载 `.apk` 直接安装
 
-## 🚀 自行编译
+## 项目说明
+
+- 本项目没有自建后端，直接请求惠生活798现有接口
+- 登录 Token 仅保存在本地设备中
+- 扫码功能需要相机权限
+- 如果官方接口变更、限流或关闭，本项目可能无法继续使用
+
+## 技术栈
+
+- Flutter
+- GetX
+- Dio
+- SharedPreferences
+- qr_code_scanner
+- google_fonts
+- modal_bottom_sheet
+- url_launcher
+
+## 自行编译
 
 ### 环境要求
 
-- Flutter SDK >= 3.7.0
-- Dart SDK >= 3.0.0
-- iOS 13.0+ / Android 5.0+
+- Flutter Stable 版本，且内置 Dart 3.7 或更高版本
+- JDK 17
+- Git
+- iOS 13.0+ / Android 设备或模拟器
 
-### 编译命令
+说明：
+
+- `qr_code_scanner` 通过 Git 依赖拉取，`flutter pub get` 时需要本机可访问 GitHub
+- Android 工程目前仍使用模板包名 `com.example.drink_water_app`
+- Android release 构建当前仍使用 debug signing 配置；如果你要正式分发，请先修改签名配置
+- iOS 构建和导出 IPA 需要你本地已经配置好 Apple 开发者签名
+
+### 常用命令
 
 ```bash
 # 安装依赖
 flutter pub get
+
+# 本地运行
+flutter run
+
+# 静态检查
+flutter analyze
 
 # 构建 Android APK
 flutter build apk --release
@@ -48,34 +81,41 @@ flutter build apk --release
 flutter build ipa --release --export-method=development
 ```
 
-## 📁 项目结构
+## 核心流程
 
-```
+1. 输入手机号和图形验证码
+2. 获取短信验证码并完成登录
+3. 扫描设备二维码，或从已收藏设备中选择目标设备
+4. 点击“开始接水”
+5. 接水完成后点击“结算”
+
+## 项目结构
+
+```text
 lib/
-├── main.dart                       # 应用入口
+├── main.dart
 ├── core/
-│   ├── app_controller.dart         # 全局控制器
-│   ├── models/                     # 数据模型
-│   ├── services/                   # API 服务
-│   └── theme/                      # 主题配置
+│   ├── app_controller.dart
+│   ├── models/
+│   ├── services/
+│   └── theme/
 └── features/
-    ├── login/                      # 登录模块
-    ├── home/                       # 主页模块
-    └── scanner/                    # 扫码模块
+    ├── home/
+    ├── login/
+    ├── scanner/
+    └── splash/
 ```
 
-## ⚠️ 免责声明
+## 免责声明
 
-本项目仅供学习交流使用，与惠生活798官方无关。请勿用于商业用途。
+本项目仅供学习和交流使用，与惠生活798官方无关，请勿用于商业用途。
 
-## 📄 License
+## License
 
-MIT License
+MIT
 
-## 🤝 贡献
+## 贡献
 
-欢迎提交 Issue 和 Pull Request！
+欢迎提交 Issue 或 Pull Request。
 
----
-
-**GitHub**: [https://github.com/tunecc/drink_798](https://github.com/tunecc/drink_798)
+仓库地址：[https://github.com/tunecc/drink_798](https://github.com/tunecc/drink_798)
