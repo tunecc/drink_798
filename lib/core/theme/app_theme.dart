@@ -14,10 +14,10 @@ class AppTheme {
   // 背景色
   static const Color backgroundLight = Color(0xFFF5F9FF);
   static const Color backgroundDark = Color(0xFF121212);
-  
+
   // 卡片色
   static const Color cardLight = Colors.white;
-  static const Color cardDark = Color(0xFF1E1E1E);
+  static const Color cardDark = Color(0xFF1F1F1F);
   
   // 成功/失败色
   static const Color successColor = Color(0xFF4CAF50);
@@ -137,10 +137,14 @@ class AppTheme {
     ),
     cardTheme: CardThemeData(
       color: cardDark,
-      elevation: 2,
-      shadowColor: Colors.black26,
+      elevation: 4,
+      shadowColor: Colors.black54,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Colors.grey.shade800,
+          width: 0.5,
+        ),
       ),
     ),
     elevatedButtonTheme: ElevatedButtonThemeData(

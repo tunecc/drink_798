@@ -4,12 +4,14 @@ class DeviceModel {
   final String name;
   final String? location;
   final bool isOnline;
+  String? note; // 用户备注
 
   DeviceModel({
     required this.id,
     required this.name,
     this.location,
     this.isOnline = true,
+    this.note,
   });
 
   factory DeviceModel.fromJson(Map<String, dynamic> json) {
@@ -18,6 +20,7 @@ class DeviceModel {
       name: json['name']?.toString() ?? '',
       location: json['location']?.toString(),
       isOnline: json['isOnline'] ?? true,
+      note: json['note']?.toString(),
     );
   }
 
@@ -27,6 +30,7 @@ class DeviceModel {
       'name': name,
       'location': location,
       'isOnline': isOnline,
+      'note': note,
     };
   }
 

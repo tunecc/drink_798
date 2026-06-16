@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/models/device_model.dart';
@@ -12,6 +13,7 @@ import '../scanner/scanner_page.dart';
 /// 主页控制器
 class HomeController extends GetxController {
   final DrinkApiService _apiService = DrinkApiService();
+  SharedPreferences? _prefs;
 
   // 设备列表
   final RxList<DeviceModel> deviceList = <DeviceModel>[].obs;
@@ -29,7 +31,13 @@ class HomeController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    _initPrefs();
     loadDevices();
+  }
+
+  /// 初始化 SharedPreferences
+  Future<void> _initPrefs() async {
+    _prefs = await SharedPreferences.getInstance();
   }
 
   @override
@@ -43,7 +51,7 @@ class HomeController extends GetxController {
     isLoading.value = true;
     try {
       final devices = await _apiService.getDeviceList();
-      
+
       // 检查是否登录失效
       if (devices.isNotEmpty && devices[0]["name"] == "登录已过期") {
         Get.snackbar(
@@ -58,7 +66,10 @@ class HomeController extends GetxController {
       }
 
       deviceList.value = devices.map((e) => DeviceModel.fromJson(e)).toList();
-      
+
+      // 加载备注
+      await _loadDeviceNotes();
+
       // 自动选择第一个设备
       if (deviceList.isNotEmpty && selectedDeviceIndex.value == -1) {
         selectedDeviceIndex.value = 0;
@@ -73,6 +84,36 @@ class HomeController extends GetxController {
       );
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// 加载设备备注
+  Future<void> _loadDeviceNotes() async {
+    if (_prefs == null) {
+      await _initPrefs();
+    }
+
+    for (var device in deviceList) {
+      final note = _prefs?.getString('device_note_${device.id}');
+      if (note != null && note.isNotEmpty) {
+        device.note = note;
+      }
+    }
+  }
+
+  /// 保存设备备注
+  Future<void> saveDeviceNote(String deviceId, String note) async {
+    if (_prefs == null) {
+      await _initPrefs();
+    }
+
+    await _prefs?.setString('device_note_$deviceId', note);
+
+    // 更新设备列表中的备注
+    final index = deviceList.indexWhere((d) => d.id == deviceId);
+    if (index != -1) {
+      deviceList[index].note = note;
+      deviceList.refresh();
     }
   }
 
