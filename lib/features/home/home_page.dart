@@ -157,7 +157,8 @@ class HomePage extends StatelessWidget {
   Widget _buildStatusCard(BuildContext context, HomeController controller) {
     return Obx(() {
       final isDrinking = controller.isDrinking.value;
-      
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+
       return AnimatedContainer(
         duration: const Duration(milliseconds: 300),
         padding: const EdgeInsets.all(24),
@@ -171,11 +172,17 @@ class HomePage extends StatelessWidget {
               : null,
           color: isDrinking ? null : Theme.of(context).cardColor,
           borderRadius: BorderRadius.circular(24),
+          border: !isDrinking && isDark
+              ? Border.all(
+                  color: Colors.grey.shade800,
+                  width: 0.5,
+                )
+              : null,
           boxShadow: [
             BoxShadow(
               color: isDrinking
                   ? AppTheme.primaryColor.withOpacity(0.3)
-                  : Colors.black.withOpacity(0.05),
+                  : Colors.black.withOpacity(isDark ? 0.3 : 0.05),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -221,7 +228,7 @@ class HomePage extends StatelessWidget {
                         fontSize: 14,
                         color: isDrinking
                             ? Colors.white.withOpacity(0.8)
-                            : Colors.grey[600],
+                            : (isDark ? Colors.grey[400] : Colors.grey[600]),
                       ),
                     ),
                   ],
@@ -243,47 +250,54 @@ class HomePage extends StatelessWidget {
 
   /// 设备选择区域
   Widget _buildDeviceSection(BuildContext context, HomeController controller) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text(
-              '我的设备',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                '我的设备',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            TextButton.icon(
-              onPressed: controller.scanAndAddDevice,
-              icon: const Icon(Ionicons.add_circle_outline, size: 20),
-              label: const Text('添加'),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Obx(() {
-          if (controller.deviceList.isEmpty) {
-            return _buildEmptyDeviceCard(context, controller);
-          }
-          return _buildDeviceCard(context, controller);
-        }),
-      ],
+              TextButton.icon(
+                onPressed: controller.scanAndAddDevice,
+                icon: const Icon(Ionicons.add_circle_outline, size: 20),
+                label: const Text('添加'),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: Obx(() {
+              if (controller.deviceList.isEmpty) {
+                return _buildEmptyDeviceCard(context, controller);
+              }
+              return _buildDeviceGrid(context, controller);
+            }),
+          ),
+        ],
+      ),
     );
   }
 
   /// 空设备卡片
   Widget _buildEmptyDeviceCard(BuildContext context, HomeController controller) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Colors.grey.withOpacity(0.2),
-          style: BorderStyle.solid,
+          color: isDark ? Colors.grey.shade800 : Colors.grey.withOpacity(0.2),
+          style: isDark ? BorderStyle.solid : BorderStyle.solid,
+          width: isDark ? 1 : 1,
         ),
       ),
       child: Column(
@@ -291,7 +305,7 @@ class HomePage extends StatelessWidget {
           Icon(
             Ionicons.hardware_chip_outline,
             size: 48,
-            color: Colors.grey[400],
+            color: isDark ? Colors.grey[600] : Colors.grey[400],
           ),
           const SizedBox(height: 16),
           const Text(
@@ -306,7 +320,7 @@ class HomePage extends StatelessWidget {
             '扫描设备上的二维码添加',
             style: TextStyle(
               fontSize: 14,
-              color: Colors.grey[600],
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
             ),
           ),
           const SizedBox(height: 20),
@@ -320,89 +334,179 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 设备卡片
-  Widget _buildDeviceCard(BuildContext context, HomeController controller) {
-    return GestureDetector(
-      onTap: () => _showDeviceSheet(context, controller),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
+  /// 设备网格
+  Widget _buildDeviceGrid(BuildContext context, HomeController controller) {
+    return ListView.builder(
+      padding: const EdgeInsets.only(bottom: 8),
+      itemCount: controller.deviceList.length,
+      itemBuilder: (context, index) {
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _buildDeviceGridItem(context, controller, index),
+        );
+      },
+    );
+  }
+
+  /// 设备网格项
+  Widget _buildDeviceGridItem(
+    BuildContext context,
+    HomeController controller,
+    int index,
+  ) {
+    return Obx(() {
+      final device = controller.deviceList[index];
+      final isSelected = controller.selectedDeviceIndex.value == index;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+
+      return GestureDetector(
+        onTap: () => controller.selectDevice(index),
+        onLongPress: () => _showNoteEditDialog(context, controller, device),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected
+                  ? AppTheme.primaryColor
+                  : (isDark ? Colors.grey.shade800 : Colors.grey.withOpacity(0.2)),
+              width: isSelected ? 2 : 0.5,
             ),
-          ],
-        ),
-        child: Obx(() {
-          final device = controller.currentDevice;
-          return Row(
+            boxShadow: isSelected
+                ? [
+                    BoxShadow(
+                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ]
+                : [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+          ),
+          child: Row(
             children: [
+              // 图标
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(14),
+                  color: isSelected
+                      ? AppTheme.primaryColor.withOpacity(0.1)
+                      : (isDark
+                          ? Colors.grey.shade800
+                          : Colors.grey[100]),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
+                child: Icon(
                   Ionicons.hardware_chip_outline,
-                  color: AppTheme.primaryColor,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : (isDark ? Colors.grey[400] : Colors.grey),
+                  size: 24,
                 ),
               ),
               const SizedBox(width: 16),
+              // 设备名称（显示备注或原始名称）
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      '当前设备',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      device?.formattedName ?? '未选择',
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                child: Text(
+                  device.note?.isNotEmpty == true
+                      ? device.note!
+                      : device.formattedName,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${controller.deviceList.length}个设备',
-                      style: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey[600],
-                      ),
-                    ),
-                    const SizedBox(width: 4),
-                    Icon(
-                      Ionicons.chevron_forward,
-                      size: 14,
-                      color: Colors.grey[600],
-                    ),
-                  ],
+              const SizedBox(width: 12),
+              // 编辑按钮
+              GestureDetector(
+                onTap: () => _showNoteEditDialog(context, controller, device),
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? Colors.grey.shade800.withOpacity(0.8)
+                        : Colors.grey[100]!.withOpacity(0.8),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    Ionicons.create_outline,
+                    size: 16,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  ),
                 ),
               ),
+              // 选中标记
+              if (isSelected) ...[
+                const SizedBox(width: 12),
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryColor,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Ionicons.checkmark,
+                    size: 16,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
             ],
-          );
-        }),
+          ),
+        ),
+      );
+    });
+  }
+
+  /// 显示备注编辑对话框
+  void _showNoteEditDialog(
+    BuildContext context,
+    HomeController controller,
+    device,
+  ) {
+    final textController = TextEditingController(text: device.note ?? '');
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('编辑备注 - ${device.formattedName}'),
+        content: TextField(
+          controller: textController,
+          decoration: const InputDecoration(
+            hintText: '为设备添加备注',
+            prefixIcon: Icon(Ionicons.create_outline),
+          ),
+          maxLength: 20,
+          autofocus: true,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('取消'),
+          ),
+          FilledButton(
+            onPressed: () {
+              controller.saveDeviceNote(device.id, textController.text);
+              Navigator.pop(context);
+              Get.snackbar(
+                '成功',
+                '备注已保存',
+                snackPosition: SnackPosition.BOTTOM,
+                duration: const Duration(seconds: 1),
+              );
+            },
+            child: const Text('保存'),
+          ),
+        ],
       ),
     );
   }
@@ -469,95 +573,10 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 显示设备选择弹窗
-  void _showDeviceSheet(BuildContext context, HomeController controller) {
-    showCupertinoModalBottomSheet(
-      context: context,
-      backgroundColor: Colors.transparent,
-      builder: (context) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
-        borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 20),
-              const Text(
-                '选择设备',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16),
-              Obx(() => ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxHeight: MediaQuery.of(context).size.height * 0.4,
-                ),
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: controller.deviceList.length,
-                  itemBuilder: (context, index) {
-                    final device = controller.deviceList[index];
-                    final isSelected = controller.selectedDeviceIndex.value == index;
-                    
-                    return ListTile(
-                      leading: Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppTheme.primaryColor.withOpacity(0.1)
-                              : Colors.grey[100],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Icon(
-                          Ionicons.hardware_chip_outline,
-                          color: isSelected ? AppTheme.primaryColor : Colors.grey,
-                        ),
-                      ),
-                      title: Text(
-                        device.formattedName,
-                        style: TextStyle(
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                        ),
-                      ),
-                      subtitle: Text('ID: ${device.id}'),
-                      trailing: isSelected
-                          ? const Icon(
-                              Ionicons.checkmark_circle,
-                              color: AppTheme.primaryColor,
-                            )
-                          : null,
-                      onTap: () {
-                        controller.selectDevice(index);
-                        Navigator.pop(context);
-                      },
-                    );
-                  },
-                ),
-              )),
-              const SizedBox(height: 20),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   /// 显示设备管理弹窗
   void _showDeviceManageSheet(BuildContext context, HomeController controller) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     showCupertinoModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
@@ -576,7 +595,7 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: isDark ? Colors.grey[700] : Colors.grey[300],
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -598,7 +617,7 @@ class HomePage extends StatelessWidget {
                         Icon(
                           Ionicons.hardware_chip_outline,
                           size: 48,
-                          color: Colors.grey[400],
+                          color: isDark ? Colors.grey[600] : Colors.grey[400],
                         ),
                         const SizedBox(height: 16),
                         const Text('暂无设备'),
@@ -606,7 +625,7 @@ class HomePage extends StatelessWidget {
                     ),
                   );
                 }
-                
+
                 return ConstrainedBox(
                   constraints: BoxConstraints(
                     maxHeight: MediaQuery.of(context).size.height * 0.4,
@@ -616,21 +635,25 @@ class HomePage extends StatelessWidget {
                     itemCount: controller.deviceList.length,
                     itemBuilder: (context, index) {
                       final device = controller.deviceList[index];
-                      
+
                       return ListTile(
                         leading: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: isDark ? Colors.grey[800] : Colors.grey[100],
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Ionicons.hardware_chip_outline,
-                            color: Colors.grey,
+                            color: isDark ? Colors.grey[400] : Colors.grey,
                           ),
                         ),
                         title: Text(device.formattedName),
-                        subtitle: Text('ID: ${device.id}'),
+                        subtitle: Text(
+                          device.note?.isNotEmpty == true
+                              ? '${device.note} · ID: ${device.id}'
+                              : 'ID: ${device.id}',
+                        ),
                         trailing: IconButton(
                           icon: const Icon(
                             Ionicons.trash_outline,
@@ -774,7 +797,7 @@ class HomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('版本: 1.0.2'),
+            const Text('版本: 1.0.3'),
             const SizedBox(height: 8),
             const Text('惠生活798喝水功能的第三方客户端'),
             const SizedBox(height: 4),
