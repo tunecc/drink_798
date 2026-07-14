@@ -255,15 +255,43 @@ class HomePage extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                '我的设备',
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+              const Expanded(
+                child: Text(
+                  '我的设备',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
+              Obx(() {
+                final isGrid = controller.layoutMode.value == 'grid';
+                return IconButton(
+                  tooltip: isGrid ? '单列布局' : '双列布局',
+                  onPressed: controller.isReordering.value
+                      ? null
+                      : () => controller.setLayoutMode(isGrid ? 'list' : 'grid'),
+                  icon: Icon(
+                    isGrid ? Ionicons.list_outline : Ionicons.grid_outline,
+                    size: 20,
+                  ),
+                );
+              }),
+              Obx(() {
+                final reordering = controller.isReordering.value;
+                return IconButton(
+                  tooltip: reordering ? '完成排序' : '调整顺序',
+                  onPressed: controller.toggleReorderMode,
+                  icon: Icon(
+                    reordering
+                        ? Ionicons.checkmark
+                        : Ionicons.swap_vertical_outline,
+                    size: 20,
+                    color: reordering ? AppTheme.primaryColor : null,
+                  ),
+                );
+              }),
               TextButton.icon(
                 onPressed: controller.scanAndAddDevice,
                 icon: const Icon(Ionicons.add_circle_outline, size: 20),
@@ -271,13 +299,19 @@ class HomePage extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Expanded(
             child: Obx(() {
               if (controller.deviceList.isEmpty) {
                 return _buildEmptyDeviceCard(context, controller);
               }
-              return _buildDeviceGrid(context, controller);
+              if (controller.isReordering.value) {
+                return _buildReorderList(context, controller);
+              }
+              if (controller.layoutMode.value == 'grid') {
+                return _buildDeviceGridLayout(context, controller);
+              }
+              return _buildDeviceCompactList(context, controller);
             }),
           ),
         ],
@@ -334,22 +368,168 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  /// 设备网格
-  Widget _buildDeviceGrid(BuildContext context, HomeController controller) {
+  /// 紧凑单列设备列表
+  Widget _buildDeviceCompactList(
+    BuildContext context,
+    HomeController controller,
+  ) {
     return ListView.builder(
       padding: const EdgeInsets.only(bottom: 8),
       itemCount: controller.deviceList.length,
       itemBuilder: (context, index) {
         return Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: _buildDeviceGridItem(context, controller, index),
+          padding: const EdgeInsets.only(bottom: 6),
+          child: _buildCompactDeviceItem(context, controller, index),
         );
       },
     );
   }
 
-  /// 设备网格项
-  Widget _buildDeviceGridItem(
+  /// 紧凑设备项
+  Widget _buildCompactDeviceItem(
+    BuildContext context,
+    HomeController controller,
+    int index, {
+    bool showDragHandle = false,
+  }) {
+    return Obx(() {
+      final device = controller.deviceList[index];
+      final isSelected = controller.selectedDeviceIndex.value == index;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+
+      return GestureDetector(
+        onTap: controller.isReordering.value
+            ? null
+            : () => controller.selectDevice(index),
+        onLongPress: controller.isReordering.value
+            ? null
+            : () => _showNoteEditDialog(context, controller, device),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: isSelected
+                  ? AppTheme.primaryColor
+                  : (isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey.withOpacity(0.2)),
+              width: isSelected ? 2 : 0.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppTheme.primaryColor.withOpacity(0.1)
+                      : (isDark ? Colors.grey.shade800 : Colors.grey[100]),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(
+                  Ionicons.hardware_chip_outline,
+                  color: isSelected
+                      ? AppTheme.primaryColor
+                      : (isDark ? Colors.grey[400] : Colors.grey),
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  device.note?.isNotEmpty == true
+                      ? device.note!
+                      : device.formattedName,
+                  style: TextStyle(
+                    fontSize: 15,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.w600,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              if (!controller.isReordering.value) ...[
+                const SizedBox(width: 8),
+                GestureDetector(
+                  onTap: () =>
+                      _showNoteEditDialog(context, controller, device),
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: isDark
+                          ? Colors.grey.shade800.withOpacity(0.8)
+                          : Colors.grey[100]!.withOpacity(0.8),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Ionicons.create_outline,
+                      size: 14,
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                  ),
+                ),
+                if (isSelected) ...[
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(5),
+                    decoration: BoxDecoration(
+                      color: AppTheme.primaryColor,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Ionicons.checkmark,
+                      size: 14,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ],
+              if (showDragHandle) ...[
+                const SizedBox(width: 8),
+                Icon(
+                  Ionicons.menu_outline,
+                  size: 20,
+                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  /// 双列密集网格
+  Widget _buildDeviceGridLayout(
+    BuildContext context,
+    HomeController controller,
+  ) {
+    return GridView.builder(
+      padding: const EdgeInsets.only(bottom: 8),
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisSpacing: 8,
+        crossAxisSpacing: 8,
+        childAspectRatio: 2.4,
+      ),
+      itemCount: controller.deviceList.length,
+      itemBuilder: (context, index) {
+        return _buildGridDeviceItem(context, controller, index);
+      },
+    );
+  }
+
+  Widget _buildGridDeviceItem(
     BuildContext context,
     HomeController controller,
     int index,
@@ -361,110 +541,107 @@ class HomePage extends StatelessWidget {
 
       return GestureDetector(
         onTap: () => controller.selectDevice(index),
-        onLongPress: () => _showNoteEditDialog(context, controller, device),
+        onLongPress: () =>
+            _showNoteEditDialog(context, controller, device),
         child: Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
             color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected
                   ? AppTheme.primaryColor
-                  : (isDark ? Colors.grey.shade800 : Colors.grey.withOpacity(0.2)),
+                  : (isDark
+                      ? Colors.grey.shade800
+                      : Colors.grey.withOpacity(0.2)),
               width: isSelected ? 2 : 0.5,
             ),
-            boxShadow: isSelected
-                ? [
-                    BoxShadow(
-                      color: AppTheme.primaryColor.withOpacity(0.3),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ]
-                : [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
           ),
           child: Row(
             children: [
-              // 图标
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppTheme.primaryColor.withOpacity(0.1)
-                      : (isDark
-                          ? Colors.grey.shade800
-                          : Colors.grey[100]),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  Ionicons.hardware_chip_outline,
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : (isDark ? Colors.grey[400] : Colors.grey),
-                  size: 24,
-                ),
+              Icon(
+                Ionicons.hardware_chip_outline,
+                size: 18,
+                color: isSelected
+                    ? AppTheme.primaryColor
+                    : (isDark ? Colors.grey[400] : Colors.grey),
               ),
-              const SizedBox(width: 16),
-              // 设备名称（显示备注或原始名称）
+              const SizedBox(width: 8),
               Expanded(
                 child: Text(
                   device.note?.isNotEmpty == true
                       ? device.note!
                       : device.formattedName,
                   style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                    fontSize: 13,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.w600,
                   ),
-                  maxLines: 1,
+                  maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              const SizedBox(width: 12),
-              // 编辑按钮
-              GestureDetector(
-                onTap: () => _showNoteEditDialog(context, controller, device),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: isDark
-                        ? Colors.grey.shade800.withOpacity(0.8)
-                        : Colors.grey[100]!.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Icon(
-                    Ionicons.create_outline,
-                    size: 16,
-                    color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  ),
+              if (isSelected)
+                const Icon(
+                  Ionicons.checkmark_circle,
+                  size: 16,
+                  color: AppTheme.primaryColor,
                 ),
-              ),
-              // 选中标记
-              if (isSelected) ...[
-                const SizedBox(width: 12),
-                Container(
-                  padding: const EdgeInsets.all(6),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: const Icon(
-                    Ionicons.checkmark,
-                    size: 16,
-                    color: Colors.white,
-                  ),
-                ),
-              ],
             ],
           ),
         ),
       );
     });
+  }
+
+  /// 排序模式：单列可拖列表
+  Widget _buildReorderList(
+    BuildContext context,
+    HomeController controller,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(bottom: 8),
+          child: Text(
+            '拖动调整顺序',
+            style: TextStyle(
+              fontSize: 12,
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+            ),
+          ),
+        ),
+        Expanded(
+          child: Obx(() {
+            return ReorderableListView.builder(
+              padding: const EdgeInsets.only(bottom: 8),
+              buildDefaultDragHandles: false,
+              itemCount: controller.deviceList.length,
+              onReorder: controller.reorderDevices,
+              itemBuilder: (context, index) {
+                final device = controller.deviceList[index];
+                return Padding(
+                  key: ValueKey(device.id),
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: ReorderableDragStartListener(
+                    index: index,
+                    child: _buildCompactDeviceItem(
+                      context,
+                      controller,
+                      index,
+                      showDragHandle: true,
+                    ),
+                  ),
+                );
+              },
+            );
+          }),
+        ),
+      ],
+    );
   }
 
   /// 显示备注编辑对话框

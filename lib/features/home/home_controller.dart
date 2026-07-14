@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/models/device_model.dart';
+import '../../core/utils/device_order.dart';
 import '../../core/services/drink_api_service.dart';
 import '../login/login_page.dart';
 import '../scanner/scanner_page.dart';
@@ -20,6 +21,12 @@ class HomeController extends GetxController {
 
   // 当前选中的设备索引
   final RxInt selectedDeviceIndex = (-1).obs;
+
+  /// Device list layout: 'list' (compact single column) or 'grid' (two columns)
+  final RxString layoutMode = 'list'.obs;
+
+  /// Whether the home list is in drag-reorder mode
+  final RxBool isReordering = false.obs;
 
   // 状态
   final RxBool isLoading = false.obs;
@@ -38,6 +45,10 @@ class HomeController extends GetxController {
   /// 初始化 SharedPreferences
   Future<void> _initPrefs() async {
     _prefs = await SharedPreferences.getInstance();
+    final savedLayout = _prefs?.getString('device_list_layout');
+    if (savedLayout == 'list' || savedLayout == 'grid') {
+      layoutMode.value = savedLayout!;
+    }
   }
 
   @override
@@ -69,6 +80,9 @@ class HomeController extends GetxController {
 
       // 加载备注
       await _loadDeviceNotes();
+
+      // 应用本地自定义顺序
+      await _applySavedOrder();
 
       // 自动选择第一个设备
       if (deviceList.isNotEmpty && selectedDeviceIndex.value == -1) {
@@ -115,6 +129,77 @@ class HomeController extends GetxController {
       deviceList[index].note = note;
       deviceList.refresh();
     }
+  }
+
+  /// 按本地 order 重排设备列表
+  Future<void> _applySavedOrder() async {
+    if (_prefs == null) {
+      await _initPrefs();
+    }
+    final order = _prefs?.getStringList('device_order') ?? <String>[];
+    if (order.isEmpty) return;
+
+    final selectedId = currentDevice?.id;
+    deviceList.value = applyDeviceOrder(deviceList.toList(), order);
+
+    if (selectedId != null) {
+      final newIndex = deviceList.indexWhere((d) => d.id == selectedId);
+      selectedDeviceIndex.value =
+          newIndex >= 0 ? newIndex : (deviceList.isEmpty ? -1 : 0);
+    }
+  }
+
+  /// 将当前设备顺序写入本地
+  Future<void> _saveDeviceOrder() async {
+    if (_prefs == null) {
+      await _initPrefs();
+    }
+    final ids = deviceList.map((d) => d.id).toList();
+    await _prefs?.setStringList('device_order', ids);
+  }
+
+  /// 切换列表布局：'list' | 'grid'
+  Future<void> setLayoutMode(String mode) async {
+    if (mode != 'list' && mode != 'grid') return;
+    if (layoutMode.value == mode) return;
+    layoutMode.value = mode;
+    if (_prefs == null) {
+      await _initPrefs();
+    }
+    await _prefs?.setString('device_list_layout', mode);
+  }
+
+  /// 进入 / 退出拖拽排序模式
+  void toggleReorderMode() {
+    if (isDrinking.value) {
+      Get.snackbar(
+        '提示',
+        '正在接水中，请先结算',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+    if (deviceList.isEmpty) return;
+    isReordering.value = !isReordering.value;
+  }
+
+  /// 拖拽重排（ReorderableListView 回调）
+  void reorderDevices(int oldIndex, int newIndex) {
+    if (oldIndex < 0 || oldIndex >= deviceList.length) return;
+    var target = newIndex;
+    if (target > oldIndex) target -= 1;
+    if (target < 0 || target >= deviceList.length) return;
+
+    final selectedId = currentDevice?.id;
+    final item = deviceList.removeAt(oldIndex);
+    deviceList.insert(target, item);
+
+    if (selectedId != null) {
+      selectedDeviceIndex.value =
+          deviceList.indexWhere((d) => d.id == selectedId);
+    }
+
+    _saveDeviceOrder();
   }
 
   /// 获取当前选中的设备
@@ -303,6 +388,7 @@ class HomeController extends GetxController {
         if (selectedDeviceIndex.value >= deviceList.length) {
           selectedDeviceIndex.value = deviceList.isEmpty ? -1 : 0;
         }
+        await _saveDeviceOrder();
         Get.snackbar(
           '成功',
           '已删除设备',
