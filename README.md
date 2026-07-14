@@ -113,6 +113,15 @@ build/ios/
 build/ios/unsigned-ipa/Runner-unsigned.ipa
 ```
 
+构建成功后，脚本还会把便于上传 GitHub Release 的文件复制到 `releases/`：
+
+```text
+releases/drink_798_v{version}_android_arm64-v8a.apk
+releases/drink_798_v{version}_ios_unsigned.ipa
+```
+
+其中 `{version}` 来自 `pubspec.yaml` 的版本号（不含 `+build`）。
+
 ### iOS 无签名构建提示
 
 `flutter build ios --release --no-codesign` 只表示不做正式签名，不代表构建产物可直接安装。

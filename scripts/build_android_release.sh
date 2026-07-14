@@ -5,9 +5,70 @@ project_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 android_output_dir="$project_root/build/app/outputs/flutter-apk"
 ios_output_dir="$project_root/build/ios"
 ios_ipa_output_dir="$project_root/build/ios/unsigned-ipa"
+releases_dir="$project_root/releases"
 
 usage() {
   echo "Usage: $0 [all|android|ios]" >&2
+}
+
+# Read version name from pubspec.yaml (e.g. 1.0.3+3 -> 1.0.3)
+app_version() {
+  local version
+  version="$(
+    awk '
+      /^version:[[:space:]]*/ {
+        v = $2
+        sub(/\+.*/, "", v)
+        print v
+        exit
+      }
+    ' "$project_root/pubspec.yaml"
+  )"
+
+  if [[ -z "$version" ]]; then
+    echo "Failed to read version from pubspec.yaml" >&2
+    return 1
+  fi
+
+  printf '%s\n' "$version"
+}
+
+copy_to_releases() {
+  local src="$1"
+  local dest_name="$2"
+  local dest
+
+  if [[ ! -f "$src" ]]; then
+    echo "Skip releases copy: source not found: $src" >&2
+    return 1
+  fi
+
+  mkdir -p "$releases_dir"
+  dest="$releases_dir/$dest_name"
+  cp -f "$src" "$dest"
+  echo "  $(du -h "$dest" | awk '{print $1}')  $dest"
+}
+
+publish_android_release_artifact() {
+  local version src dest_name
+  version="$(app_version)"
+  src="$android_output_dir/app-arm64-v8a-release.apk"
+  dest_name="drink_798_v${version}_android_arm64-v8a.apk"
+
+  echo
+  echo "Releases Android artifact:"
+  copy_to_releases "$src" "$dest_name"
+}
+
+publish_ios_release_artifact() {
+  local version src dest_name
+  version="$(app_version)"
+  src="$ios_ipa_output_dir/Runner-unsigned.ipa"
+  dest_name="drink_798_v${version}_ios_unsigned.ipa"
+
+  echo
+  echo "Releases iOS artifact:"
+  copy_to_releases "$src" "$dest_name"
 }
 
 check_ios_engine_cache() {
@@ -106,6 +167,7 @@ package_unsigned_ipa() {
 build_android() {
   flutter build apk --release --split-per-abi
   print_android_artifacts
+  publish_android_release_artifact
 }
 
 build_ios() {
@@ -125,6 +187,7 @@ build_ios() {
   COPYFILE_DISABLE=1 flutter build ios --release --no-codesign
   package_unsigned_ipa
   print_ios_artifacts
+  publish_ios_release_artifact
 }
 
 cd "$project_root"

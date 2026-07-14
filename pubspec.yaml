@@ -2,7 +2,7 @@ name: drink_water_app
 description: "一款简洁美观的智能饮水APP - 快速接水，轻松生活"
 publish_to: 'none'
 
-version: 1.0.3+3
+version: 1.0.4+4
 
 environment:
   sdk: ^3.7.0
