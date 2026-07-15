@@ -29,8 +29,8 @@ class HomePage extends StatelessWidget {
                 end: Alignment.bottomCenter,
                 colors: controller.isDrinking.value
                     ? [
-                        const Color(0xFF00D4FF).withOpacity(0.3),
-                        const Color(0xFF0099CC).withOpacity(0.5),
+                        const Color(0xFF00D4FF).withValues(alpha:0.3),
+                        const Color(0xFF0099CC).withValues(alpha:0.5),
                         Theme.of(context).scaffoldBackgroundColor,
                       ]
                     : [
@@ -82,7 +82,7 @@ class HomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withOpacity(0.1),
+                  color: AppTheme.primaryColor.withValues(alpha:0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -181,8 +181,8 @@ class HomePage extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: isDrinking
-                  ? AppTheme.primaryColor.withOpacity(0.3)
-                  : Colors.black.withOpacity(isDark ? 0.3 : 0.05),
+                  ? AppTheme.primaryColor.withValues(alpha:0.3)
+                  : Colors.black.withValues(alpha:isDark ? 0.3 : 0.05),
               blurRadius: 20,
               offset: const Offset(0, 10),
             ),
@@ -197,8 +197,8 @@ class HomePage extends StatelessWidget {
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDrinking
-                        ? Colors.white.withOpacity(0.2)
-                        : AppTheme.primaryColor.withOpacity(0.1),
+                        ? Colors.white.withValues(alpha:0.2)
+                        : AppTheme.primaryColor.withValues(alpha:0.1),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
@@ -227,7 +227,7 @@ class HomePage extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: isDrinking
-                            ? Colors.white.withOpacity(0.8)
+                            ? Colors.white.withValues(alpha:0.8)
                             : (isDark ? Colors.grey[400] : Colors.grey[600]),
                       ),
                     ),
@@ -238,7 +238,7 @@ class HomePage extends StatelessWidget {
             if (isDrinking) ...[
               const SizedBox(height: 20),
               LinearProgressIndicator(
-                backgroundColor: Colors.white.withOpacity(0.2),
+                backgroundColor: Colors.white.withValues(alpha:0.2),
                 valueColor: const AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             ],
@@ -329,7 +329,7 @@ class HomePage extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.withOpacity(0.2),
+          color: isDark ? Colors.grey.shade800 : Colors.grey.withValues(alpha:0.2),
           style: isDark ? BorderStyle.solid : BorderStyle.solid,
           width: isDark ? 1 : 1,
         ),
@@ -414,12 +414,12 @@ class HomePage extends StatelessWidget {
                   ? AppTheme.primaryColor
                   : (isDark
                       ? Colors.grey.shade800
-                      : Colors.grey.withOpacity(0.2)),
+                      : Colors.grey.withValues(alpha:0.2)),
               width: isSelected ? 2 : 0.5,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(isDark ? 0.25 : 0.04),
+                color: Colors.black.withValues(alpha:isDark ? 0.25 : 0.04),
                 blurRadius: 6,
                 offset: const Offset(0, 2),
               ),
@@ -431,7 +431,7 @@ class HomePage extends StatelessWidget {
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
                   color: isSelected
-                      ? AppTheme.primaryColor.withOpacity(0.1)
+                      ? AppTheme.primaryColor.withValues(alpha:0.1)
                       : (isDark ? Colors.grey.shade800 : Colors.grey[100]),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -467,8 +467,8 @@ class HomePage extends StatelessWidget {
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
                       color: isDark
-                          ? Colors.grey.shade800.withOpacity(0.8)
-                          : Colors.grey[100]!.withOpacity(0.8),
+                          ? Colors.grey.shade800.withValues(alpha:0.8)
+                          : Colors.grey[100]!.withValues(alpha:0.8),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
@@ -553,7 +553,7 @@ class HomePage extends StatelessWidget {
                   ? AppTheme.primaryColor
                   : (isDark
                       ? Colors.grey.shade800
-                      : Colors.grey.withOpacity(0.2)),
+                      : Colors.grey.withValues(alpha:0.2)),
               width: isSelected ? 2 : 0.5,
             ),
           ),
@@ -958,7 +958,7 @@ class HomePage extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withOpacity(0.1),
+                color: AppTheme.primaryColor.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: const Icon(
@@ -974,7 +974,7 @@ class HomePage extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('版本: 1.0.3'),
+            const Text('版本: 1.0.4'),
             const SizedBox(height: 8),
             const Text('惠生活798喝水功能的第三方客户端'),
             const SizedBox(height: 4),
@@ -1075,7 +1075,6 @@ class _BubbleAnimationState extends State<_BubbleAnimation>
           _bubbles.add(_Bubble(
             x: _random.nextDouble() * (MediaQuery.of(context).size.width - 50),
             size: _random.nextDouble() * 30 + 10,
-            speed: _random.nextDouble() * 2 + 1,
             controller: AnimationController(
               duration: Duration(seconds: (_random.nextInt(3) + 2)),
               vsync: this,
@@ -1124,12 +1123,12 @@ class _BubbleAnimationState extends State<_BubbleAnimation>
                     shape: BoxShape.circle,
                     gradient: RadialGradient(
                       colors: [
-                        Colors.white.withOpacity(0.3),
-                        AppTheme.primaryColor.withOpacity(0.2),
+                        Colors.white.withValues(alpha:0.3),
+                        AppTheme.primaryColor.withValues(alpha:0.2),
                       ],
                     ),
                     border: Border.all(
-                      color: AppTheme.primaryColor.withOpacity(0.3),
+                      color: AppTheme.primaryColor.withValues(alpha:0.3),
                       width: 1,
                     ),
                   ),
@@ -1146,13 +1145,11 @@ class _BubbleAnimationState extends State<_BubbleAnimation>
 class _Bubble {
   final double x;
   final double size;
-  final double speed;
   final AnimationController controller;
 
   _Bubble({
     required this.x,
     required this.size,
-    required this.speed,
     required this.controller,
   });
 }

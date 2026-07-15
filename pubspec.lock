@@ -113,14 +113,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.1.1"
-  enhanced_future_builder:
-    dependency: "direct main"
-    description:
-      name: enhanced_future_builder
-      sha256: d0360c6cf190f35db6f3add919505afa02babe7471bfc960c2ad88c2ace4ad21
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.0"
   fake_async:
     dependency: transitive
     description:

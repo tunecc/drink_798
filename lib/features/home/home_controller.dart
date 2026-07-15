@@ -89,13 +89,7 @@ class HomeController extends GetxController {
         selectedDeviceIndex.value = 0;
       }
     } catch (e) {
-      Get.snackbar(
-        '错误',
-        '加载设备失败',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _err('加载设备失败');
     } finally {
       isLoading.value = false;
     }
@@ -239,14 +233,7 @@ class HomeController extends GetxController {
       if (success) {
         isDrinking.value = true;
         _startStatusCheck();
-        Get.snackbar(
-          '成功',
-          '开始接水',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 1),
-        );
+        _ok('开始接水');
       } else {
         Get.snackbar(
           '失败',
@@ -257,13 +244,7 @@ class HomeController extends GetxController {
         );
       }
     } catch (e) {
-      Get.snackbar(
-        '错误',
-        '操作失败',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _err('操作失败');
     }
   }
 
@@ -280,14 +261,7 @@ class HomeController extends GetxController {
       isDrinking.value = false;
 
       if (success) {
-        Get.snackbar(
-          '成功',
-          '已结算',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-          duration: const Duration(seconds: 1),
-        );
+        _ok('已结算');
       } else {
         Get.snackbar(
           '提示',
@@ -346,13 +320,7 @@ class HomeController extends GetxController {
         );
 
         if (success) {
-          Get.snackbar(
-            '成功',
-            '设备添加成功',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.green,
-            colorText: Colors.white,
-          );
+          _ok('设备添加成功');
           loadDevices();
         } else {
           Get.snackbar(
@@ -389,22 +357,10 @@ class HomeController extends GetxController {
           selectedDeviceIndex.value = deviceList.isEmpty ? -1 : 0;
         }
         await _saveDeviceOrder();
-        Get.snackbar(
-          '成功',
-          '已删除设备',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.green,
-          colorText: Colors.white,
-        );
+        _ok('已删除设备');
       }
     } catch (e) {
-      Get.snackbar(
-        '错误',
-        '删除失败',
-        snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
+      _err('删除失败');
     }
   }
 
@@ -412,4 +368,21 @@ class HomeController extends GetxController {
   Future<void> logout() async {
     await AppController.to.logout();
   }
+
+  void _err(String msg) => Get.snackbar(
+        '错误',
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+  void _ok(String msg) => Get.snackbar(
+        '成功',
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: const Duration(seconds: 1),
+      );
 }

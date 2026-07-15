@@ -40,7 +40,7 @@ class _ScannerPageState extends State<ScannerPage> {
               borderLength: 32,
               borderWidth: 4,
               cutOutSize: MediaQuery.of(context).size.width * 0.7,
-              overlayColor: Colors.black.withOpacity(0.7),
+              overlayColor: Colors.black.withValues(alpha:0.7),
             ),
           ),
 
@@ -86,7 +86,7 @@ class _ScannerPageState extends State<ScannerPage> {
                   end: Alignment.bottomCenter,
                   colors: [
                     Colors.transparent,
-                    Colors.black.withOpacity(0.8),
+                    Colors.black.withValues(alpha:0.8),
                   ],
                 ),
               ),
@@ -102,7 +102,7 @@ class _ScannerPageState extends State<ScannerPage> {
                         vertical: 12,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white.withOpacity(0.15),
+                        color: Colors.white.withValues(alpha:0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -110,14 +110,14 @@ class _ScannerPageState extends State<ScannerPage> {
                         children: [
                           Icon(
                             Ionicons.information_circle_outline,
-                            color: Colors.white.withOpacity(0.9),
+                            color: Colors.white.withValues(alpha:0.9),
                             size: 20,
                           ),
                           const SizedBox(width: 8),
                           Text(
                             '将设备二维码放入框内自动扫描',
                             style: TextStyle(
-                              color: Colors.white.withOpacity(0.9),
+                              color: Colors.white.withValues(alpha:0.9),
                               fontSize: 14,
                             ),
                           ),
@@ -187,7 +187,7 @@ class _ScannerPageState extends State<ScannerPage> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.15),
+              color: Colors.white.withValues(alpha:0.15),
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
@@ -200,7 +200,7 @@ class _ScannerPageState extends State<ScannerPage> {
           Text(
             label,
             style: TextStyle(
-              color: Colors.white.withOpacity(0.8),
+              color: Colors.white.withValues(alpha:0.8),
               fontSize: 12,
             ),
           ),
@@ -286,9 +286,9 @@ class _ScannerLinePainter extends CustomPainter {
         end: Alignment.centerRight,
         colors: [
           Colors.transparent,
-          AppTheme.primaryColor.withOpacity(0.8),
+          AppTheme.primaryColor.withValues(alpha:0.8),
           AppTheme.primaryColor,
-          AppTheme.primaryColor.withOpacity(0.8),
+          AppTheme.primaryColor.withValues(alpha:0.8),
           Colors.transparent,
         ],
         stops: const [0.0, 0.2, 0.5, 0.8, 1.0],

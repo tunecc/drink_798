@@ -225,18 +225,8 @@ class DrinkApiService {
       );
       return response.data["data"]["device"]["gene"]["status"] == 99;
     } catch (e) {
-      return true;
+      // 出错时按“仍在使用”处理，避免网络抖动导致提前自动结算
+      return false;
     }
-  }
-
-  /// 获取Token
-  String getToken() => _token["token"] ?? "";
-
-  /// 设置Token (用于调试)
-  Future<void> setToken(String token) async {
-    _token["token"] = token;
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_tokenKey, jsonEncode(_token));
-    await prefs.setBool(_loginKey, true);
   }
 }

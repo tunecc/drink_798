@@ -28,7 +28,6 @@ dependencies:
   shared_preferences: ^2.5.2
   
   # 工具
-  enhanced_future_builder: ^2.0.0
   modal_bottom_sheet: ^3.0.0
   
   # 扫码
