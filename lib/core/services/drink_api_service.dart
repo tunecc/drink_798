@@ -13,13 +13,33 @@ class DrinkApiService {
     _tokenInitialized = _initToken();
   }
 
-  final Dio _dio = Dio();
+  // 使用参考脚本中 App (ApplicationType 1,1) 的请求头。
+  final Dio _dio = Dio(
+    BaseOptions(
+      baseUrl: _baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: const {
+        'ApplicationType': '1,1',
+        'VersionCode': '3.1.7',
+        'User-Agent': 'Android_ilife798_3.1.7',
+        'Accept': '*/*',
+        'Accept-Encoding': 'gzip',
+        'Connection': 'Keep-Alive',
+      },
+    ),
+  );
   final Map<String, dynamic> _token = {"uid": "", "eid": "", "token": ""};
   late final Future<void> _tokenInitialized;
 
   static const String _baseUrl = "https://i.ilife798.com/api/v1";
   static const String _tokenKey = "drink_water_app_token";
   static const String _loginKey = "drink_water_app_is_login";
+
+  Future<Options> _authOptions() async {
+    await _tokenInitialized;
+    return Options(headers: {'Authorization': _token['token']});
+  }
 
   /// 初始化Token
   Future<void> _initToken() async {
@@ -115,7 +135,10 @@ class DrinkApiService {
         options: Options(headers: {"Authorization": normalizedToken}),
       );
       final data = response.data;
-      if (data is! Map || data["data"]?["account"] == null) {
+      if (data is! Map ||
+          data['code'] != 0 ||
+          data['data'] is! Map ||
+          data['data']['account'] == null) {
         return false;
       }
 
@@ -127,6 +150,8 @@ class DrinkApiService {
   }
 
   Future<void> _saveLoginToken(Map<String, dynamic> tokenData) async {
+    // 防止启动时尚未读完旧 Token，随后覆盖刚保存的新 Token。
+    await _tokenInitialized;
     _token["uid"] = tokenData["uid"] ?? "";
     _token["eid"] = tokenData["eid"] ?? "";
     _token["token"] = tokenData["token"] ?? "";
@@ -150,7 +175,7 @@ class DrinkApiService {
   /// 获取设备列表
   Future<List<Map<String, dynamic>>> getDeviceList() async {
     String url = "$_baseUrl/ui/app/master";
-    Options options = Options(headers: {"Authorization": _token["token"]});
+    Options options = await _authOptions();
 
     try {
       Response response = await _dio.get(url, options: options);
@@ -186,7 +211,7 @@ class DrinkApiService {
     required bool isRemove,
   }) async {
     String url = "$_baseUrl/dev/favo";
-    Options options = Options(headers: {"Authorization": _token["token"]});
+    Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId, "remove": isRemove};
 
@@ -205,7 +230,7 @@ class DrinkApiService {
   /// 开始接水
   Future<bool> startDrinking({required String deviceId}) async {
     String url = "$_baseUrl/dev/start";
-    Options options = Options(headers: {"Authorization": _token["token"]});
+    Options options = await _authOptions();
 
     Map<String, dynamic> params = {
       "did": deviceId,
@@ -229,7 +254,7 @@ class DrinkApiService {
   /// 结束接水
   Future<bool> stopDrinking({required String deviceId}) async {
     String url = "$_baseUrl/dev/end";
-    Options options = Options(headers: {"Authorization": _token["token"]});
+    Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId};
 
@@ -248,7 +273,7 @@ class DrinkApiService {
   /// 检查设备状态
   Future<bool> isDeviceAvailable({required String deviceId}) async {
     String url = "$_baseUrl/ui/app/dev/status";
-    Options options = Options(headers: {"Authorization": _token["token"]});
+    Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId, "more": true, "promo": false};
 
