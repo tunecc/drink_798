@@ -10,11 +10,12 @@ class DrinkApiService {
   factory DrinkApiService() => _instance;
 
   DrinkApiService._internal() {
-    _initToken();
+    _tokenInitialized = _initToken();
   }
 
   final Dio _dio = Dio();
   final Map<String, dynamic> _token = {"uid": "", "eid": "", "token": ""};
+  late final Future<void> _tokenInitialized;
 
   static const String _baseUrl = "https://i.ilife798.com/api/v1";
   static const String _tokenKey = "drink_water_app_token";
@@ -34,8 +35,10 @@ class DrinkApiService {
 
   /// 检查是否已登录
   Future<bool> isLoggedIn() async {
+    await _tokenInitialized;
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_loginKey) ?? false;
+    return (prefs.getBool(_loginKey) ?? false) &&
+        (_token["token"] as String).isNotEmpty;
   }
 
   /// 获取图形验证码
@@ -88,13 +91,11 @@ class DrinkApiService {
       final result = response.data;
       
       if (result["code"] == 0) {
-        _token["uid"] = result["data"]["al"]["uid"];
-        _token["eid"] = result["data"]["al"]["eid"];
-        _token["token"] = result["data"]["al"]["token"];
-        
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setString(_tokenKey, jsonEncode(_token));
-        await prefs.setBool(_loginKey, true);
+        await _saveLoginToken({
+          "uid": result["data"]["al"]["uid"],
+          "eid": result["data"]["al"]["eid"],
+          "token": result["data"]["al"]["token"],
+        });
         return true;
       }
       return false;
@@ -103,10 +104,44 @@ class DrinkApiService {
     }
   }
 
+  /// 使用已有 Token 登录。先向服务端校验，避免保存已过期或无效的 Token。
+  Future<bool> loginWithToken(String token) async {
+    final normalizedToken = token.trim();
+    if (normalizedToken.isEmpty) return false;
+
+    try {
+      final response = await _dio.get(
+        "$_baseUrl/ui/app/master",
+        options: Options(headers: {"Authorization": normalizedToken}),
+      );
+      final data = response.data;
+      if (data is! Map || data["data"]?["account"] == null) {
+        return false;
+      }
+
+      await _saveLoginToken({"uid": "", "eid": "", "token": normalizedToken});
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<void> _saveLoginToken(Map<String, dynamic> tokenData) async {
+    _token["uid"] = tokenData["uid"] ?? "";
+    _token["eid"] = tokenData["eid"] ?? "";
+    _token["token"] = tokenData["token"] ?? "";
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_tokenKey, jsonEncode(_token));
+    await prefs.setBool(_loginKey, true);
+  }
+
   /// 登出
   Future<void> logout() async {
+    await _tokenInitialized;
     SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_loginKey, false);
+    await prefs.remove(_tokenKey);
     _token["uid"] = "";
     _token["eid"] = "";
     _token["token"] = "";
