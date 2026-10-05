@@ -13,7 +13,8 @@ class DrinkApiService {
     _tokenInitialized = _initToken();
   }
 
-  // 使用参考脚本中 App (ApplicationType 1,1) 的请求头。
+  // 模拟官方安卓客户端的会话请求头；服务端目前不校验，
+  // 版本号对齐官方 App，避免日后按最低版本拦截。
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl,
@@ -21,8 +22,8 @@ class DrinkApiService {
       receiveTimeout: const Duration(seconds: 15),
       headers: const {
         'ApplicationType': '1,1',
-        'VersionCode': '3.1.7',
-        'User-Agent': 'Android_ilife798_3.1.7',
+        'VersionCode': _clientVersion,
+        'User-Agent': 'Android_ilife798_$_clientVersion',
         'Accept': '*/*',
         'Accept-Encoding': 'gzip',
         'Connection': 'Keep-Alive',
@@ -33,6 +34,7 @@ class DrinkApiService {
   late final Future<void> _tokenInitialized;
 
   static const String _baseUrl = "https://i.ilife798.com/api/v1";
+  static const String _clientVersion = "3.1.8";
   static const String _tokenKey = "drink_water_app_token";
   static const String _loginKey = "drink_water_app_is_login";
 
@@ -42,14 +44,26 @@ class DrinkApiService {
   }
 
   /// 初始化Token
+  ///
+  /// 本地存储损坏时保持未登录状态，不能让 [_tokenInitialized]
+  /// 变成失败 Future 拖垮所有认证请求。
   Future<void> _initToken() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    String? tokenStr = prefs.getString(_tokenKey);
-    if (tokenStr != null) {
-      Map<String, dynamic> map = jsonDecode(tokenStr);
-      map.forEach((key, value) {
-        _token[key] = value;
-      });
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? tokenStr = prefs.getString(_tokenKey);
+      if (tokenStr != null) {
+        final map = jsonDecode(tokenStr);
+        if (map is! Map) {
+          // 不是 JSON 对象：清掉坏数据，等待重新登录覆盖
+          await prefs.remove(_tokenKey);
+          return;
+        }
+        map.forEach((key, value) {
+          _token[key] = value;
+        });
+      }
+    } catch (_) {
+      // jsonDecode 失败等异常按未登录处理，坏数据会在下次登录时被覆盖
     }
   }
 
