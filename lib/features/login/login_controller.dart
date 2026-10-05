@@ -15,11 +15,14 @@ class LoginController extends GetxController {
   final phoneController = TextEditingController();
   final captchaController = TextEditingController();
   final smsCodeController = TextEditingController();
+  final tokenController = TextEditingController();
 
   // 状态
   final RxBool isLoading = false.obs;
   final RxBool isSendingSms = false.obs;
   final RxBool isSmsSent = false.obs;
+  final RxBool isTokenLogin = false.obs;
+  final RxBool isTokenVisible = false.obs;
   final Rx<Uint8List?> captchaImage = Rx<Uint8List?>(null);
 
   // 随机参数
@@ -37,6 +40,7 @@ class LoginController extends GetxController {
     phoneController.dispose();
     captchaController.dispose();
     smsCodeController.dispose();
+    tokenController.dispose();
     super.onClose();
   }
 
@@ -162,11 +166,53 @@ class LoginController extends GetxController {
     }
   }
 
+  /// 校验并保存用户手动输入的 Token。
+  Future<void> loginWithToken() async {
+    if (tokenController.text.trim().isEmpty) {
+      Get.snackbar('提示', '请输入 Token', snackPosition: SnackPosition.BOTTOM);
+      return;
+    }
+
+    isLoading.value = true;
+    try {
+      final success = await _apiService.loginWithToken(tokenController.text);
+      if (success) {
+        Get.snackbar(
+          '成功',
+          'Token 验证成功，已登录',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        Get.offAll(() => const HomePage());
+      } else {
+        Get.snackbar(
+          '失败',
+          'Token 无效或已过期，请检查后重试',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+      }
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   /// 重置状态回到第一步
   void resetToFirstStep() {
     isSmsSent.value = false;
     captchaController.clear();
     smsCodeController.clear();
     refreshCaptcha();
+  }
+
+  void showTokenLogin() {
+    isSmsSent.value = false;
+    isTokenLogin.value = true;
+  }
+
+  void showPhoneLogin() {
+    isTokenLogin.value = false;
   }
 }

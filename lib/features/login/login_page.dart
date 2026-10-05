@@ -43,9 +43,14 @@ class LoginPage extends StatelessWidget {
                   ),
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.all(24),
-                    child: Obx(() => controller.isSmsSent.value
-                        ? _buildSmsCodeForm(context, controller)
-                        : _buildPhoneForm(context, controller)),
+                    child: Obx(() {
+                      if (controller.isTokenLogin.value) {
+                        return _buildTokenForm(context, controller);
+                      }
+                      return controller.isSmsSent.value
+                          ? _buildSmsCodeForm(context, controller)
+                          : _buildPhoneForm(context, controller);
+                    }),
                   ),
                 ),
               ),
@@ -246,6 +251,97 @@ class LoginPage extends StatelessWidget {
                   ),
           )),
         ),
+        const SizedBox(height: 16),
+        Center(
+          child: TextButton.icon(
+            onPressed: controller.showTokenLogin,
+            icon: const Icon(Icons.key_rounded, size: 18),
+            label: const Text('使用 Token 登录'),
+          ),
+        ),
+      ],
+    );
+  }
+
+  /// Token 登录表单
+  Widget _buildTokenForm(BuildContext context, LoginController controller) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        IconButton(
+          onPressed: controller.showPhoneLogin,
+          icon: const Icon(Icons.arrow_back_rounded),
+          style: IconButton.styleFrom(
+            backgroundColor: Theme.of(context).brightness == Brightness.dark
+                ? Colors.grey[800]
+                : Colors.grey[100],
+          ),
+        ),
+        const SizedBox(height: 20),
+        const Text(
+          'Token 登录',
+          style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          '粘贴有效的 Token 后即可登录',
+          style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+        ),
+        const SizedBox(height: 32),
+        _buildInputLabel('Token', context),
+        const SizedBox(height: 8),
+        Obx(() => _buildTextField(
+              context: context,
+              controller: controller.tokenController,
+              hintText: '请输入或粘贴 Token',
+              prefixIcon: Icons.key_rounded,
+              obscureText: !controller.isTokenVisible.value,
+              suffixIcon: IconButton(
+                tooltip:
+                    controller.isTokenVisible.value ? '隐藏 Token' : '显示 Token',
+                onPressed: () => controller.isTokenVisible.toggle(),
+                icon: Icon(controller.isTokenVisible.value
+                    ? Icons.visibility_off_outlined
+                    : Icons.visibility_outlined),
+              ),
+            )),
+        const SizedBox(height: 12),
+        Text(
+          'Token 仅保存在本机，用于访问你的饮水设备。',
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+        ),
+        const SizedBox(height: 32),
+        SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: Obx(() => FilledButton(
+                onPressed: controller.isLoading.value
+                    ? null
+                    : controller.loginWithToken,
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppTheme.primaryColor,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+                child: controller.isLoading.value
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : const Text(
+                        '验证并登录',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              )),
+        ),
       ],
     );
   }
@@ -386,6 +482,8 @@ class LoginPage extends StatelessWidget {
     TextAlign textAlign = TextAlign.start,
     TextStyle? style,
     EdgeInsetsGeometry? contentPadding,
+    bool obscureText = false,
+    Widget? suffixIcon,
   }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
@@ -394,6 +492,7 @@ class LoginPage extends StatelessWidget {
       keyboardType: keyboardType,
       maxLength: maxLength,
       autofocus: autofocus,
+      obscureText: obscureText,
       textAlign: textAlign,
       style: style ?? TextStyle(
         fontSize: 16,
@@ -408,8 +507,12 @@ class LoginPage extends StatelessWidget {
         ),
         counterText: '',
         prefixIcon: prefixIcon != null 
-            ? Icon(prefixIcon, color: isDark ? Colors.grey[400] : Colors.grey[600])
+            ? Icon(
+                prefixIcon,
+                color: isDark ? Colors.grey[400] : Colors.grey[600],
+              )
             : null,
+        suffixIcon: suffixIcon,
         filled: true,
         fillColor: isDark ? Colors.grey[800] : Colors.grey[100],
         contentPadding: contentPadding ?? const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
