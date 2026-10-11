@@ -140,7 +140,8 @@ class DrinkApiService {
       "authCode": captcha,
       "un": phone,
     };
-    String url = "$_baseUrl/acc/login/code?sign=${DrinkApiSigner.shortSign(data)}";
+    // 与 acc/login 一致：该接口不校验签名，见 login() 内的说明。
+    const url = "$_baseUrl/acc/login/code";
 
     try {
       final response = await _dio.post(url, data: data);
@@ -184,13 +185,11 @@ class DrinkApiService {
       "un": phone,
     };
 
-    // 登录使用长签名（含 30 秒时间档位），与 acc/login 在官方客户端
-    // 走的 acceptCurrentSystemVerDict: 一致。曾误用短签名，跨档即验签失败。
-    String url = "$_baseUrl/acc/login?sign=${DrinkApiSigner.longSign(
-      data,
-      token: '',
-      uid: '',
-    )}";
+    // acc/login 不校验签名。实测同一种 authCode：不带 sign、带空 sign、
+    // 带错误 sign，服务端均返回「短信验证码错误」；而带上按官方算法算出
+    // 的 sign 反而返回「验签失败」。逆向之前本项目不带签名即可登录。
+    // 设备接口（dev/start 等）仍需要签名，见各方法内的 longSign 调用。
+    const url = "$_baseUrl/acc/login";
 
     try {
       final response = await _dio.post(url, data: data);

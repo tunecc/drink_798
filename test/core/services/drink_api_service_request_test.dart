@@ -136,7 +136,8 @@ void main() {
       expect(params['sign'], matches(RegExp(r'^[0-9a-f]{32}$')));
     });
 
-    test('sendSmsCode 在 URL 上携带短签名 sign', () async {
+    test('sendSmsCode 不带 sign', () async {
+      // 该接口不校验签名，见 login 测试内的说明。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.sendSmsCode(
@@ -145,39 +146,31 @@ void main() {
         phone: '22644212509',
       );
 
-      // POST 的签名拼在 URL 查询参数上，与官方一致
-      final sign = adapter.captured?.uri.queryParameters['sign'];
-      expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
     });
 
-    test('login 在 URL 上携带长签名 sign', () async {
-      // 登录走 acceptCurrentSystemVerDict:（含 30 秒时间档位），
-      // 不是短信接口用的短签名。曾误用短签名，跨档即「验签失败」。
+    test('login 不带 sign', () async {
+      // acc/login 不校验签名。实测同一种 authCode：不带 sign、带空 sign、
+      // 带错误 sign 服务端均返回「短信验证码错误」；带上按官方算法算出的
+      // sign 反而返回「验签失败」。逆向之前本项目不带签名即可登录。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
-      final sign = adapter.captured?.uri.queryParameters['sign'];
-      expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
     });
 
-    test('login 与 sendSmsCode 的签名类型不同', () async {
-      // 登录用长签名（含时间），短信用短签名（不含时间）。
-      // 同一参数下两者签名值应不同。
+    test('login 与 sendSmsCode 都不带 sign', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
 
       await api.sendSmsCode(
         doubleRandom: 'rand', captcha: 'abcd', phone: '22644212509',
       );
-      final smsSign = adapter.captured?.uri.queryParameters['sign'];
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
 
       await api.login(phone: '22644212509', smsCode: '123456');
-      final loginSign = adapter.captured?.uri.queryParameters['sign'];
-
-      expect(smsSign, isNotNull);
-      expect(loginSign, isNotNull);
-      expect(smsSign, isNot(loginSign));
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
     });
 
     test('login 参数集不含 cid', () async {
@@ -306,9 +299,8 @@ void main() {
       expect(result.message, '系统错误');
     });
 
-    test('login 签名不受本地残留 token 影响', () async {
-      // 官方客户端未登录时 token/uid 为空，服务端按空串验签。
-      // 若用本地残留的旧 token 算签名，服务端返回「验签失败」。
+    test('login 不受本地残留 token 影响', () async {
+      // 登录请求不带 sign，残留 token 无从影响它。
       SharedPreferences.setMockInitialValues({
         'drink_water_app_token':
             '{"uid":"87654321abcdefgh","eid":"e1","token":"abcdefgh12345678"}',
@@ -319,20 +311,7 @@ void main() {
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
-      final withResidual = adapter.captured?.uri.queryParameters['sign'];
-
-      // 清掉残留后再算一次
-      SharedPreferences.setMockInitialValues({});
-      final fresh = DrinkApiService();
-      await fresh.isLoggedIn();
-      await fresh.login(phone: '22644212509', smsCode: '123456');
-
-      final withoutResidual = adapter.captured?.uri.queryParameters['sign'];
-
-      expect(withResidual, isNotNull);
-      expect(withoutResidual, isNotNull);
-      expect(withResidual, withoutResidual,
-          reason: '残留 token 改变了登录签名，服务端会拒绝');
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
     });
   });
 }
