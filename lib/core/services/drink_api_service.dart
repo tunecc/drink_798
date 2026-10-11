@@ -147,15 +147,22 @@ class DrinkApiService {
     required String phone,
     required String smsCode,
   }) async {
+    // 参数集与官方一致：openCode、un、authCode。
+    // 曾多传 cid，官方不发送该参数；它参与签名计算导致服务端返回
+    // 「验签失败」(code -1)，登录永远无法成功。
     Map<String, dynamic> data = {
       "openCode": "",
       "authCode": smsCode,
       "un": phone,
-      "cid": "drinkwaterapp123456789",
     };
 
-    // 签名拼在 URL 查询参数上，与官方 stringByAppendingFormat(@"?sign=%@") 一致。
-    String url = "$_baseUrl/acc/login?sign=${DrinkApiSigner.shortSign(data)}";
+    // 登录使用长签名（含 30 秒时间档位），与 acc/login 在官方客户端
+    // 走的 acceptCurrentSystemVerDict: 一致。曾误用短签名，跨档即验签失败。
+    String url = "$_baseUrl/acc/login?sign=${DrinkApiSigner.longSign(
+      data,
+      token: _token["token"],
+      uid: _token["uid"],
+    )}";
 
     try {
       Response response = await _dio.post(url, data: data);

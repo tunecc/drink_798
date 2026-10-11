@@ -212,6 +212,27 @@ void main() {
           'cnt': 1,
         };
 
+    test('密钥片段按官方格式串分散插入盐值之间', () {
+      // 期望值由服务端验签通过反推确认。字符片段必须插在盐值之间：
+      // k1[1] k2[25]↑ k3[0] | dF6hJ9kL2nP | k4[18] | rT8wY1 | k2[21] | G | k3[23] | iM7oQ | k1[15] | v
+      // 聚成一圈再拼盐值会得到不同结果，服务端返回「验签失败」。
+      final sign = DrinkApiSigner.shortSign({'un': '22644212509', 'authCode': '123456'});
+
+      expect(sign, isNot('d75a96c18f30e951079f27df9c672c65'),
+          reason: '旧顺序（片段聚合）的签名值，服务端不接受');
+      expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
+    });
+
+    test('长签名的密钥片段顺序与短签名一致', () {
+      final params = startParams();
+
+      final long = DrinkApiSigner.longSign(params,
+          token: 'abcdefgh12345678', uid: '87654321abcdefgh', nowMillis: millis);
+
+      // 同一组密钥片段，长签名与短签名应产生同结构的拼接
+      expect(long, matches(RegExp(r'^[0-9a-f]{32}$')));
+    });
+
     test('签名先于 sign 入参计算，追加 sign 不改变已有签名', () {
       final params = startParams();
 

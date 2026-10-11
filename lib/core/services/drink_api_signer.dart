@@ -94,11 +94,10 @@ class DrinkApiSigner {
   static const String _salt4 = 'iM7oQ';
   static const String _salt5 = 'v';
 
-  /// 短签名，用于登录类接口。
+  /// 短签名，用于短信验证码等接口。
   ///
-  /// 拼接顺序：序列化参数、密钥字符片段、固定盐值。字符片段依次为
-  /// `k1[1]`、`k2[25]` 转大写、`k3[0]`、`k4[18]`、`k2[21]`、`k3[23]`、`k1[15]`
-  /// （下标 1-based）。拼接结果经 [objcEncode] 后取 MD5。
+  /// 拼接顺序见 [_keyFragments]：序列化参数后接密钥片段与盐值，字符片段
+  /// 分散插在盐值之间。结果经 [objcEncode] 后取 MD5。
   ///
   /// 短签名不含时间戳与身份信息，相同参数必然得到相同结果。
   static String shortSign(Map<String, dynamic> params) {
@@ -139,22 +138,29 @@ class DrinkApiSigner {
 
   /// 密钥字符片段与固定盐值的拼接，两个签名共用。
   ///
-  /// 顺序：`k1[1]`、`k2[25]` 转大写、`k3[0]`、`k4[18]`、`k2[21]`、`k3[23]`、
-  /// `k1[15]`，随后五个固定盐值。下标均为 1-based。
+  /// 顺序必须严格对应官方格式串
+  /// `%@%@%@%@dF6hJ9kL2nP%@rT8wY1%@G%@iM7oQ%@v`：
+  ///
+  /// ```
+  /// k1[1] k2[25]↑ k3[0] │ dF6hJ9kL2nP │ k4[18] │ rT8wY1 │ k2[21] │ G │ k3[23] │ iM7oQ │ k1[15] │ v
+  /// ```
+  ///
+  /// 字符片段分散插在盐值之间，不能聚成一圈再拼盐值——那样会得到不同
+  /// 的 MD5 输入，服务端返回「验签失败」。下标均为 1-based。
   static String _keyFragments([String prefix = '']) {
     final buffer = StringBuffer(prefix)
       ..write(_charAt(key1, 1))
       ..write(_charAt(key2, 25).toUpperCase())
       ..write(_charAt(key3, 0))
+      ..write(_salt1) // dF6hJ9kL2nP
       ..write(_charAt(key4, 18))
+      ..write(_salt2) // rT8wY1
       ..write(_charAt(key2, 21))
+      ..write(_salt3) // G
       ..write(_charAt(key3, 23))
+      ..write(_salt4) // iM7oQ
       ..write(_charAt(key1, 15))
-      ..write(_salt1)
-      ..write(_salt2)
-      ..write(_salt3)
-      ..write(_salt4)
-      ..write(_salt5);
+      ..write(_salt5); // v
     return buffer.toString();
   }
 

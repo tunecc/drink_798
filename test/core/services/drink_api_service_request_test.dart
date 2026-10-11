@@ -150,13 +150,49 @@ void main() {
       expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
     });
 
-    test('login 在 URL 上携带短签名 sign', () async {
+    test('login 在 URL 上携带长签名 sign', () async {
+      // 登录走 acceptCurrentSystemVerDict:（含 30 秒时间档位），
+      // 不是短信接口用的短签名。曾误用短签名，跨档即「验签失败」。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
       final sign = adapter.captured?.uri.queryParameters['sign'];
       expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
+    });
+
+    test('login 与 sendSmsCode 的签名类型不同', () async {
+      // 登录用长签名（含时间），短信用短签名（不含时间）。
+      // 同一参数下两者签名值应不同。
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+
+      await api.sendSmsCode(
+        doubleRandom: 'rand', captcha: 'abcd', phone: '22644212509',
+      );
+      final smsSign = adapter.captured?.uri.queryParameters['sign'];
+
+      await api.login(phone: '22644212509', smsCode: '123456');
+      final loginSign = adapter.captured?.uri.queryParameters['sign'];
+
+      expect(smsSign, isNotNull);
+      expect(loginSign, isNotNull);
+      expect(smsSign, isNot(loginSign));
+    });
+
+    test('login 参数集不含 cid', () async {
+      // 曾多传 cid，官方不发送该参数。cid 参与签名计算，
+      // 导致服务端返回「验签失败」(code -1)，登录永远无法成功。
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.login(phone: '22644212509', smsCode: '123456');
+
+      final body = adapter.captured?.data;
+      expect(body, isNotNull);
+      final text = body is String ? body : '$body';
+      expect(text, isNot(contains('cid')));
+      expect(text, contains('un'));
+      expect(text, contains('authCode'));
     });
   });
 
@@ -207,6 +243,21 @@ void main() {
       expect(result.success, isFalse);
       expect(result.code, -100);
       expect(result.message, '系统错误');
+    });
+
+    test('login 参数集不含 cid', () async {
+      // 曾多传 cid，官方不发送该参数。cid 参与签名计算，
+      // 导致服务端返回「验签失败」(code -1)，登录永远无法成功。
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.login(phone: '22644212509', smsCode: '123456');
+
+      final body = adapter.captured?.data;
+      expect(body, isNotNull);
+      final text = body is String ? body : '$body';
+      expect(text, isNot(contains('cid')));
+      expect(text, contains('un'));
+      expect(text, contains('authCode'));
     });
   });
 }
