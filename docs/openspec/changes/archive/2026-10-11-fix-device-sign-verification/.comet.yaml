@@ -16,7 +16,7 @@ plan: docs/superpowers/plans/2026-10-11-fix-device-sign-verification.md
 verify_result: pass
 verify_failures: 0
 verification_report: docs/superpowers/reports/2026-10-11-fix-device-sign-verification-verify.md
-branch_status: pending
+branch_status: handled
 created_at: 2026-10-11
 verified_at: 2026-10-11
 archive_confirmation: confirmed
