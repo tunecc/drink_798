@@ -196,6 +196,67 @@ void main() {
     });
   });
 
+  group('DrinkApiService.login 失败分类', () {
+    late _CapturingAdapter adapter;
+
+    setUp(() {
+      adapter = _CapturingAdapter();
+      SharedPreferences.setMockInitialValues({});
+      DrinkApiService().setHttpClientAdapter(adapter);
+    });
+
+    test('服务端拒绝时透出 code 与 msg', () async {
+      adapter.responseBody = '{"code":-1,"msg":"短信验证码错误"}';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.login(phone: '22644212509', smsCode: '000000');
+
+      expect(result.success, isFalse);
+      expect(result.code, -1);
+      expect(result.message, '短信验证码错误');
+    });
+
+    test('登录被接受但缺少账号信息时不说成验证码错误', () async {
+      // 曾在此处抛异常并被 catch 吞掉，用户看到误导性的「验证码错误或已过期」。
+      adapter.responseBody = '{"code":0,"data":{"foo":"bar"}}';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.login(phone: '22644212509', smsCode: '123456');
+
+      expect(result.success, isFalse);
+      expect(result.message, isNot(contains('验证码')));
+      expect(result.message, contains('账号信息'));
+    });
+
+    test('登录成功时返回 success 且无错误信息', () async {
+      adapter.responseBody =
+          '{"code":0,"data":{"al":{"uid":"u1","eid":"e1","token":"t1"}}}';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.login(phone: '22644212509', smsCode: '123456');
+
+      expect(result.success, isTrue);
+      expect(result.code, 0);
+      expect(result.message, isNull);
+    });
+
+    test('响应不是 JSON 对象时给出技术原因', () async {
+      adapter.responseBody = 'not json at all';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.login(phone: '22644212509', smsCode: '123456');
+
+      expect(result.success, isFalse);
+      expect(result.code, isNull);
+      expect(result.message, isNotNull);
+      expect(result.message, isNot(contains('验证码')));
+    });
+  });
+
   group('DrinkApiService 错误信息透出', () {
     late _CapturingAdapter adapter;
 
@@ -245,19 +306,33 @@ void main() {
       expect(result.message, '系统错误');
     });
 
-    test('login 参数集不含 cid', () async {
-      // 曾多传 cid，官方不发送该参数。cid 参与签名计算，
-      // 导致服务端返回「验签失败」(code -1)，登录永远无法成功。
+    test('login 签名不受本地残留 token 影响', () async {
+      // 官方客户端未登录时 token/uid 为空，服务端按空串验签。
+      // 若用本地残留的旧 token 算签名，服务端返回「验签失败」。
+      SharedPreferences.setMockInitialValues({
+        'drink_water_app_token':
+            '{"uid":"87654321abcdefgh","eid":"e1","token":"abcdefgh12345678"}',
+        'drink_water_app_is_login': true,
+      });
+
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
-      final body = adapter.captured?.data;
-      expect(body, isNotNull);
-      final text = body is String ? body : '$body';
-      expect(text, isNot(contains('cid')));
-      expect(text, contains('un'));
-      expect(text, contains('authCode'));
+      final withResidual = adapter.captured?.uri.queryParameters['sign'];
+
+      // 清掉残留后再算一次
+      SharedPreferences.setMockInitialValues({});
+      final fresh = DrinkApiService();
+      await fresh.isLoggedIn();
+      await fresh.login(phone: '22644212509', smsCode: '123456');
+
+      final withoutResidual = adapter.captured?.uri.queryParameters['sign'];
+
+      expect(withResidual, isNotNull);
+      expect(withoutResidual, isNotNull);
+      expect(withResidual, withoutResidual,
+          reason: '残留 token 改变了登录签名，服务端会拒绝');
     });
   });
 }

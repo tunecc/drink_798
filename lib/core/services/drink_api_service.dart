@@ -127,7 +127,10 @@ class DrinkApiService {
   }
 
   /// 发送短信验证码
-  Future<bool> sendSmsCode({
+  ///
+  /// 与 [login] 一样区分「服务端拒绝」和「请求未完成」，避免把网络异常
+  /// 说成「图形验证码错误」。
+  Future<DrinkResult> sendSmsCode({
     required String doubleRandom,
     required String captcha,
     required String phone,
@@ -138,12 +141,37 @@ class DrinkApiService {
       "un": phone,
     };
     String url = "$_baseUrl/acc/login/code?sign=${DrinkApiSigner.shortSign(data)}";
-    Response response = await _dio.post(url, data: data);
-    return response.data["code"] == 0;
+
+    try {
+      final response = await _dio.post(url, data: data);
+      final result = response.data;
+      if (result is! Map) {
+        return const DrinkResult(success: false, message: '服务端返回格式异常');
+      }
+      if (result['code'] == 0) {
+        return const DrinkResult(success: true, code: 0);
+      }
+      final message = result['msg'];
+      return DrinkResult(
+        success: false,
+        code: result['code'] is int ? result['code'] : null,
+        message: message is String && message.isNotEmpty ? message : '发送失败',
+      );
+    } on DioException catch (e) {
+      return DrinkResult(success: false, message: '网络错误：${e.message}');
+    } catch (e) {
+      return DrinkResult(success: false, message: '请求失败：$e');
+    }
   }
 
   /// 登录
-  Future<bool> login({
+  ///
+  /// 返回值区分三种失败，避免把解析失败或网络异常一律说成「验证码错误」：
+  /// - [DrinkResult.success] 为真：登录成功
+  /// - [DrinkResult.code] 非 null：服务端明确拒绝，[DrinkResult.message] 是其原因
+  /// - [DrinkResult.code] 为 null：请求未完成或响应无法解析，[DrinkResult.message]
+  ///   为具体的技术原因
+  Future<DrinkResult> login({
     required String phone,
     required String smsCode,
   }) async {
@@ -160,25 +188,52 @@ class DrinkApiService {
     // 走的 acceptCurrentSystemVerDict: 一致。曾误用短签名，跨档即验签失败。
     String url = "$_baseUrl/acc/login?sign=${DrinkApiSigner.longSign(
       data,
-      token: _token["token"],
-      uid: _token["uid"],
+      token: '',
+      uid: '',
     )}";
 
     try {
-      Response response = await _dio.post(url, data: data);
+      final response = await _dio.post(url, data: data);
       final result = response.data;
-      
-      if (result["code"] == 0) {
-        await _saveLoginToken({
-          "uid": result["data"]["al"]["uid"],
-          "eid": result["data"]["al"]["eid"],
-          "token": result["data"]["al"]["token"],
-        });
-        return true;
+
+      if (result is! Map) {
+        return const DrinkResult(
+          success: false,
+          message: '服务端返回格式异常',
+        );
       }
-      return false;
+
+      final code = result['code'];
+      if (code != 0) {
+        final message = result['msg'];
+        return DrinkResult(
+          success: false,
+          code: code is int ? code : null,
+          message: message is String && message.isNotEmpty ? message : '登录被拒绝',
+        );
+      }
+
+      // code == 0 即登录成功。凭据字段缺失属于响应形状问题，
+      // 不能反过来说成「验证码错误」——那会掩盖真实故障。
+      final payload = result['data'];
+      final account = payload is Map ? payload['al'] : null;
+      if (account is! Map) {
+        return const DrinkResult(
+          success: false,
+          message: '登录已被接受，但响应缺少账号信息，请反馈此问题',
+        );
+      }
+
+      await _saveLoginToken({
+        "uid": account['uid'] ?? "",
+        "eid": account['eid'] ?? "",
+        "token": account['token'] ?? "",
+      });
+      return const DrinkResult(success: true, code: 0);
+    } on DioException catch (e) {
+      return DrinkResult(success: false, message: '网络错误：${e.message}');
     } catch (e) {
-      return false;
+      return DrinkResult(success: false, message: '解析响应失败：$e');
     }
   }
 

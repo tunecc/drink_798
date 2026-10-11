@@ -79,13 +79,13 @@ class LoginController extends GetxController {
 
     isSendingSms.value = true;
     try {
-      final success = await _apiService.sendSmsCode(
+      final result = await _apiService.sendSmsCode(
         doubleRandom: _doubleRandom,
         captcha: captchaController.text,
         phone: phoneController.text,
       );
 
-      if (success) {
+      if (result.success) {
         isSmsSent.value = true;
         Get.snackbar(
           '成功',
@@ -95,9 +95,10 @@ class LoginController extends GetxController {
           colorText: Colors.white,
         );
       } else {
+        // 透出服务端原因，区分「图形验证码错误」与网络/格式异常
         Get.snackbar(
           '失败',
-          '图形验证码错误，请重试',
+          result.message ?? '发送失败',
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
@@ -107,7 +108,7 @@ class LoginController extends GetxController {
     } catch (e) {
       Get.snackbar(
         '错误',
-        '发送失败，请检查网络',
+        '发送失败：$e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
@@ -130,12 +131,12 @@ class LoginController extends GetxController {
 
     isLoading.value = true;
     try {
-      final success = await _apiService.login(
+      final result = await _apiService.login(
         phone: phoneController.text,
         smsCode: smsCodeController.text,
       );
 
-      if (success) {
+      if (result.success) {
         Get.snackbar(
           '成功',
           '登录成功！',
@@ -145,18 +146,22 @@ class LoginController extends GetxController {
         );
         Get.offAll(() => const HomePage());
       } else {
+        // 透出服务端原因。code 为 null 表示请求未完成或响应无法解析，
+        // 此时 message 是具体的技术原因，不能一律说成验证码错误。
+        final detail = result.message ?? '登录失败';
         Get.snackbar(
-          '失败',
-          '验证码错误或已过期',
+          result.code == null ? '登录异常' : '登录失败',
+          result.isSessionExpired ? '登录已过期，请重试' : detail,
           snackPosition: SnackPosition.BOTTOM,
           backgroundColor: Colors.red,
           colorText: Colors.white,
+          duration: const Duration(seconds: 5),
         );
       }
     } catch (e) {
       Get.snackbar(
         '错误',
-        '登录失败，请检查网络',
+        '登录失败：$e',
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: Colors.red,
         colorText: Colors.white,
