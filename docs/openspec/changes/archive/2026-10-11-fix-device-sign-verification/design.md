@@ -2,6 +2,8 @@
 comet_change: fix-device-sign-verification
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-10-11-fix-device-sign-verification
+status: final
 ---
 
 # Design

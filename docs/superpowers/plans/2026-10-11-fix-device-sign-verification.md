@@ -2,6 +2,7 @@
 change: fix-device-sign-verification
 design-doc: docs/openspec/changes/fix-device-sign-verification/design.md
 base-ref: 3d85201c80ceb98751a1c5fc74d03e6128ded843
+archived-with: 2026-10-11-fix-device-sign-verification
 ---
 
 # 实施计划：修复设备接口签名验证

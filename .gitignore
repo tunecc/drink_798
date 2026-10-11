@@ -55,3 +55,4 @@ releases
 
 # Comet change runtime state
 /docs/openspec/changes/*/.comet/
+/docs/openspec/changes/archive/*/.comet/
