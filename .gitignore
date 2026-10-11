@@ -47,3 +47,11 @@ releases
 
 # Local git worktrees
 .worktrees/
+# >>> Comet managed project state >>>
+!/.comet/
+/.comet/*
+!/.comet/config.yaml
+# <<< Comet managed project state <<<
+
+# Comet change runtime state
+/docs/openspec/changes/*/.comet/

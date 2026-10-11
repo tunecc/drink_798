@@ -23,6 +23,9 @@ dependencies:
   
   # 网络
   dio: ^5.8.0+1
+
+  # 签名摘要
+  crypto: ^3.0.7
   
   # 本地存储
   shared_preferences: ^2.5.2

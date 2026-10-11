@@ -4,6 +4,32 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'drink_api_signer.dart';
+
+/// 饮水操作的结果。
+///
+/// 携带服务端返回码与错误信息，使调用方能区分「登录已过期」
+/// 「余额不足」「设备离线」等不同原因，而不是一律提示设备无响应。
+class DrinkResult {
+  const DrinkResult({
+    required this.success,
+    this.code,
+    this.message,
+  });
+
+  /// 服务端返回码为 0 时为真。
+  final bool success;
+
+  /// 服务端返回码；网络异常等未取得响应时为 null。
+  final int? code;
+
+  /// 服务端返回的错误信息；成功时为 null。
+  final String? message;
+
+  /// 登录态过期。服务端以 -99 表示。
+  bool get isSessionExpired => code == -99;
+}
+
 /// 惠生活798 饮水API服务
 class DrinkApiService {
   static final DrinkApiService _instance = DrinkApiService._internal();
@@ -13,25 +39,34 @@ class DrinkApiService {
     _tokenInitialized = _initToken();
   }
 
-  // 模拟官方安卓客户端的会话请求头；服务端目前不校验，
-  // 版本号对齐官方 App，避免日后按最低版本拦截。
+  // 请求头与官方客户端对齐：只发 VersionCode 与 User-Agent，
+  // Authorization 由 _authOptions() 按请求注入。
+  // 历史上还发送 ApplicationType、Accept、Accept-Encoding、Connection，
+  // 逆向确认官方客户端不使用这些头，服务端也不校验，故移除。
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl,
       connectTimeout: const Duration(seconds: 15),
       receiveTimeout: const Duration(seconds: 15),
       headers: const {
-        'ApplicationType': '1,1',
         'VersionCode': _clientVersion,
         'User-Agent': 'Android_ilife798_$_clientVersion',
-        'Accept': '*/*',
-        'Accept-Encoding': 'gzip',
-        'Connection': 'Keep-Alive',
       },
     ),
   );
   final Map<String, dynamic> _token = {"uid": "", "eid": "", "token": ""};
   late final Future<void> _tokenInitialized;
+
+  /// 替换底层 HTTP adapter，仅供测试注入。
+  void setHttpClientAdapter(HttpClientAdapter adapter) {
+    _dio.httpClientAdapter = adapter;
+  }
+
+  /// 支付类型。官方默认值，集中定义便于按实测调整。
+  static const int _paymentType = 0;
+
+  /// 接水次数。官方默认值，集中定义便于按实测调整。
+  static const int _drinkCount = 1;
 
   static const String _baseUrl = "https://i.ilife798.com/api/v1";
   static const String _clientVersion = "3.1.8";
@@ -97,12 +132,12 @@ class DrinkApiService {
     required String captcha,
     required String phone,
   }) async {
-    String url = "$_baseUrl/acc/login/code";
     Map<String, dynamic> data = {
       "s": doubleRandom,
       "authCode": captcha,
       "un": phone,
     };
+    String url = "$_baseUrl/acc/login/code?sign=${DrinkApiSigner.shortSign(data)}";
     Response response = await _dio.post(url, data: data);
     return response.data["code"] == 0;
   }
@@ -112,14 +147,16 @@ class DrinkApiService {
     required String phone,
     required String smsCode,
   }) async {
-    String url = "$_baseUrl/acc/login";
     Map<String, dynamic> data = {
       "openCode": "",
       "authCode": smsCode,
       "un": phone,
       "cid": "drinkwaterapp123456789",
     };
-    
+
+    // 签名拼在 URL 查询参数上，与官方 stringByAppendingFormat(@"?sign=%@") 一致。
+    String url = "$_baseUrl/acc/login?sign=${DrinkApiSigner.shortSign(data)}";
+
     try {
       Response response = await _dio.post(url, data: data);
       final result = response.data;
@@ -228,6 +265,11 @@ class DrinkApiService {
     Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId, "remove": isRemove};
+    params["sign"] = DrinkApiSigner.longSign(
+      params,
+      token: _token["token"],
+      uid: _token["uid"],
+    );
 
     try {
       Response response = await _dio.get(
@@ -242,16 +284,27 @@ class DrinkApiService {
   }
 
   /// 开始接水
-  Future<bool> startDrinking({required String deviceId}) async {
+  Future<DrinkResult> startDrinking({required String deviceId}) async {
     String url = "$_baseUrl/dev/start";
     Options options = await _authOptions();
 
+    // 业务参数对齐官方：did、upgrade、ptype、args、rcp、cnt。
+    // args 对饮水设备为空串（官方仅在洗衣机、吹风机、触碰开锁三类设备填 JSON）。
     Map<String, dynamic> params = {
       "did": deviceId,
       "upgrade": true,
+      "ptype": _paymentType,
+      "args": "",
       "rcp": false,
-      "stype": 5,
+      "cnt": _drinkCount,
     };
+
+    // 签名必须在 sign 写入 params 之前计算，否则 serialize 会把 sign 也纳入。
+    params["sign"] = DrinkApiSigner.longSign(
+      params,
+      token: _token["token"],
+      uid: _token["uid"],
+    );
 
     try {
       Response response = await _dio.get(
@@ -259,18 +312,23 @@ class DrinkApiService {
         queryParameters: params,
         options: options,
       );
-      return response.data["code"] == 0;
+      return _toResult(response.data);
     } catch (e) {
-      return false;
+      return const DrinkResult(success: false);
     }
   }
 
   /// 结束接水
-  Future<bool> stopDrinking({required String deviceId}) async {
+  Future<DrinkResult> stopDrinking({required String deviceId}) async {
     String url = "$_baseUrl/dev/end";
     Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId};
+    params["sign"] = DrinkApiSigner.longSign(
+      params,
+      token: _token["token"],
+      uid: _token["uid"],
+    );
 
     try {
       Response response = await _dio.get(
@@ -278,10 +336,26 @@ class DrinkApiService {
         queryParameters: params,
         options: options,
       );
-      return response.data["code"] == 0;
+      return _toResult(response.data);
     } catch (e) {
-      return false;
+      return const DrinkResult(success: false);
     }
+  }
+
+  /// 把服务端响应转为 [DrinkResult]。
+  ///
+  /// 响应形状为 `{"code": <int>, "msg": <string>}`。
+  DrinkResult _toResult(dynamic data) {
+    if (data is! Map) {
+      return const DrinkResult(success: false);
+    }
+    final code = data['code'];
+    final message = data['msg'];
+    return DrinkResult(
+      success: code == 0,
+      code: code is int ? code : null,
+      message: message is String && message.isNotEmpty ? message : null,
+    );
   }
 
   /// 检查设备状态

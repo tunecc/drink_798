@@ -11,6 +11,44 @@ import '../../core/services/drink_api_service.dart';
 import '../login/login_page.dart';
 import '../scanner/scanner_page.dart';
 
+/// 失败提示的呈现内容。
+class DrinkFailurePrompt {
+  const DrinkFailurePrompt({
+    required this.title,
+    required this.message,
+    required this.isSessionExpired,
+  });
+
+  final String title;
+  final String message;
+
+  /// 是否为登录态过期。用于选择提示配色。
+  final bool isSessionExpired;
+}
+
+/// 把服务端返回转换为用户可读的失败提示。
+///
+/// 登录态过期（code -99）单独引导重新登录；其他业务错误透出服务端信息；
+/// 两者都缺失时退回 [fallback]。
+DrinkFailurePrompt drinkFailurePrompt(
+  DrinkResult result, {
+  required String fallback,
+}) {
+  if (result.isSessionExpired) {
+    return const DrinkFailurePrompt(
+      title: '登录已过期',
+      message: '请重新登录后再试',
+      isSessionExpired: true,
+    );
+  }
+
+  return DrinkFailurePrompt(
+    title: '失败',
+    message: result.message ?? fallback,
+    isSessionExpired: false,
+  );
+}
+
 /// 主页控制器
 class HomeController extends GetxController {
   final DrinkApiService _apiService = DrinkApiService();
@@ -226,22 +264,16 @@ class HomeController extends GetxController {
     }
 
     try {
-      final success = await _apiService.startDrinking(
+      final result = await _apiService.startDrinking(
         deviceId: currentDevice!.id,
       );
 
-      if (success) {
+      if (result.success) {
         isDrinking.value = true;
         _startStatusCheck();
         _ok('开始接水');
       } else {
-        Get.snackbar(
-          '失败',
-          '设备无响应，请检查设备状态',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
+        _fail(result, fallback: '设备无响应，请检查设备状态');
       }
     } catch (e) {
       _err('操作失败');
@@ -253,28 +285,48 @@ class HomeController extends GetxController {
     if (currentDevice == null) return;
 
     try {
-      final success = await _apiService.stopDrinking(
+      final result = await _apiService.stopDrinking(
         deviceId: currentDevice!.id,
       );
 
       _statusTimer?.cancel();
       isDrinking.value = false;
 
-      if (success) {
+      if (result.success) {
         _ok('已结算');
       } else {
-        Get.snackbar(
-          '提示',
-          '结算可能未成功，请检查',
-          snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
+        _fail(result, fallback: '结算可能未成功，请检查');
       }
     } catch (e) {
       isDrinking.value = false;
       _statusTimer?.cancel();
     }
+  }
+
+  /// 按服务端返回码呈现失败原因。
+  ///
+  /// 登录态过期时引导重新登录，其他错误透出服务端信息；
+  /// 都没有时退回 [fallback]，不再一律提示设备无响应。
+  void _fail(DrinkResult result, {required String fallback}) {
+    final prompt = drinkFailurePrompt(result, fallback: fallback);
+    if (prompt.isSessionExpired) {
+      Get.snackbar(
+        prompt.title,
+        prompt.message,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    Get.snackbar(
+      prompt.title,
+      prompt.message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: Colors.red,
+      colorText: Colors.white,
+    );
   }
 
   /// 开始状态检查
