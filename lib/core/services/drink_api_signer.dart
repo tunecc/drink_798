@@ -131,9 +131,8 @@ class DrinkApiSigner {
   }) {
     final query = serialize(params);
     final tick = _timeTick(nowMillis ?? DateTime.now().millisecondsSinceEpoch);
-    return md5Hex(
-      objcEncode('$query$tick${_tail8(token)}${_tail8(uid)}${_keyFragments()}'),
-    );
+    final raw = '$query$tick${_tail8(token)}${_tail8(uid)}${_keyFragments()}';
+    return md5Hex(objcEncode(raw));
   }
 
   /// 密钥字符片段与固定盐值的拼接，两个签名共用。
