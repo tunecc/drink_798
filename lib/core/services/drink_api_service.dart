@@ -4,7 +4,6 @@ import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'drink_api_signer.dart';
 
 /// 饮水操作的结果。
 ///
@@ -326,11 +325,6 @@ class DrinkApiService {
     Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId, "remove": isRemove};
-    params["sign"] = DrinkApiSigner.longSign(
-      params,
-      token: _token["token"],
-      uid: _token["uid"],
-    );
 
     try {
       Response response = await _dio.get(
@@ -360,12 +354,6 @@ class DrinkApiService {
       "cnt": _drinkCount,
     };
 
-    // 签名必须在 sign 写入 params 之前计算，否则 serialize 会把 sign 也纳入。
-    params["sign"] = DrinkApiSigner.longSign(
-      params,
-      token: _token["token"],
-      uid: _token["uid"],
-    );
 
     try {
       Response response = await _dio.get(
@@ -385,11 +373,6 @@ class DrinkApiService {
     Options options = await _authOptions();
 
     Map<String, dynamic> params = {"did": deviceId};
-    params["sign"] = DrinkApiSigner.longSign(
-      params,
-      token: _token["token"],
-      uid: _token["uid"],
-    );
 
     try {
       Response response = await _dio.get(

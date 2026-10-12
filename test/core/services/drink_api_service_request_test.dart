@@ -61,14 +61,14 @@ void main() {
       expect(params.containsKey('stype'), isFalse);
     });
 
-    test('携带 sign 参数且为 32 位十六进制', () async {
+    test('startDrinking 不带 sign', () async {
+      // 实测服务端不校验该接口签名：不带 sign 返回 code:0，
+      // 带上按官方算法算出的 sign 反而返回「验签失败」。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.startDrinking(deviceId: 'device123');
 
-      final sign = adapter.captured?.queryParameters['sign'];
-      expect(sign, isNotNull);
-      expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
+      expect(adapter.captured?.queryParameters.containsKey('sign'), isFalse);
     });
 
     test('URL 中布尔参数序列化为 true/false', () async {
@@ -113,7 +113,7 @@ void main() {
       DrinkApiService().setHttpClientAdapter(adapter);
     });
 
-    test('stopDrinking 携带 did 与长签名 sign', () async {
+    test('stopDrinking 携带 did 且不带 sign', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.stopDrinking(deviceId: 'device123');
@@ -121,10 +121,10 @@ void main() {
       final params = adapter.captured?.queryParameters;
       expect(params, isNotNull);
       expect(params!['did'], 'device123');
-      expect(params['sign'], matches(RegExp(r'^[0-9a-f]{32}$')));
+      expect(params.containsKey('sign'), isFalse);
     });
 
-    test('toggleFavoriteDevice 携带 did、remove 与长签名 sign', () async {
+    test('toggleFavoriteDevice 携带 did、remove 且不带 sign', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.toggleFavoriteDevice(deviceId: 'device123', isRemove: false);
@@ -133,7 +133,7 @@ void main() {
       expect(params, isNotNull);
       expect(params!['did'], 'device123');
       expect(params['remove'], false);
-      expect(params['sign'], matches(RegExp(r'^[0-9a-f]{32}$')));
+      expect(params.containsKey('sign'), isFalse);
     });
 
     test('sendSmsCode 不带 sign', () async {
