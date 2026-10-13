@@ -1,7 +1,7 @@
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 
@@ -35,6 +35,20 @@ class DrinkApiService {
   factory DrinkApiService() => _instance;
 
   DrinkApiService._internal() {
+    _tokenInitialized = _initToken();
+  }
+
+  /// 仅供测试使用的生成式构造。
+  ///
+  /// 生产代码必须继续用 `DrinkApiService()` 取单例。之所以要新开一个构造：
+  /// Dart 里工厂构造不能作为超类构造器，子类必须重定向到一个生成式构造，
+  /// 否则 `extends DrinkApiService` 直接编译失败。
+  ///
+  /// Token 初始化照常走 [_initToken]（它本身吞掉所有异常），这样即使误用于
+  /// 生产也只是拿到一个未登录的服务，不会像预完成 Future 那样带着空
+  /// Authorization 请求、被设备列表判定过期并清掉已保存的 Token。
+  @visibleForTesting
+  DrinkApiService.test() {
     _tokenInitialized = _initToken();
   }
 

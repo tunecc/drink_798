@@ -9,7 +9,10 @@ import '../home/home_page.dart';
 
 /// 登录页面控制器
 class LoginController extends GetxController {
-  final DrinkApiService _apiService = DrinkApiService();
+  LoginController({DrinkApiService? apiService})
+    : _apiService = apiService ?? DrinkApiService();
+
+  final DrinkApiService _apiService;
 
   // 输入控制器
   final phoneController = TextEditingController();

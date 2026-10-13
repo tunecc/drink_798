@@ -47,6 +47,9 @@ class AppTheme {
       primary: primaryColor,
       secondary: primaryLight,
       surface: backgroundLight,
+      // 不显式给 onSurfaceVariant 时它会退化成 onSurface（纯黑），
+      // 副标题、提示文字和"弱化"的 Token 入口反而比正文更抢眼。
+      onSurfaceVariant: Colors.black54,
       error: errorColor,
     ),
     appBarTheme: AppBarTheme(
@@ -122,6 +125,8 @@ class AppTheme {
       primary: primaryLight,
       secondary: primaryColor,
       surface: backgroundDark,
+      // 同上：缺省时退化成 onSurface（纯白），弱化文字会失去层次。
+      onSurfaceVariant: Colors.white70,
       error: errorColor,
     ),
     appBarTheme: AppBarTheme(

@@ -8,6 +8,7 @@ import '../../core/app_controller.dart';
 import '../../core/models/device_model.dart';
 import '../../core/utils/device_order.dart';
 import '../../core/services/drink_api_service.dart';
+import '../login/login_controller.dart';
 import '../login/login_page.dart';
 import '../scanner/scanner_page.dart';
 
@@ -110,6 +111,9 @@ class HomeController extends GetxController {
           backgroundColor: Colors.orange,
           colorText: Colors.white,
         );
+        // 与 AppController.logout 一致：登录页控制器是单例注册，
+        // 不删除就会沿用上次的 isSmsSent/isTokenLogin 而停在错误步骤。
+        Get.delete<LoginController>();
         Get.offAll(() => const LoginPage());
         return;
       }
