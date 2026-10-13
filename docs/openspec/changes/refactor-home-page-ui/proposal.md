@@ -8,7 +8,7 @@ The home page is the screen users live on, yet in its idle state it renders as o
 
 - The idle background gains a real visual anchor: a brand-gradient header band that fades smoothly into the light body, reusing the pattern the login page settled on instead of a two-stop no-op gradient.
 - Surface roles are separated into measurable steps — page background, resting card, selected card, elevated sheet — so elevation no longer depends on a 2% color difference. Each step is also separated by border or shadow, never by fill alone.
-- Type scale gains distinct levels: screen title, status headline, status caption, section title, item title, secondary action. Secondary text uses `onSurfaceVariant` rather than hard-coded black or white alpha.
+- Type scale gains distinct levels: screen title, status headline, status caption, section title, item title, secondary action. Secondary text resolves through one named de-emphasized foreground role for its surface instead of an opacity applied at each call site, and still clears the 4.5:1 floor — which is why that role is a page-local step rather than `onSurfaceVariant`, measured at 4.44 on the new page base.
 - The primary action becomes a proper focal button with an explicit disabled state, replacing the current `Colors.grey[300]` fallback that looks like an enabled control.
 - Device items express selected / resting / dragging / editing through fill, border and check mark together, while tap and long-press targets do not shrink.
 - The home page's own bottom sheets (device management, settings) and dialogs are brought onto the same surface and type scale as the body.

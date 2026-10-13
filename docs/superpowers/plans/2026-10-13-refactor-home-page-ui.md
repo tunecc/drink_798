@@ -194,6 +194,54 @@ Grid at 320×568 with 1.3 scale, reorder mode at the same size, sheet grabber pr
 legibility, the modal barrier over the page, and a grayscale-only selection assertion.
 Verify: `fvm flutter test --no-pub` = 113 passed, `fvm flutter analyze --no-pub` clean.
 
+## Group 9 — Round 3, returned by the final integration review
+
+Scope unchanged. Findings and numbers: "Verify round 3" in `design.md`.
+
+<!-- comet-task-ref:0424bbad-47ff-46c7-ba89-21af6891c810 -->
+### 9.1 Dialog action labels
+RED: `取消`/`确定` measured 3.12:1 on the white dialog face. Verify: every text button label in
+all four dialogs clears 4.5 in both modes.
+
+<!-- comet-task-ref:b16bf9d6-7943-4aac-a0a9-ff1223c2fb57 -->
+### 9.2 A hairline that is actually drawn
+RED: light border channel measured 1.078–1.130 against the surfaces it separates. Verify: the
+measured border channel is true for the status card and a resting tile in both modes.
+
+<!-- comet-task-ref:82faa4f8-31c6-49d0-92dc-d85b84b3608e -->
+### 9.3 Note field second channel
+RED: the field's own border against its own fill was 1.099. Verify: measured against the dialog
+face, not the page gradient.
+
+<!-- comet-task-ref:7578180f-b2f6-41e1-948f-860feae0217b -->
+### 9.4 In-card progress clause
+Coverage guard for Requirement 4's "keeps animating" clause; disclosed as passing on first write,
+because the widget already existed and only the assertion was missing.
+
+<!-- comet-task-ref:a37b7fd7-d879-4c38-87d9-1840ea47afff -->
+### 9.5 Idle gradient landing
+Coverage guard for Requirement 1's bottom-region clause: terminal stop equals the `Scaffold`
+colour in both modes.
+
+<!-- comet-task-ref:cf8cffbe-ccdc-42d3-841b-db7d57e008c4 -->
+### 9.6 Spec patch and record corrections
+Reword Requirement 3's secondary-text scenario to constrain the role plus the 4.5 floor instead
+of naming a global theme token; correct the round-2 claim about the progress indicator and the
+stale D4/D7 records. Acceptance: `comet classic openspec -- validate` passes and the handoff is
+refreshed.
+
+<!-- comet-task-ref:2f7b5c2f-b4b5-4c26-9c7d-2a57864abfce -->
+### 9.7 Assertions that cannot fail for the right reason
+Headline dominance by size/weight; small-screen reachability by viewport rect and a real tap;
+the reorder pill measured in dark as well; gradient surfaces judged at the stop nearest the
+backdrop; opaque-Material surface lookup so a filled button's label is not judged against the
+dialog behind it.
+
+<!-- comet-task-ref:9ee2546f-9f1c-4689-ace0-9e9f6674a10e -->
+### 9.8 Record corrections
+D4's dark figures after the round-2 re-tune, and D7's assumption that a Container border adds
+layout height. No behaviour change; the numbers must match what is built.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.

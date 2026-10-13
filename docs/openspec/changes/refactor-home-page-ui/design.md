@@ -181,9 +181,14 @@ Harness corrections of the same kind: `contrastOn` flattens a translucent *backg
 ## Verify round 2 (returned by `verify-fail`, same scope)
 
 The independent integration review rejected the first round. Two of its findings were
-verified as untrue and are recorded here so they are not re-litigated: both sheets *did*
-already carry a grabber, and the progress indicator plus the 320×568 / 1.3 list case
-*were* already covered (`home_page_ui_test.dart` in-progress group and small-screen group).
+verified as partly untrue and are recorded here so they are not re-litigated: both sheets *did*
+already carry a grabber, and the 320×568 / 1.3 non-empty-list case *was* already covered.
+
+**Correction to this record, found in round 3:** the same paragraph claimed the progress
+indicator was already tested. It was not. What the suite covered was the page-level
+`CircularProgressIndicator` for a pending request; Requirement 4's clause is about the
+`LinearProgressIndicator` inside the status card while a session runs, and nothing asserted it.
+The claim is fixed by task 9.4 rather than repeated.
 
 What was actually wrong and how it changed:
 
@@ -198,3 +203,36 @@ What was actually wrong and how it changed:
 | reorder hint | bare `Text` on the page gradient | brand-gradient pill with a brand-ink border (`reorderHintKey`) | Requirement 5 says the hint sits "on a surface distinct from normal browsing". A `card`-filled pill was tried first and rejected — that *is* the resting tile, pixel for pixel. The accent pill is 4.4 from the page band, 4.6 from a resting tile, and its white label is 4.80 on its own lightest stop. |
 | `HomeController.loadDevices` | expired-session `return` inside `try` | also clears `_reloadQueued` | The early return skips the tail that consumes the flag, so the *next* load fired one whole extra round of requests after a session had expired. |
 | note dialog controller | `TextEditingController` built in the `showDialog` builder | `_NoteEditDialog` StatefulWidget disposes it | Nobody released it when the route closed. Save path, validation, autofocus, `maxLength: 20` and the pop-then-snackbar order are unchanged. |
+
+## Verify round 3 (returned by the final integration review, same scope)
+
+| Item | Was | Now | Why |
+| --- | --- | --- | --- |
+| Dialog action labels | no `foregroundColor`, so the theme's `primary #2196F3` painted them | page brand ink on all four (`取消` x3, `确定`) | **3.12:1** on the white dialog face, under Requirement 3's 4.5 body floor. This was the one place the redesign left a theme default in a home-owned dialog; brand ink gives 6.97 light / 6.67 dark. |
+| D3 `hairlineLight` | `0x2E9FB4C9` | `0x4D7E96AE` | Composited against the surfaces it separates: **1.133** on the white card, **1.099** on the page base, **1.079** on the brand band — all below 1.15, so the "second channel" of every light card was really just a 7%-alpha shadow. The new value measures **1.344 / 1.297 / 1.242** in the same order. |
+| Note field | one channel (fill 1.174 against the dialog face, border **1.099** against its own fill) | same fill, border lifted with the hairline to 1.293 | Requirement 2 applies to the field too; it was the same drawn-but-invisible defect class round 2 fixed on cards and the grabber. |
+| `channelsOf` | fill from the lightest gradient stop; elevation = any shadow with α > 0 | fill from the stop **closest** to the backdrop; elevation needs α ≥ 0.12 *and* blur *and* offset *and* a ≥1.05 mark on the surface behind | Two unfalsifiable paths: taking the lightest stop judged a gradient surface at its best case, and a 6%-alpha shadow certified itself as an elevation channel. Both were load-bearing for the light cards, which is why the stricter harness went red before any token changed. Of the two numeric gates the **α ≥ 0.12** one is the operative bound: a black shadow at α 0.07 already leaves a 1.062 mark, so the 1.05 floor only screens out fully diffuse or zero-offset shadows. |
+| `surfaceBehind` | nearest `MaterialType.card` ancestor, matched by a Finder | innermost opaque Material, walked with `visitAncestorElements` | Filtering by type made a solid button's label measure against the white dialog behind it (1.000) instead of against the surface it is painted on, so the predicate is now opacity. The walk replaces the Finder: `_AncestorWidgetFinder` yields innermost-first, so a "keep the last match" loop silently returned the **outermost** opaque Material — the opposite of what the first version of this fix claimed. A M3 `FilledButton` carries its fill on the `ButtonStyle`, not on any ancestor Material, so solid button labels are verified by `_expectSolidActionLegible`, which reads `style.backgroundColor.resolve`; that path is exercised by the note dialog's 保存. |
+| Headline dominance assertion | compared the two labels' contrast ratios | compares font size and weight | Both lines clear 4.5, so a ratio comparison passed for a reason unrelated to dominance; dominance lives in size and weight only. |
+| Small-screen reachability | `findsOneWidget` | rect centre inside the 320×568 viewport, plus a real tap on the layout toggle | "In the tree" is not "reachable"; a widget positioned off-screen satisfies `findsOneWidget`. |
+
+Record corrections rather than behaviour changes:
+
+- **D4 numbers are stale.** Measured against the round-2 dark stack they are 14.77 (white on dark card, recorded 16.06), 8.01 (secondary, recorded 8.50) and 6.67 (brand glyph on the dark card, recorded 7.25). Every one still clears its floor; the table above D3/D4 keeps the original figures as the round-1 record.
+- **D7's derivation was wrong.** A `Container`'s `BoxDecoration.border` is painted inside its box and adds no layout height, so pre-change tiles were 36 + 2x10 = **56**, not the 60 recorded. The 60.0 / 57.0 floors the test asserts are measurements of the new build that happen to sit above that bar, so the guard is stricter than the requirement — not, as first written, derived from the old geometry.
+- **Two of the round-3 tests are coverage guards, not observed REDs**: the in-card `LinearProgressIndicator` presence/absence and the idle gradient landing on the `Scaffold` colour both passed the moment they were written, because the behaviour was already correct and only the assertion was missing. They are recorded as guards, and the round-2 claim that the progress indicator was already tested is corrected above.
+
+### Spec patch (round 3)
+
+Requirement 3's scenario *Secondary text is not brighter than primary text* said the secondary line must use "the theme's de-emphasized foreground role". Kept literally, that means `colorScheme.onSurfaceVariant`, which in this app is `Colors.black54` — measured at **4.44:1** on the new page base, below the 4.5 floor the same requirement sets, and `AppTheme` is inside this change's declared "must not touch" boundary. The two clauses contradicted each other and the archive would have carried that into the main spec.
+
+The scenario now constrains what it was always trying to constrain: one named de-emphasized foreground role per surface rather than an opacity sprinkled at each call site, and that role must clear the 4.5 floor. The wording change and the matching proposal line are part of this commit; no requirement, scenario set or numeric floor changed meaning.
+
+## Out-of-scope defects found while verifying (not fixed here)
+
+These were surfaced by the review passes. Each sits outside the boundary the user set (home page body plus its own sheets and dialogs, no global theme edits, no behaviour change), so they are recorded rather than silently passed over.
+
+- `HomeController` prompts: the snackbar bodies are white labels on `Colors.orange` (**2.16:1**), `Colors.red` (**3.68:1**) and `Colors.green` (**2.78:1**) — `home_controller.dart:111`, `:321`, `:454-468`. They predate the redesign and are emitted by the controller rather than the page's own widget tree, but they are the last sub-floor text the home screen puts on screen. A follow-up should move them onto the page's `destructive` / `settle` roles.
+- `ScannerPage` overflows horizontally by 12px at 320×568 with a 1.3 text scale (`scanner_page.dart:108`). Reproduced by the home suite when the add-device entry is actually tapped; the small-screen assertion therefore proves the home page's reachability and pops back at a normal size instead of carrying another page's overflow.
+- The about dialog still shows a hardcoded `版本: 1.0.4` while `pubspec.yaml` is at 1.0.6.
+- `main.dart` forces `statusBarIconBrightness: Brightness.dark`, which puts black status icons over the dark band on a dark-scheme device.

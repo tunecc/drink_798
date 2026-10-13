@@ -50,7 +50,9 @@ abstract final class _HomeT {
   static const cardLight = Color(0xFFFFFFFF);
   static const tintLight = Color(0xFFDCEBF9);
   static const bandTopLight = Color(0xFFC5E0F7);
-  static const hairlineLight = Color(0x2E9FB4C9);
+  // α.24 的淡边压在白卡 1.130 / 本体 1.104 / 品牌带 1.078，三条全在 1.15 以下：
+  // 描边画了但看不出画，"两条通道"实际只剩一档填充差。提到 α.30 才有第二条。
+  static const hairlineLight = Color(0x4D7E96AE);
 
   // 深色：靠"抬亮"分层，但卡片必须比它真正压着的那条带也亮一档。
   // 上一版是 page #0F1417 / band #15293C / card #1A222B，带比卡片还亮，
@@ -1038,8 +1040,9 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  // hairline 压在抽屉面上只有 1.13，肉眼基本看不见；
-                  // tint 比抽屉面低 1.24（深色 1.39）。
+                  // 拖拽条走 tint：比抽屉面深 1.24（深色 1.39）。
+                  // 它当初定下来时 hairline 压在白卡上只有 1.13，肉眼看不见；
+                  // round 3 把 hairline 提到 1.34 之后 tint 仍是更深的那一档。
                   color: p.tint,
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -1161,6 +1164,11 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            // 不吃主题 primary（#2196F3 压在白色对话框面上只有 3.12），
+            // 统一到页面自己的品牌墨：浅色 6.97，深色 6.67。
+            style: TextButton.styleFrom(
+              foregroundColor: _HomePalette.of(context).brandInk,
+            ),
             child: const Text('取消'),
           ),
           TextButton(
@@ -1202,8 +1210,9 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  // hairline 压在抽屉面上只有 1.13，肉眼基本看不见；
-                  // tint 比抽屉面低 1.24（深色 1.39）。
+                  // 拖拽条走 tint：比抽屉面深 1.24（深色 1.39）。
+                  // 它当初定下来时 hairline 压在白卡上只有 1.13，肉眼看不见；
+                  // round 3 把 hairline 提到 1.34 之后 tint 仍是更深的那一档。
                   color: p.tint,
                   borderRadius: BorderRadius.circular(2),
                 ),
@@ -1316,6 +1325,9 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            style: TextButton.styleFrom(
+              foregroundColor: _HomePalette.of(context).brandInk,
+            ),
             child: const Text('确定'),
           ),
         ],
@@ -1344,6 +1356,11 @@ class HomePage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
+            // 不吃主题 primary（#2196F3 压在白色对话框面上只有 3.12），
+            // 统一到页面自己的品牌墨：浅色 6.97，深色 6.67。
+            style: TextButton.styleFrom(
+              foregroundColor: _HomePalette.of(context).brandInk,
+            ),
             child: const Text('取消'),
           ),
           TextButton(
@@ -1431,6 +1448,7 @@ class _NoteEditDialogState extends State<_NoteEditDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
+          style: TextButton.styleFrom(foregroundColor: p.brandInk),
           child: const Text('取消'),
         ),
         FilledButton(

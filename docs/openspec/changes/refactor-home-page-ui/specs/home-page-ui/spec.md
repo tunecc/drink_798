@@ -64,7 +64,8 @@ The home page SHALL render text at no fewer than three distinct hierarchy levels
 #### Scenario: Secondary text is not brighter than primary text
 
 - **WHEN** a caption or hint is displayed next to a headline on the same card
-- **THEN** the secondary line uses the theme's de-emphasized foreground role rather than a hard-coded black or white alpha
+- **THEN** the secondary line resolves through one named de-emphasized foreground role for the surface it sits on, rather than an opacity applied ad hoc at each call site
+- **AND** it still clears the 4.5:1 floor above against that surface, so the role is chosen for legibility and not for rank alone
 - **AND** its visual weight stays below the headline it belongs to
 
 #### Scenario: Text on the accent state stays readable at its weakest point

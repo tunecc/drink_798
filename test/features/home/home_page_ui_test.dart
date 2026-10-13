@@ -11,6 +11,7 @@ import 'package:drink_water_app/core/models/device_model.dart';
 import 'package:drink_water_app/core/theme/app_theme.dart';
 import 'package:drink_water_app/features/home/home_controller.dart';
 import 'package:drink_water_app/features/home/home_page.dart';
+import 'package:drink_water_app/features/scanner/scanner_page.dart';
 
 import 'fake_home_api_service.dart';
 
@@ -174,6 +175,18 @@ Color surfaceColor(BoxDecoration d) {
   return g.colors.reduce((a, b) => luminance(a) >= luminance(b) ? a : b);
 }
 
+/// 渐变面里离 `base` 最近的那一档。
+///
+/// 白色文字压在渐变上要用最浅端算（最不利），但两块面**分不分得开**要反过来，
+/// 按离对方最近的那端算 —— 取最浅端等于永远在比最好的情况。
+Color closestStop(BoxDecoration d, Color base) {
+  if (d.color case final c?) return c;
+  final lb = luminance(base);
+  return (d.gradient! as LinearGradient).colors.reduce(
+    (a, b) => (luminance(a) - lb).abs() <= (luminance(b) - lb).abs() ? a : b,
+  );
+}
+
 /// 背景层的主色（取渐变的终止停靠，即页面本体色）。
 Color pageBaseColor(WidgetTester tester) {
   final d = decorationAt(tester, homeBackgroundKey);
@@ -227,15 +240,18 @@ Color backgroundBehind(WidgetTester tester, Key key) {
   final base = behind ?? backgroundBehind(tester, key);
   final line = d.border?.top;
   return (
-    fill: contrast(surfaceColor(d), base) >= 1.15,
+    fill: contrast(closestStop(d, base), base) >= 1.15,
     border: line != null &&
         line.color.a > 0 &&
         contrast(composite(line.color, base), base) >= 1.15,
+    // 一层 7% 的投影肉眼看不出抬升，不能算通道：既要有实际扩散与偏移，
+    // 也要它在身后那块面上真的落下一点痕迹。
     elevation: (d.boxShadow ?? []).any(
       (s) =>
-          s.color.a > 0 &&
+          s.color.a >= 0.12 &&
           s.blurRadius > 0 &&
-          s.offset != const Offset(0, 0),
+          s.offset != const Offset(0, 0) &&
+          contrast(composite(s.color, base), base) >= 1.05,
     ),
   );
 }
@@ -245,6 +261,27 @@ int channelCount({bool fill = false, bool border = false, bool elevation = false
 
 String _channelText(({bool fill, bool border, bool elevation}) c) =>
     'fill=${c.fill} border=${c.border} elevation=${c.elevation}';
+
+/// 文字真正吃到的那块"面"：**最内层**的不透明 Material。
+///
+/// 只认 MaterialType.card 会把实色按钮的底算成它身后那块面；按不透明度筛才对。
+/// 注意 M3 的 FilledButton 底色并不落在祖先 Material 上（它由 ButtonStyle 自己绘制），
+/// 所以实色按钮的标签要用 `_expectSolidActionLegible` 读 `style.backgroundColor`。
+/// 这里沿 `visitAncestorElements` 从近往远走，第一个不透明命中就停，
+/// 不依赖 Finder 的返回顺序。
+Color surfaceBehind(WidgetTester tester, String text) {
+  Color? found;
+  tester.element(find.text(text)).visitAncestorElements((e) {
+    final w = e.widget;
+    if (w is Material && (w.color?.a ?? 0) >= 0.99) {
+      found = w.color;
+      return false;
+    }
+    return true;
+  });
+  if (found case final c?) return c;
+  throw StateError('no opaque surface behind "$text"');
+}
 
 /// 某个 key 子树里的文字颜色，按文本内容取。
 Color textColorIn(WidgetTester tester, Key key, String text) {
@@ -257,16 +294,6 @@ Color textColorIn(WidgetTester tester, Key key, String text) {
   final color = t.style?.color;
   if (color == null) throw StateError('"$text" carries no explicit color');
   return color;
-}
-
-/// 找到某个文字身后那块真正的"面"：对话框底是 MaterialType.card，
-/// 按钮自己的 Material 不是，所以按类型取才不会再拿错透明底。
-Color surfaceBehind(WidgetTester tester, String text) {
-  final f = find.ancestor(of: find.text(text), matching: find.byType(Material));
-  for (final m in tester.widgetList<Material>(f)) {
-    if (m.type == MaterialType.card && (m.color?.a ?? 0) > 0.99) return m.color!;
-  }
-  throw StateError('no opaque card surface behind "$text"');
 }
 
 /// 文字真正吃到的颜色：按钮标签的颜色是经 DefaultTextStyle 下发的，
@@ -477,12 +504,20 @@ void main() {
         contrastOn(textColorIn(tester, statusCardKey, '选择设备开始接水'), card),
         greaterThanOrEqualTo(4.5),
       );
-      // 标题必须比副标题更抢眼
+      // 标题压过副标题靠字号与字重，不靠对比度：两条都读得出时对比度差毫无意义。
+      Text textStyleOf(String s) => tester.widget<Text>(
+        find.descendant(of: find.byKey(statusCardKey), matching: find.text(s)),
+      );
+      final head = textStyleOf('准备就绪').style!;
+      final caption = textStyleOf('选择设备开始接水').style!;
+      final headRank =
+          (head.fontSize ?? 0) * 100 + (head.fontWeight?.index ?? 0);
+      final captionRank =
+          (caption.fontSize ?? 0) * 100 + (caption.fontWeight?.index ?? 0);
       expect(
-        contrastOn(textColorIn(tester, statusCardKey, '准备就绪'), card),
-        greaterThan(
-          contrastOn(textColorIn(tester, statusCardKey, '选择设备开始接水'), card),
-        ),
+        headRank,
+        greaterThan(captionRank),
+        reason: '状态卡标题没有靠字号或字重压过副标题',
       );
 
       // 排序提示条现在是品牌色面，文字压在自己的最浅停靠点上算，不再比页面底色
@@ -589,9 +624,9 @@ void main() {
     ) async {
       await pumpHomePage(tester);
 
-      // 基线来自改版前的实现，不是抄新代码的量出来的：
-      // 行内容高 36 + 纵向 padding 10×2 + 描边（选中 2.0×2 / 常态 0.5×2）
-      // ⇒ 选中 60.0、常态 57.0；备注按钮 6+14+6 = 26；工具栏 IconButton 40×40。
+      // 基线：Container 的 BoxDecoration.border 画在盒子内部，不给布局加高度，
+      // 所以改版前条目实际是 36 内容 + 10×2 padding = 56。这里的 60.0 / 57.0 是
+      // 改版后量出来的值，比"不得缩小"的底线更严，不是从旧几何推出来的。
       expect(tester.getRect(find.byKey(deviceTileKey('101'))).height,
           greaterThanOrEqualTo(60.0));
       expect(tester.getRect(find.byKey(deviceTileKey('102'))).height,
@@ -686,9 +721,41 @@ void main() {
         tester.getRect(find.byType(FilledButton).last).height,
         greaterThanOrEqualTo(56.0),
       );
-      // 主操作、布局切换、添加入口都还得点得到
-      expect(find.byTooltip('双列布局'), findsOneWidget);
+      // 主操作、布局切换、添加入口都还得点得到 —— "在树上"不算点得到，
+      // 必须整块落在 320x568 视口内，并且真按一次能生效。
+      final view = const Rect.fromLTWH(0, 0, 320, 568);
+      for (final key in [primaryActionKey, layoutToggleKey]) {
+        final rect = tester.getRect(find.byKey(key));
+        expect(view.contains(rect.center), isTrue, reason: '$key 跑出了视口');
+      }
+      await tester.tap(find.byKey(layoutToggleKey));
+      await tester.pump();
+      expect(Get.find<HomeController>().layoutMode.value, 'grid');
+
+      await tester.tap(find.byKey(layoutToggleKey));
+      await tester.pump();
       expect(find.text('添加'), findsOneWidget);
+      final addRect = tester.getRect(find.text('添加'));
+      expect(
+        view.contains(addRect.center),
+        isTrue,
+        reason: '添加入口在小屏上被挤出了可视区',
+      );
+      // 只量矩形还算不上"点得到"。真按一次之前把绘制尺寸放回常态：
+      // 扫码页自己在 320 宽 + 1.3 字号下横向溢出 12px（`scanner_page.dart:108`，
+      // 改版前就存在，不在本次边界内），不该让它替首页背一条异常。
+      // 首页侧的"小屏可点"由上面两条视口内断言负责。
+      await tester.binding.setSurfaceSize(const Size(400, 900));
+      await tester.pump();
+      await tester.tap(find.text('添加'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(find.byType(ScannerPage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      // 这个 app 用 Material 的返回键，tester.pageBack() 找的是 iOS 那条。
+      Navigator.of(tester.element(find.byType(ScannerPage))).pop();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
     });
   });
 
@@ -1273,30 +1340,34 @@ void main() {
     testWidgets('reorder hint sits on a surface distinct from normal browsing', (
       tester,
     ) async {
-      await pumpHomePage(tester);
-      await tester.tap(find.byTooltip('调整顺序'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 400));
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.tap(find.byTooltip('调整顺序'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
 
-      final hint = decorationAt(tester, reorderHintKey);
-      final behind = backgroundBehind(tester, reorderHintKey);
-      final tile = surfaceColor(decorationAt(tester, deviceTileKey('101')));
-      expect(
-        contrast(surfaceColor(hint), behind),
-        greaterThanOrEqualTo(1.15),
-        reason: '提示面和页面底色分不开',
-      );
-      expect(
-        contrast(surfaceColor(hint), tile),
-        greaterThanOrEqualTo(1.15),
-        reason: '提示面和静止条目同色，就等于浏览态本身，不是"另一个模式"',
-      );
-      final c = channelsOf(tester, reorderHintKey, behind: behind);
-      expect(
-        channelCount(fill: c.fill, border: c.border, elevation: c.elevation),
-        greaterThanOrEqualTo(2),
-        reason: '提示条 ${_channelText(c)}',
-      );
+        final hint = decorationAt(tester, reorderHintKey);
+        final behind = backgroundBehind(tester, reorderHintKey);
+        final tile = surfaceColor(decorationAt(tester, deviceTileKey('101')));
+        // 提示条是渐变面，分离度必须按离底色最近的那一档算，取最浅端是在比最好的情况。
+        expect(
+          contrast(closestStop(hint, behind), behind),
+          greaterThanOrEqualTo(1.15),
+          reason: '$brightness 提示面和页面底色分不开',
+        );
+        expect(
+          contrast(closestStop(hint, tile), tile),
+          greaterThanOrEqualTo(1.15),
+          reason: '$brightness 提示面和静止条目同色，就等于浏览态本身',
+        );
+        final c = channelsOf(tester, reorderHintKey, behind: behind);
+        expect(
+          channelCount(fill: c.fill, border: c.border, elevation: c.elevation),
+          greaterThanOrEqualTo(2),
+          reason: '$brightness 提示条 ${_channelText(c)}',
+        );
+      }
     });
 
     testWidgets('selection still reads after the hue is stripped away', (
@@ -1419,6 +1490,168 @@ void main() {
         isTrue,
         reason: '页面背后的遮罩全透明，抽屉像是浮在原图上',
       );
+    });
+  });
+
+  group('round 3 regressions', () {
+    /// 对话框里的文字按钮标签不吃主题 primary：`#2196F3` 压在白色对话框面上
+    /// 只有 3.12，浅色下每条"取消"都是糊的。深色没这个问题（6.67）。
+    ///
+    /// 只管 TextButton：实色 FilledButton 的底经 ButtonStyle 绘制，Material 上是
+    /// null，标签由 `_expectSolidActionLegible` 按 style 取值来验。
+    void expectDialogLabelsLegible(WidgetTester tester, List<String> labels) {
+      for (final label in labels) {
+        expect(
+          find.text(label),
+          findsOneWidget,
+          reason: '$label 不在当前对话框里',
+        );
+        expect(
+          contrastOn(
+            effectiveTextColor(tester, label),
+            surfaceBehind(tester, label),
+          ),
+          greaterThanOrEqualTo(4.5),
+          reason: '$label 的标签色压不住它所在的面',
+        );
+      }
+    }
+
+    Future<void> settleDialog(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+    }
+
+    testWidgets('every dialog action label clears 4.5 on the dialog face', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        await tester.longPress(find.byKey(deviceTileKey('102')));
+        await settleDialog(tester);
+        expectDialogLabelsLegible(tester, ['取消']);
+        _expectSolidActionLegible(tester, label: '保存');
+        await tester.tap(find.text('取消'));
+        await settleDialog(tester);
+
+        await tester.tap(find.text('管理设备'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        await tester.tap(find.byIcon(Ionicons.trash_outline).first);
+        await settleDialog(tester);
+        expectDialogLabelsLegible(tester, ['取消', '删除']);
+        await tester.tap(find.text('取消'));
+        await settleDialog(tester);
+        await tester.tapAt(const Offset(200, 60));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+
+        // 「关于」这条 ListTile 自己会先关掉抽屉再弹对话框，所以退出确认框
+        // 必须重新开一次设置抽屉，不能假设还停在原地。
+        await tester.tap(find.byTooltip('设置'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        await tester.tap(find.text('关于'));
+        await settleDialog(tester);
+        expectDialogLabelsLegible(tester, ['确定']);
+        await tester.tap(find.text('确定'));
+        await settleDialog(tester);
+
+        await tester.tap(find.byTooltip('设置'));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        await tester.tap(find.text('退出登录'));
+        await settleDialog(tester);
+        expectDialogLabelsLegible(tester, ['取消', '退出']);
+        await tester.tap(find.text('取消'));
+        await settleDialog(tester);
+      }
+    });
+
+    testWidgets('the hairline is a real channel, not a drawn-but-invisible line', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        for (final key in [statusCardKey, deviceTileKey('102')]) {
+          final c = channelsOf(tester, key);
+          expect(
+            c.border,
+            isTrue,
+            reason: '$brightness / $key 的描边合成后离身后的面不足 1.15，'
+                '那两条通道其实只剩投影',
+          );
+        }
+      }
+    });
+
+    testWidgets('the note field is separated from the dialog by two channels', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.longPress(find.byKey(deviceTileKey('102')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+
+        final field = tester.widget<TextField>(find.byType(TextField));
+        final face = surfaceBehind(tester, '为设备添加备注');
+        final fill = field.decoration!.fillColor!;
+        final line = field.decoration!.enabledBorder!.borderSide.color;
+        expect(
+          contrast(fill, face),
+          greaterThanOrEqualTo(1.15),
+          reason: '$brightness 输入框填充离对话框面不足 1.15',
+        );
+        // 描边画在填充自己身上，身后就是填充，不能拿页面渐变当背景算。
+        expect(
+          contrast(composite(line, fill), fill),
+          greaterThanOrEqualTo(1.15),
+          reason: '$brightness 输入框描边压在自身填充上看不见',
+        );
+      }
+    });
+
+    testWidgets('the in-card progress bar exists only while water is running', (
+      tester,
+    ) async {
+      await pumpHomePage(tester);
+      expect(
+        find.byType(LinearProgressIndicator),
+        findsNothing,
+        reason: '空闲时状态卡里不该有条在跑',
+      );
+
+      Get.find<HomeController>().isDrinking.value = true;
+      await tester.pump();
+      expect(
+        find.byType(LinearProgressIndicator),
+        findsOneWidget,
+        reason: '接水中状态卡丢了进度条',
+      );
+    });
+
+    testWidgets('the idle gradient lands exactly on the scaffold colour', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        final scaffold = tester.widget<Scaffold>(find.byType(Scaffold)).backgroundColor;
+        final d = decorationAt(tester, homeBackgroundKey);
+        final last = sampleGradient(d.gradient! as LinearGradient, 1.0);
+        expect(
+          last,
+          equals(scaffold),
+          reason: '$brightness 渐变收口和 Scaffold 底色不同，安全区上方会出现一条硬边',
+        );
+      }
     });
   });
 }
