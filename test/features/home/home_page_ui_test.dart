@@ -214,18 +214,70 @@ Color sampleGradient(LinearGradient g, double t) {
   return g.colors.last;
 }
 
+/// 某个绘制位置身后那段页面底色，按 Finder 取，便于量没有 key 的对话框面。
+Color backgroundAt(WidgetTester tester, Finder target) {
+  final d = decorationAt(tester, homeBackgroundKey);
+  final bg = tester.getRect(find.byKey(homeBackgroundKey));
+  final dy = tester.getRect(target).center.dy;
+  return sampleGradient(
+    d.gradient! as LinearGradient,
+    ((dy - bg.top) / bg.height).clamp(0.0, 1.0),
+  );
+}
+
+/// 抬升面的圆角半径。
+///
+/// AlertDialog 的圆角走 `Material.shape`，抽屉那种手搭的 Material 走
+/// `borderRadius`，只读后者会把已经画出来的圆角判成 0。
+double cornerRadius(Material m) {
+  final s = m.shape;
+  if (s is RoundedRectangleBorder && s.borderRadius is BorderRadius) {
+    return (s.borderRadius as BorderRadius).topLeft.x;
+  }
+  final r = m.borderRadius;
+  if (r is BorderRadius) return r.topLeft.x;
+  return 0.0;
+}
+
+/// 抽屉、对话框这类用 Material 直接画出来的抬升面，`channelsOf` 认不到（它只读
+/// BoxDecoration），所以给它同一把尺子的三个可测项：离页面本色的档位、
+/// 圆角顶边、以及身后页面确实被压暗或盖住。按面上任一段文字定位，
+/// 对话框没有 key。
+void expectElevatedSurface(WidgetTester tester, String onSurface) {
+  Material? face;
+  tester.element(find.text(onSurface)).visitAncestorElements((e) {
+    final w = e.widget;
+    if (w is Material && (w.color?.a ?? 0) >= 0.99) {
+      face = w;
+      return false;
+    }
+    return true;
+  });
+  final m = face;
+  if (m == null) throw StateError('no opaque surface behind "$onSurface"');
+  expect(
+    contrast(m.color!, backgroundAt(tester, find.text(onSurface))),
+    greaterThanOrEqualTo(1.15),
+    reason: '$onSurface 所在的面离它盖住的页面底色分不开',
+  );
+  final radius = cornerRadius(m);
+  expect(radius, greaterThan(0.0), reason: '$onSurface 所在的面没有圆角边');
+  expect(
+    tester
+        .widgetList<ModalBarrier>(find.byType(ModalBarrier))
+        .any((b) => (b.color?.a ?? 0) > 0),
+    isTrue,
+    reason: '$onSurface 身后的页面没被压暗，像是同层的一部分',
+  );
+}
+
 /// 某个 key 真正压在的那块页面底色。
 ///
 /// 背景是 topCenter→bottomCenter 的三段渐变，本体色只出现在最底端；
 /// 用 pageBaseColor 当卡片的背景等于宣称上半屏那条品牌带不存在，
 /// 而状态卡恰恰就落在带上。
-Color backgroundBehind(WidgetTester tester, Key key) {
-  final d = decorationAt(tester, homeBackgroundKey);
-  final g = d.gradient! as LinearGradient;
-  final bg = tester.getRect(find.byKey(homeBackgroundKey));
-  final dy = tester.getRect(find.byKey(key)).center.dy;
-  return sampleGradient(g, ((dy - bg.top) / bg.height).clamp(0.0, 1.0));
-}
+Color backgroundBehind(WidgetTester tester, Key key) =>
+    backgroundAt(tester, find.byKey(key));
 
 /// 三个分离通道里哪些是真的：填充档位、看得见的描边、真实的投影。
 ///
@@ -1434,26 +1486,31 @@ void main() {
     testWidgets('both sheets carry a grabber that reads against the sheet face', (
       tester,
     ) async {
-      for (final entry in [
-        ('管理设备', find.text('管理设备'), deviceManageSheetKey),
-        ('设置', find.byTooltip('设置'), settingsSheetKey),
-      ]) {
-        Get.reset();
-        await pumpHomePage(tester);
-        await tester.tap(entry.$2);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 700));
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        for (final entry in [
+          ('管理设备', find.text('管理设备'), deviceManageSheetKey, '设备管理'),
+          ('设置', find.byTooltip('设置'), settingsSheetKey, '设置'),
+        ]) {
+          Get.reset();
+          await pumpHomePage(tester, brightness: brightness);
+          await tester.tap(entry.$2);
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 700));
 
-        final grabber = decorationAt(tester, sheetGrabberKey);
-        final face = tester.widget<Material>(find.byKey(entry.$3)).color!;
-        expect(
-          contrast(composite(grabber.color!, face), face),
-          greaterThanOrEqualTo(1.15),
-          reason: '${entry.$1} 的拖拽条和抽屉面一个色，等于没画',
-        );
-        final rect = tester.getRect(find.byKey(sheetGrabberKey));
-        expect(rect.width, greaterThanOrEqualTo(40));
-        expect(rect.height, greaterThanOrEqualTo(4));
+          final grabber = decorationAt(tester, sheetGrabberKey);
+          final face = tester.widget<Material>(find.byKey(entry.$3)).color!;
+          expect(
+            contrast(composite(grabber.color!, face), face),
+            greaterThanOrEqualTo(1.15),
+            reason: '$brightness ${entry.$1} 的拖拽条和抽屉面一个色，等于没画',
+          );
+          final rect = tester.getRect(find.byKey(sheetGrabberKey));
+          expect(rect.width, greaterThanOrEqualTo(40));
+          expect(rect.height, greaterThanOrEqualTo(4));
+
+          // 抽屉面本身也必须和它盖住的页面分得开 —— 规格这条没有模式限定词。
+          expectElevatedSurface(tester, entry.$4);
+        }
       }
     });
 
@@ -1651,6 +1708,65 @@ void main() {
           equals(scaffold),
           reason: '$brightness 渐变收口和 Scaffold 底色不同，安全区上方会出现一条硬边',
         );
+      }
+    });
+  });
+
+  group('round 4 coverage', () {
+    Future<void> settle(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    Future<void> openSheet(WidgetTester tester, Finder opener) async {
+      await tester.tap(opener);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    testWidgets('every dialog face separates from the page in both modes', (
+      tester,
+    ) async {
+      // 规格里"抽屉/对话框是一个独立的抬升面"没有模式限定词，
+      // 而抬升面是 Material 画的，前面那套 BoxDecoration 尺子量不到它们。
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        await tester.longPress(find.byKey(deviceTileKey('102')));
+        await settle(tester);
+        expectElevatedSurface(tester, '编辑备注 - 1-102');
+        await tester.tap(find.text('取消'));
+        await settle(tester);
+
+        await openSheet(tester, find.text('管理设备'));
+        await tester.tap(find.byIcon(Ionicons.trash_outline).first);
+        await settle(tester);
+        expectElevatedSurface(tester, '确认删除');
+        await tester.tap(find.text('取消'));
+        await settle(tester);
+        // 删除框是从设备管理抽屉里点出来的，取消之后抽屉还在，
+        // 它的遮罩压住整页 —— 这时候点顶栏的"设置"会被吞掉。
+        await tester.tapAt(const Offset(200, 60));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        expect(find.text('设备管理'), findsNothing);
+
+        await openSheet(tester, find.byTooltip('设置'));
+        await tester.tap(find.text('关于'));
+        await settle(tester);
+        expectElevatedSurface(tester, '版本: 1.0.4');
+        await tester.tap(find.text('确定'));
+        await settle(tester);
+        // 上一张还压着 AbsorbPointer 的话，下面那次开抽屉会被吞掉。
+        expect(find.text('版本: 1.0.4'), findsNothing);
+
+        await openSheet(tester, find.byTooltip('设置'));
+        await tester.tap(find.text('退出登录'));
+        await settle(tester);
+        expectElevatedSurface(tester, '确认退出');
+        await tester.tap(find.text('取消'));
+        await settle(tester);
       }
     });
   });

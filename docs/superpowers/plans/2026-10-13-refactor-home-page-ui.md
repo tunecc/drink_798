@@ -242,6 +242,26 @@ dialog behind it.
 D4's dark figures after the round-2 re-tune, and D7's assumption that a Container border adds
 layout height. No behaviour change; the numbers must match what is built.
 
+## Group 10 — Round 4, coverage the closing check owed
+
+Test and docs only; no `lib/` change.
+
+<!-- comet-task-ref:6612bd7c-2359-4426-92a3-9adce57fd136 -->
+### 10.1 Elevated surfaces measured in light as well
+Requirement 2's sheet and dialog clauses carry no mode qualifier, but only dark was asserted.
+Because these faces are painted by a `Material` and not a `BoxDecoration`, `channelsOf` cannot
+reach them: `expectElevatedSurface()` measures the fill step against the gradient sampled at that
+surface's own position, a non-zero corner radius and a non-transparent barrier, for both sheets
+and all four dialogs in both modes.
+Verify: `fvm flutter test --no-pub test/features/home/` covers every sheet and dialog twice.
+
+<!-- comet-task-ref:cab1ad11-a533-4876-b880-4de2c2c4bf32 -->
+### 10.2 Record accuracy and stated limits
+Grabber tint figure corrected to the measured 1.214, and the suite's three accepted limits
+written down: single-channel decorative chips are not one of the four named surface roles,
+Requirement 3 is verified on enumerated pairs rather than a whole-tree sweep, and the progress
+indicator is proven present/absent rather than in motion.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.
