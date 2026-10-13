@@ -148,6 +148,54 @@ Verify: `git diff --stat lib/core/theme/app_theme.dart lib/features/login lib/co
 ### 7.4 On-device handoff
 Verify: the user gets `fvm flutter run` plus the release-build commands; taste stays their call.
 
+## Group 8 — Round 2, returned by Verify
+
+Written after `verify-fail`; scope is unchanged, these are the defects the integration
+review proved. Details and numbers live in the "Verify round 2" table of `design.md`.
+
+<!-- comet-task-ref:7b6f4c97-d8ba-40f5-8c48-94a0945a8937 -->
+### 8.1 Measure the surface a widget actually sits on
+Add `sampleGradient` + `backgroundBehind(key)` and re-point the light and dark separation
+tests at it. RED: the dark status card fails its fill channel, because the band is lighter
+than the card.
+
+<!-- comet-task-ref:4bd924cf-93af-4e34-bce1-6d30df7aa555 -->
+### 8.2 Re-tune the dark surface stack
+Ordering must be page < band < card < selected < tint so every adjacent pair clears 1.15.
+Verify: 8.1 goes GREEN and secondary text still clears 4.5 on the new card.
+
+<!-- comet-task-ref:6fb38240-f553-40ac-bf6c-cfbeadfa510b -->
+### 8.3 Make the channel assertion measurable
+`channelsOf()` counts a fill step, a border composited over its real backdrop, and a shadow
+with alpha *and* blur *and* offset. Verify: this is what exposes the dark hairline at 1.11 and
+the light grabber at 1.13.
+
+<!-- comet-task-ref:5d89fc04-40de-4490-8c5c-e04e507d11f9 -->
+### 8.4 Mode-aware marker and visible chip
+`markerFill` / `markerInk` per brightness, `deviceCheckMarkerKey` so the test can hold the
+marker itself, note-edit chip moved to the tint role. Verify: marker ≥3.0 on its tile and glyph
+≥4.5 on the marker, in both modes; chip ≥1.15 on the tile it lives in.
+
+<!-- comet-task-ref:7106d70b-4cd0-4852-a3a4-9a3ad9cf4680 -->
+### 8.5 A reorder surface that is not the browsing surface
+A `card`-filled pill was rejected in review — it is the resting tile pixel for pixel. The hint
+becomes a brand-gradient pill with a brand-ink border. Verify: ≥1.15 against both the page band
+and a resting tile, two channels, white label 4.80 on its lightest stop.
+
+<!-- comet-task-ref:bac227c2-d709-4a37-b9c4-2d2edf9009e8 -->
+### 8.6 Lifecycle: queued reload and dialog controller
+Clear `_reloadQueued` on the expired-session return; move the note dialog into a StatefulWidget
+that disposes its controller. Verify: a fetch-count test pins the extra round trip; save path,
+autofocus, `maxLength` and pop-then-snackbar order unchanged.
+
+<!-- comet-task-ref:7fd463ee-f3a7-47a7-8b02-48fd436951b4 -->
+### 8.7 Coverage the spec names but no test held
+Grid at 320×568 with 1.3 scale, reorder mode at the same size, sheet grabber presence and
+legibility, the modal barrier over the page, and a grayscale-only selection assertion.
+Verify: `fvm flutter test --no-pub` = 113 passed, `fvm flutter analyze --no-pub` clean.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.
+
+After round 2 the same coupling exists on the dark side: `#1E2934` is simultaneously the card, the sheet face and the dialog background, and `#31404F` is the icon chip, the note chip and the grabber. Moving either value re-decides 8.2, 8.3 and 8.4 together.

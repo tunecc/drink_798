@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
@@ -187,6 +188,64 @@ Color pageBandColor(WidgetTester tester) {
   return (d.gradient! as LinearGradient).colors.first;
 }
 
+/// 渐变在归一化位置 t 上的实际绘制色（stops 缺省按均匀分布）。
+Color sampleGradient(LinearGradient g, double t) {
+  final stops = g.stops ??
+      List.generate(g.colors.length, (i) => i / (g.colors.length - 1));
+  for (var i = 0; i < stops.length - 1; i++) {
+    if (t <= stops[i + 1]) {
+      final local = (t - stops[i]) / (stops[i + 1] - stops[i]);
+      return Color.lerp(g.colors[i], g.colors[i + 1], local.clamp(0.0, 1.0))!;
+    }
+  }
+  return g.colors.last;
+}
+
+/// 某个 key 真正压在的那块页面底色。
+///
+/// 背景是 topCenter→bottomCenter 的三段渐变，本体色只出现在最底端；
+/// 用 pageBaseColor 当卡片的背景等于宣称上半屏那条品牌带不存在，
+/// 而状态卡恰恰就落在带上。
+Color backgroundBehind(WidgetTester tester, Key key) {
+  final d = decorationAt(tester, homeBackgroundKey);
+  final g = d.gradient! as LinearGradient;
+  final bg = tester.getRect(find.byKey(homeBackgroundKey));
+  final dy = tester.getRect(find.byKey(key)).center.dy;
+  return sampleGradient(g, ((dy - bg.top) / bg.height).clamp(0.0, 1.0));
+}
+
+/// 三个分离通道里哪些是真的：填充档位、看得见的描边、真实的投影。
+///
+/// "border != null" 不是通道 —— 描边色合成后和身后的面几乎同亮度时，
+/// 它画了等于没画；投影同理，全透明或 blur/offset 都是零就不算抬升。
+({bool fill, bool border, bool elevation}) channelsOf(
+  WidgetTester tester,
+  Key key, {
+  Color? behind,
+}) {
+  final d = decorationAt(tester, key);
+  final base = behind ?? backgroundBehind(tester, key);
+  final line = d.border?.top;
+  return (
+    fill: contrast(surfaceColor(d), base) >= 1.15,
+    border: line != null &&
+        line.color.a > 0 &&
+        contrast(composite(line.color, base), base) >= 1.15,
+    elevation: (d.boxShadow ?? []).any(
+      (s) =>
+          s.color.a > 0 &&
+          s.blurRadius > 0 &&
+          s.offset != const Offset(0, 0),
+    ),
+  );
+}
+
+int channelCount({bool fill = false, bool border = false, bool elevation = false}) =>
+    [fill, border, elevation].where((c) => c).length;
+
+String _channelText(({bool fill, bool border, bool elevation}) c) =>
+    'fill=${c.fill} border=${c.border} elevation=${c.elevation}';
+
 /// 某个 key 子树里的文字颜色，按文本内容取。
 Color textColorIn(WidgetTester tester, Key key, String text) {
   final found = find.descendant(
@@ -325,25 +384,51 @@ void main() {
     ) async {
       await pumpHomePage(tester);
 
-      final base = pageBaseColor(tester);
+      final behind = backgroundBehind(tester, statusCardKey);
       final card = decorationAt(tester, statusCardKey);
+      final c = channelsOf(tester, statusCardKey);
       expect(
-        contrast(surfaceColor(card), base),
-        greaterThanOrEqualTo(1.15),
-        reason: 'card fill too close to the page base',
+        c.fill,
+        isTrue,
+        reason: '卡片填充离它真正压着的那段渐变不足 1.15',
       );
-      final secondChannel =
-          card.border != null || (card.boxShadow?.isNotEmpty ?? false);
-      expect(secondChannel, isTrue, reason: 'no border or elevation on the card');
+      expect(
+        channelCount(fill: c.fill, border: c.border, elevation: c.elevation),
+        greaterThanOrEqualTo(2),
+        reason: '单靠填充不满足分离要求：${_channelText(c)}',
+      );
+      expect(
+        contrast(surfaceColor(card), behind),
+        greaterThanOrEqualTo(1.15),
+      );
     });
 
     testWidgets('dark mode keeps the same separation', (tester) async {
       await pumpHomePage(tester, brightness: Brightness.dark);
 
-      final base = pageBaseColor(tester);
-      final card = decorationAt(tester, statusCardKey);
-      expect(contrast(surfaceColor(card), base), greaterThanOrEqualTo(1.15));
-      expect(card.border != null || (card.boxShadow?.isNotEmpty ?? false), isTrue);
+      // 状态卡落在顶部品牌带上，比的是带而不是本体色。
+      final c = channelsOf(tester, statusCardKey);
+      expect(
+        c.fill,
+        isTrue,
+        reason: '深色卡片压在本体色上勉强够，压到品牌带上就糊成一片',
+      );
+      expect(
+        channelCount(fill: c.fill, border: c.border, elevation: c.elevation),
+        greaterThanOrEqualTo(2),
+        reason: _channelText(c),
+      );
+
+      final tile = channelsOf(tester, deviceTileKey('102'));
+      expect(
+        channelCount(
+          fill: tile.fill,
+          border: tile.border,
+          elevation: tile.elevation,
+        ),
+        greaterThanOrEqualTo(2),
+        reason: '深色设备项 ${_channelText(tile)}',
+      );
     });
 
     testWidgets('selection changes two channels and never glues the tile back', (
@@ -400,21 +485,21 @@ void main() {
         ),
       );
 
-      // 落在页面本体上的次要文字（排序提示）同样要过 4.5
-      final band = pageBandColor(tester);
+      // 排序提示条现在是品牌色面，文字压在自己的最浅停靠点上算，不再比页面底色
       await tester.tap(find.byTooltip('调整顺序'));
       await tester.pump();
       expect(find.text('拖动调整顺序'), findsOneWidget);
       expect(
-        contrastOnPageText(
+        contrastOn(
           tester.widget<Text>(find.text('拖动调整顺序')).style!.color!,
-          base,
-          band,
+          surfaceColor(decorationAt(tester, reorderHintKey)),
         ),
         greaterThanOrEqualTo(4.5),
       );
       await tester.tap(find.byTooltip('完成排序'));
       await tester.pump();
+
+      final band = pageBandColor(tester);
 
       // 三个次级入口的文字也压在本体色上：默认 primary 蓝只有 2.66:1。
       for (final label in ['我的设备', '添加', '管理设备', '扫码添加']) {
@@ -1037,14 +1122,14 @@ void main() {
       final selected = decorationAt(tester, deviceTileKey('101'));
       expect(
         contrast(surfaceColor(selected), surfaceColor(resting)),
-        greaterThanOrEqualTo(1.05),
-        reason: '深色选中靠提亮，这一档必须真的看得见',
+        greaterThanOrEqualTo(1.15),
+        reason: '深色选中靠提亮，但 1.15 才是相邻表面的底线',
       );
 
       final chip = iconChipOf(tester, '101');
       expect(
         contrast(surfaceColor(chip), surfaceColor(selected)),
-        greaterThanOrEqualTo(1.05),
+        greaterThanOrEqualTo(1.15),
         reason: '图标底与条目底色撞成同一块，图标就糊进背景了',
       );
 
@@ -1094,6 +1179,246 @@ void main() {
       await tester.pump(const Duration(milliseconds: 900));
       // 被排队的那次必须补跑，否则扫码添加回来的新设备永远不上屏。
       expect(api.deviceListCalls, 2);
+    });
+
+    testWidgets('an expired session leaves no queued reload behind', (
+      tester,
+    ) async {
+      final api = HangingDeviceListApiService(
+        devices: const [{'id': '0', 'name': '登录已过期'}],
+      );
+      await pumpHomePage(tester, api: api);
+
+      // GetX 的 snackbar 队列有节流，条与条之间会隔帧，固定泵两轮不一定排空；
+      // 这里按"还在就继续排"循环，否则残留守布会把 Ticker 泄漏到下一个测试。
+      Future<void> drain() async {
+        for (var i = 0; i < 6 && find.byType(GetSnackBar).evaluate().isNotEmpty; i++) {
+          await tester.pump(const Duration(seconds: 5));
+          await tester.pump(const Duration(milliseconds: 900));
+        }
+      }
+
+      final controller = Get.find<HomeController>();
+      // 初次加载仍在途，这一次只排队，不发请求。
+      unawaited(controller.loadDevices());
+      await tester.pump();
+      expect(api.deviceListCalls, 1, reason: '在途时不该并发第二条');
+
+      api.release();
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 900));
+      await drain();
+      expect(api.deviceListCalls, 1, reason: '过期分支跳登录页，不该顺手补跑队列');
+
+      // 回到首页后重新加载：队列标记必须已经清掉，只发这一条。
+      await controller.loadDevices();
+      await tester.pump();
+      expect(api.deviceListCalls, 2, reason: '过期分支残留了排队标记');
+      await drain();
+      expect(find.byType(GetSnackBar), findsNothing);
+    });
+  });
+
+  group('round 2 regressions', () {
+    testWidgets('note edit chip is a separate surface from the tile it sits in', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        final tile = surfaceColor(decorationAt(tester, deviceTileKey('102')));
+        final chip = decorationAt(tester, deviceEditKey('102'));
+        expect(
+          contrast(surfaceColor(chip), tile),
+          greaterThanOrEqualTo(1.15),
+          reason:
+              '$brightness 备注编辑按钮和条目同色，只剩一条 1px 描边撑着，看不出那是个可点的东西',
+        );
+      }
+    });
+
+    testWidgets('selection marker clears 3.0 against the tile and 4.5 for its glyph', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+
+        final marker = decorationAt(tester, deviceCheckMarkerKey('101'));
+        final tile = surfaceColor(decorationAt(tester, deviceTileKey('101')));
+        expect(
+          contrast(surfaceColor(marker), tile),
+          greaterThanOrEqualTo(3.0),
+          reason: '$brightness 角标本身在选中条目上不成形',
+        );
+        expect(
+          contrastOn(
+            tester
+                .widget<Icon>(
+                  find.descendant(
+                    of: find.byKey(deviceCheckMarkerKey('101')),
+                    matching: find.byType(Icon),
+                  ),
+                )
+                .color!,
+            surfaceColor(marker),
+          ),
+          greaterThanOrEqualTo(4.5),
+          reason: '$brightness 勾在角标上读不出来',
+        );
+      }
+    });
+
+    testWidgets('reorder hint sits on a surface distinct from normal browsing', (
+      tester,
+    ) async {
+      await pumpHomePage(tester);
+      await tester.tap(find.byTooltip('调整顺序'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      final hint = decorationAt(tester, reorderHintKey);
+      final behind = backgroundBehind(tester, reorderHintKey);
+      final tile = surfaceColor(decorationAt(tester, deviceTileKey('101')));
+      expect(
+        contrast(surfaceColor(hint), behind),
+        greaterThanOrEqualTo(1.15),
+        reason: '提示面和页面底色分不开',
+      );
+      expect(
+        contrast(surfaceColor(hint), tile),
+        greaterThanOrEqualTo(1.15),
+        reason: '提示面和静止条目同色，就等于浏览态本身，不是"另一个模式"',
+      );
+      final c = channelsOf(tester, reorderHintKey, behind: behind);
+      expect(
+        channelCount(fill: c.fill, border: c.border, elevation: c.elevation),
+        greaterThanOrEqualTo(2),
+        reason: '提示条 ${_channelText(c)}',
+      );
+    });
+
+    testWidgets('selection still reads after the hue is stripped away', (
+      tester,
+    ) async {
+      await pumpHomePage(tester);
+
+      final resting = decorationAt(tester, deviceTileKey('102'));
+      final selected = decorationAt(tester, deviceTileKey('101'));
+      final base = backgroundBehind(tester, deviceTileKey('102'));
+      // 灰度渲染只保留亮度：色相不同（淡蓝描边 vs 品牌蓝描边）在这里不算数。
+      var gray = 0;
+      if ((luminance(surfaceColor(resting)) - luminance(surfaceColor(selected)))
+          .abs() >
+          0.0005) {
+        gray++;
+      }
+      double lineStrength(BoxDecoration d) =>
+          contrast(composite(d.border!.top.color, base), base) *
+          d.border!.top.width;
+      if ((lineStrength(resting) - lineStrength(selected)).abs() >= 0.6) gray++;
+      double lift(BoxDecoration d) {
+        final s = d.boxShadow!.first;
+        return s.color.a * (s.blurRadius + s.offset.dy.abs());
+      }
+      if ((lift(resting) - lift(selected)).abs() >= 1.0) gray++;
+      // 角标算一个灰度通道的前提是它自己在灰度下也真的比条目底深/浅，
+      // 只"存在一个角标"不算数 —— 否则这条断言永远不可能失败。
+      final marker = decorationAt(tester, deviceCheckMarkerKey('101'));
+      if (contrast(surfaceColor(marker), surfaceColor(selected)) >= 3.0) gray++;
+      expect(
+        find.byKey(deviceCheckMarkerKey('102')),
+        findsNothing,
+        reason: '未选中条目不该带角标',
+      );
+
+      expect(
+        gray,
+        greaterThanOrEqualTo(2),
+        reason: '灰度下选中态与普通态只剩一个通道，色觉或灰度模式下分不出来',
+      );
+    });
+
+    testWidgets('grid layout survives 320x568 at 1.3 text scale', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        size: const Size(320, 568),
+        textScale: 1.3,
+      );
+      await tester.tap(find.byTooltip('双列布局'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.byKey(deviceTileKey('101')), findsOneWidget);
+      expect(tester.takeException(), isNull, reason: '小屏宫格溢出');
+      expect(
+        tester.getRect(find.byKey(primaryActionKey)).height,
+        greaterThanOrEqualTo(56.0),
+      );
+    });
+
+    testWidgets('both sheets carry a grabber that reads against the sheet face', (
+      tester,
+    ) async {
+      for (final entry in [
+        ('管理设备', find.text('管理设备'), deviceManageSheetKey),
+        ('设置', find.byTooltip('设置'), settingsSheetKey),
+      ]) {
+        Get.reset();
+        await pumpHomePage(tester);
+        await tester.tap(entry.$2);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+
+        final grabber = decorationAt(tester, sheetGrabberKey);
+        final face = tester.widget<Material>(find.byKey(entry.$3)).color!;
+        expect(
+          contrast(composite(grabber.color!, face), face),
+          greaterThanOrEqualTo(1.15),
+          reason: '${entry.$1} 的拖拽条和抽屉面一个色，等于没画',
+        );
+        final rect = tester.getRect(find.byKey(sheetGrabberKey));
+        expect(rect.width, greaterThanOrEqualTo(40));
+        expect(rect.height, greaterThanOrEqualTo(4));
+      }
+    });
+
+    testWidgets('reorder mode survives 320x568 at 1.3 text scale', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        size: const Size(320, 568),
+        textScale: 1.3,
+      );
+      await tester.tap(find.byTooltip('调整顺序'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
+
+      expect(find.text('拖动调整顺序'), findsOneWidget);
+      expect(find.byIcon(Ionicons.menu_outline), findsWidgets);
+      expect(tester.takeException(), isNull, reason: '小屏排序模式溢出');
+    });
+
+    testWidgets('the sheet covers the page behind it', (tester) async {
+      await pumpHomePage(tester);
+      await tester.tap(find.text('管理设备'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+
+      expect(find.byKey(deviceManageSheetKey), findsOneWidget);
+      final barriers = tester.widgetList<ModalBarrier>(
+        find.byType(ModalBarrier),
+      ).toList();
+      expect(barriers, isNotEmpty, reason: '抽屉下面没有遮罩层');
+      expect(
+        barriers.any((b) => b.color != null && b.color!.a > 0),
+        isTrue,
+        reason: '页面背后的遮罩全透明，抽屉像是浮在原图上',
+      );
     });
   });
 }

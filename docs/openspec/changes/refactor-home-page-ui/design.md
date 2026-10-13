@@ -177,3 +177,24 @@ These correct numbers in the tables above or fill gaps they left. None changes a
 Harness corrections of the same kind: `contrastOn` flattens a translucent *background* onto a backdrop before measuring (the in-progress icon chip is `white α .18` and read as pure white otherwise); page-level text is measured against the darker of the band stop and the page base; the "second channel" assertion measures the border step and shadow alpha instead of accepting any non-null border; `FilledButton.icon`'s runtime type is a private subclass, so solid-action assertions match `is FilledButton` rather than `byType(FilledButton)`; the bubble assertion pumps a frame before advancing 900ms because `_BubbleAnimation`'s periodic timer is created during that frame.
 
 **TDD history gap, disclosed:** task 3.1 (type-scale levels) entered as a regression guard rather than an observed RED — the group-2 token pass had already applied the sizes. Tasks 1.1, 2.1, 2.4/2.5, 4.1, 4.4 (empty-state overflow), 5.1, 6.1 and the review-driven disabled-state test each recorded a real RED first.
+
+## Verify round 2 (returned by `verify-fail`, same scope)
+
+The independent integration review rejected the first round. Two of its findings were
+verified as untrue and are recorded here so they are not re-litigated: both sheets *did*
+already carry a grabber, and the progress indicator plus the 320×568 / 1.3 list case
+*were* already covered (`home_page_ui_test.dart` in-progress group and small-screen group).
+
+What was actually wrong and how it changed:
+
+| Item | Was | Now | Why |
+| --- | --- | --- | --- |
+| D3 dark surface stack | page `#0F1417` / band `#15293C` / card `#1A222B` / selected `#22303E` / tint `#2A3947` | `#0A0F14` / `#0D1A28` / `#1E2934` / `#283645` / `#31404F` | The band was *lighter* than the card and the status card sits on the band, so the pair the requirement names measured **1.082** against the 1.15 floor. Ordering is now page < band < card: card/band 1.189, card/page 1.303, selected/card 1.198, tint/selected 1.160, tint/card 1.390. |
+| separation assertion | compared with `pageBaseColor()` — the gradient's last stop | compares with `backgroundBehind(key)`, the gradient sampled at the widget's own vertical centre | The page base is only painted at the very bottom of the screen. Measuring a card that sits in the band against the base asserted a surface the card never touches, which is how the 1.082 violation survived a green suite. |
+| "second channel" assertion | `border != null \|\| boxShadow.isNotEmpty` | `channelsOf()` measures each channel: fill step ≥ 1.15 against the real backdrop, border *composited over that backdrop* ≥ 1.15, shadow with non-zero alpha **and** blur **and** offset | The old form is true for every card ever built. Measuring the border is what exposed the dark hairline: `α.24 #3A4A5A` over the new card composites to **1.113**, i.e. a line that is drawn but not visible, so it is now `α.35 #4C6076` (1.311 on the card, 1.341 on the page). |
+| D3 selection marker | `accentStart` fill + white glyph in both modes | light unchanged; dark uses brand ink fill with page ink glyph | `accentStart` on the dark selected tile is **2.57** (floor 3.0) and a white glyph on it is unreadable. Dark inverts it: fill 5.57 against the tile, glyph 8.69 against the fill. |
+| D8 note-edit chip | `color: p.card` | `color: p.tint` | A resting tile *is* `p.card`, so the chip was **1.000** against the surface it sits in — the edit affordance existed only as a 1px hairline. |
+| D8 sheet grabber | `p.hairline` | `p.tint` | Found by the assertion written for this round: the hairline on the light sheet face is **1.133**, so the grabber the spec names was effectively invisible. Tint gives 1.235 (light) / 1.390 (dark). |
+| reorder hint | bare `Text` on the page gradient | brand-gradient pill with a brand-ink border (`reorderHintKey`) | Requirement 5 says the hint sits "on a surface distinct from normal browsing". A `card`-filled pill was tried first and rejected — that *is* the resting tile, pixel for pixel. The accent pill is 4.4 from the page band, 4.6 from a resting tile, and its white label is 4.80 on its own lightest stop. |
+| `HomeController.loadDevices` | expired-session `return` inside `try` | also clears `_reloadQueued` | The early return skips the tail that consumes the flag, so the *next* load fired one whole extra round of requests after a session had expired. |
+| note dialog controller | `TextEditingController` built in the `showDialog` builder | `_NoteEditDialog` StatefulWidget disposes it | Nobody released it when the route closed. Save path, validation, autofocus, `maxLength: 20` and the pop-then-snackbar order are unchanged. |

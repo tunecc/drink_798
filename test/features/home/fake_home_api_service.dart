@@ -72,11 +72,19 @@ class FakeHomeApiService extends DrinkApiService {
 ///
 /// 用 Completer 而不是 Future.delayed：测试收尾时不能留下 pending Timer。
 class HangingDeviceListApiService extends FakeHomeApiService {
+  HangingDeviceListApiService({
+    super.devices = const [
+      {'id': '101', 'name': '1栋101'},
+      {'id': '102', 'name': '1栋102'},
+    ],
+  });
+
   final Completer<List<Map<String, dynamic>>> _gate = Completer();
 
   /// 释放挂起的请求；每个用这个替身的测试都必须在断言后调用。
+  /// 交出去的是配置里那份列表，所以"登录已过期"这类特殊返回也能走这条路径。
   void release() {
-    if (!_gate.isCompleted) _gate.complete(const []);
+    if (!_gate.isCompleted) _gate.complete(devices);
   }
 
   @override

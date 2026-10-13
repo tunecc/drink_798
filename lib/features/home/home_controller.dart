@@ -132,6 +132,9 @@ class HomeController extends GetxController {
         // 不删除就会沿用上次的 isSmsSent/isTokenLogin 而停在错误步骤。
         Get.delete<LoginController>();
         Get.offAll(() => const LoginPage());
+        // 这条分支从 try 里直接 return，末尾的补跑不会执行；标记不清掉，
+        // 下次进首页加载完就会多发一整轮请求。
+        _reloadQueued = false;
         return;
       }
 

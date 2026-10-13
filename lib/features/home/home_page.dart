@@ -7,6 +7,7 @@ import 'package:ionicons/ionicons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../core/models/device_model.dart';
 import 'home_controller.dart';
 
 /// 页面结构锚点。widget 测试靠这些 key 取"实际绘制的表面与文字颜色"，
@@ -27,6 +28,16 @@ Key deviceTileKey(String id) => Key('deviceTile-$id');
 /// 设备项右侧的备注编辑按钮容器：命中区基线就钉在这个 key 上。
 Key deviceEditKey(String id) => Key('deviceEdit-$id');
 
+/// 选中角标的底色容器。角标是选中态的第二语言，测试要能单独取到它的面，
+/// 而 find.ancestor 在一串同类型容器里给不出"最内层"的稳定顺序。
+Key deviceCheckMarkerKey(String id) => Key('deviceCheckMarker-$id');
+
+/// 排序模式提示条自己的面：规格要求它和平常浏览分开。
+const reorderHintKey = Key('reorderHint');
+
+/// 抽屉顶部的拖拽条。两个抽屉各开各的，同一时刻只会有一个在树上。
+const sheetGrabberKey = Key('sheetGrabber');
+
 /// 首页专用视觉 token，数值与推导见
 /// docs/openspec/changes/refactor-home-page-ui/design.md 的 D3/D4/D8。
 ///
@@ -41,14 +52,19 @@ abstract final class _HomeT {
   static const bandTopLight = Color(0xFFC5E0F7);
   static const hairlineLight = Color(0x2E9FB4C9);
 
-  // 深色：靠"抬亮"分层（page→card 1.154，card→selected 1.193）。
-  static const pageDark = Color(0xFF0F1417);
-  static const cardDark = Color(0xFF1A222B);
-  static const selectedDark = Color(0xFF22303E);
-  // 深色图标底与选中底必须分开：两者都取 #22303E 时，选中条目的图标底糊成一片。
-  static const tintDark = Color(0xFF2A3947);
-  static const bandTopDark = Color(0xFF15293C);
-  static const hairlineDark = Color(0x3D3A4A5A);
+  // 深色：靠"抬亮"分层，但卡片必须比它真正压着的那条带也亮一档。
+  // 上一版是 page #0F1417 / band #15293C / card #1A222B，带比卡片还亮，
+  // 状态卡坐在带上只有 1.082，看着像被挖了个洞。现在 page < band < card，
+  // 卡片永远是最亮的一块：card/band 1.189、card/page 1.303、
+  // selected/card 1.198、tint/selected 1.160。
+  static const pageDark = Color(0xFF0A0F14);
+  static const cardDark = Color(0xFF1E2934);
+  static const selectedDark = Color(0xFF283645);
+  // 深色图标底与选中底必须分开：两者都取同一块时，选中条目的图标底糊成一片。
+  static const tintDark = Color(0xFF31404F);
+  static const bandTopDark = Color(0xFF0D1A28);
+  // α.24 的旧描边压在新卡片上合成后只差 1.11，等于没画；提到 α.35 才有第二条通道。
+  static const hairlineDark = Color(0x594C6076);
 
   // 强调面：白色标签在最浅停靠点仍有 4.80，旧 #00D4FF 只有 1.77。
   static const accentStart = Color(0xFF0277BD);
@@ -147,6 +163,12 @@ class _HomePalette {
 
   Color tileFill({required bool isSelected}) =>
       isSelected && selectionTintsFill ? selected : card;
+
+  /// 选中角标的面与符号色。浅色用品牌渐变起手色压在白卡上是 4.80，
+  /// 深色反过来：品牌蓝底配白勾在 #283645 上只有 2.57，所以深色改成
+  /// 亮品牌蓝底配页面墨色（面 5.57、符号 8.69）。
+  Color get markerFill => isDark ? brandInk : _HomeT.accentStart;
+  Color get markerInk => isDark ? page : Colors.white;
 
   LinearGradient get idleBackground => LinearGradient(
     begin: Alignment.topCenter,
@@ -655,7 +677,8 @@ class HomePage extends StatelessWidget {
                     key: deviceEditKey(device.id),
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: p.card,
+                      // 静止条目本身就是 card 面，再铺 card 等于隐形，只剩一条描边。
+                      color: p.tint,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(color: p.hairline, width: 1),
                     ),
@@ -669,15 +692,16 @@ class HomePage extends StatelessWidget {
                 if (isSelected) ...[
                   const SizedBox(width: 8),
                   Container(
+                    key: deviceCheckMarkerKey(device.id),
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: _HomeT.accentStart,
+                      color: p.markerFill,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
+                    child: Icon(
                       Ionicons.checkmark,
                       size: 14,
-                      color: Colors.white,
+                      color: p.markerInk,
                     ),
                   ),
                 ],
@@ -776,10 +800,10 @@ class HomePage extends StatelessWidget {
                 ),
               ),
               if (isSelected)
-                const Icon(
+                Icon(
                   Ionicons.checkmark_circle,
                   size: 16,
-                  color: _HomeT.accentStart,
+                  color: p.markerFill,
                 ),
             ],
           ),
@@ -800,12 +824,24 @@ class HomePage extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.only(bottom: 8),
-          child: Text(
-            '拖动调整顺序',
-            style: TextStyle(
-              fontSize: 13,
-              fontWeight: FontWeight.w500,
-              color: p.inkSecondary,
+          // 规格要求排序提示落在"和平常浏览不同的一块面"上。card 底 + hairline
+          // 描边和静止条目长得一模一样，看着像浏览态本身；这里改成品牌色模式条，
+          // 离本体色 4.4、离白条目 4.6，白字压在最浅停靠点仍有 4.80。
+          child: Container(
+            key: reorderHintKey,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              gradient: p.accentFill,
+              borderRadius: BorderRadius.circular(_HomeT.radiusChip),
+              border: Border.all(color: p.brandInk, width: 1.2),
+            ),
+            child: const Text(
+              '拖动调整顺序',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
+              ),
             ),
           ),
         ),
@@ -843,68 +879,12 @@ class HomePage extends StatelessWidget {
   void _showNoteEditDialog(
     BuildContext context,
     HomeController controller,
-    device,
+    DeviceModel device,
   ) {
-    final textController = TextEditingController(text: device.note ?? '');
-    final p = _HomePalette.of(context);
-    // 主题的输入框底是纯白 / #1F1F1F，压在对话框上分不出边界；这里用本体色，
-    // 比对话框面低一档（1.174），副文字压在上面仍有 5.48。
-    final fieldBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(_HomeT.radiusChip),
-      borderSide: BorderSide(color: p.hairline),
-    );
-
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
-        // 在新的本体色旁边会露出第三层灰。
-        backgroundColor: p.card,
-        title: Text(
-          '编辑备注 - ${device.formattedName}',
-          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
-        ),
-        content: TextField(
-          controller: textController,
-          style: TextStyle(color: p.ink),
-          decoration: InputDecoration(
-            hintText: '为设备添加备注',
-            hintStyle: TextStyle(color: p.inkSecondary),
-            prefixIcon: Icon(Ionicons.create_outline, color: p.neutralGlyph),
-            filled: true,
-            fillColor: p.page,
-            counterStyle: TextStyle(color: p.inkSecondary),
-            enabledBorder: fieldBorder,
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(_HomeT.radiusChip),
-              borderSide: BorderSide(color: p.brandInk, width: 1.6),
-            ),
-          ),
-          maxLength: 20,
-          autofocus: true,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('取消'),
-          ),
-          FilledButton(
-            // 主题的 primary 底配白字只有 3.13:1，实色按钮统一走深一档的品牌蓝。
-            style: FilledButton.styleFrom(backgroundColor: _HomeT.accentStart),
-            onPressed: () {
-              controller.saveDeviceNote(device.id, textController.text);
-              Navigator.pop(context);
-              Get.snackbar(
-                '成功',
-                '备注已保存',
-                snackPosition: SnackPosition.BOTTOM,
-                duration: const Duration(seconds: 1),
-              );
-            },
-            child: const Text('保存'),
-          ),
-        ],
-      ),
+      builder: (context) =>
+          _NoteEditDialog(device: device, controller: controller),
     );
   }
 
@@ -1054,10 +1034,13 @@ class HomePage extends StatelessWidget {
             children: [
               const SizedBox(height: 12),
               Container(
+                key: sheetGrabberKey,
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: p.hairline,
+                  // hairline 压在抽屉面上只有 1.13，肉眼基本看不见；
+                  // tint 比抽屉面低 1.24（深色 1.39）。
+                  color: p.tint,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1215,10 +1198,13 @@ class HomePage extends StatelessWidget {
             children: [
               const SizedBox(height: 12),
               Container(
+                key: sheetGrabberKey,
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: p.hairline,
+                  // hairline 压在抽屉面上只有 1.13，肉眼基本看不见；
+                  // tint 比抽屉面低 1.24（深色 1.39）。
+                  color: p.tint,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
@@ -1372,6 +1358,97 @@ class HomePage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+/// 备注编辑对话框。
+///
+/// 原来是对话框 builder 里手建的 TextEditingController，路由关掉也没人回收；
+/// 交给 State 持有，dispose 里还掉。
+class _NoteEditDialog extends StatefulWidget {
+  const _NoteEditDialog({required this.device, required this.controller});
+
+  final DeviceModel device;
+  final HomeController controller;
+
+  @override
+  State<_NoteEditDialog> createState() => _NoteEditDialogState();
+}
+
+class _NoteEditDialogState extends State<_NoteEditDialog> {
+  late final TextEditingController _text = TextEditingController(
+    text: widget.device.note ?? '',
+  );
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final p = _HomePalette.of(context);
+    // 主题的输入框底是纯白 / #1F1F1F，压在对话框上分不出边界；这里用本体色，
+    // 比对话框面低一档，副文字压在上面仍然达标。
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(_HomeT.radiusChip),
+      borderSide: BorderSide(color: p.hairline),
+    );
+
+    return AlertDialog(
+      // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
+      // 在新的本体色旁边会露出第三层灰。
+      backgroundColor: p.card,
+      title: Text(
+        '编辑备注 - ${widget.device.formattedName}',
+        style: TextStyle(
+          fontSize: 17,
+          fontWeight: FontWeight.w700,
+          color: p.ink,
+        ),
+      ),
+      content: TextField(
+        controller: _text,
+        style: TextStyle(color: p.ink),
+        decoration: InputDecoration(
+          hintText: '为设备添加备注',
+          hintStyle: TextStyle(color: p.inkSecondary),
+          prefixIcon: Icon(Ionicons.create_outline, color: p.neutralGlyph),
+          filled: true,
+          fillColor: p.page,
+          counterStyle: TextStyle(color: p.inkSecondary),
+          enabledBorder: fieldBorder,
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(_HomeT.radiusChip),
+            borderSide: BorderSide(color: p.brandInk, width: 1.6),
+          ),
+        ),
+        maxLength: 20,
+        autofocus: true,
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('取消'),
+        ),
+        FilledButton(
+          // 主题的 primary 底配白字只有 3.13:1，实色按钮统一走深一档的品牌蓝。
+          style: FilledButton.styleFrom(backgroundColor: _HomeT.accentStart),
+          onPressed: () {
+            widget.controller.saveDeviceNote(widget.device.id, _text.text);
+            Navigator.pop(context);
+            Get.snackbar(
+              '成功',
+              '备注已保存',
+              snackPosition: SnackPosition.BOTTOM,
+              duration: const Duration(seconds: 1),
+            );
+          },
+          child: const Text('保存'),
+        ),
+      ],
     );
   }
 }
