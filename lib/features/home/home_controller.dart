@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +10,7 @@ import '../../core/services/drink_api_service.dart';
 import '../login/login_controller.dart';
 import '../login/login_page.dart';
 import '../scanner/scanner_page.dart';
+import 'home_prompt_colors.dart';
 
 /// 失败提示的呈现内容。
 class DrinkFailurePrompt {
@@ -125,8 +125,8 @@ class HomeController extends GetxController {
           '提示',
           '登录已过期，请重新登录',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
+          backgroundColor: HomePromptColors.warning,
+          colorText: HomePromptColors.label,
         );
         // 与 AppController.logout 一致：登录页控制器是单例注册，
         // 不删除就会沿用上次的 isSmsSent/isTokenLogin 而停在错误步骤。
@@ -238,6 +238,8 @@ class HomeController extends GetxController {
         '提示',
         '正在接水中，请先结算',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: HomePromptColors.notice,
+        colorText: HomePromptColors.label,
       );
       return;
     }
@@ -280,6 +282,8 @@ class HomeController extends GetxController {
         '提示',
         '正在接水中，请先结算',
         snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: HomePromptColors.notice,
+        colorText: HomePromptColors.label,
       );
       return;
     }
@@ -289,7 +293,13 @@ class HomeController extends GetxController {
   /// 开始接水
   Future<void> startDrinking() async {
     if (currentDevice == null) {
-      Get.snackbar('提示', '请先选择设备', snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        '提示',
+        '请先选择设备',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: HomePromptColors.notice,
+        colorText: HomePromptColors.label,
+      );
       return;
     }
 
@@ -344,8 +354,8 @@ class HomeController extends GetxController {
         prompt.title,
         prompt.message,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.orange,
-        colorText: Colors.white,
+        backgroundColor: HomePromptColors.warning,
+        colorText: HomePromptColors.label,
       );
       return;
     }
@@ -354,8 +364,8 @@ class HomeController extends GetxController {
       prompt.title,
       prompt.message,
       snackPosition: SnackPosition.BOTTOM,
-      backgroundColor: Colors.red,
-      colorText: Colors.white,
+      backgroundColor: HomePromptColors.error,
+      colorText: HomePromptColors.label,
     );
   }
 
@@ -409,8 +419,8 @@ class HomeController extends GetxController {
             '失败',
             '添加设备失败',
             snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: Colors.red,
-            colorText: Colors.white,
+            backgroundColor: HomePromptColors.error,
+            colorText: HomePromptColors.label,
           );
         }
       } catch (e) {
@@ -418,8 +428,8 @@ class HomeController extends GetxController {
           '错误',
           '添加设备时出错',
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
+          backgroundColor: HomePromptColors.error,
+          colorText: HomePromptColors.label,
         );
       }
     }
@@ -455,16 +465,16 @@ class HomeController extends GetxController {
         '错误',
         msg,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
+        backgroundColor: HomePromptColors.error,
+        colorText: HomePromptColors.label,
       );
 
   void _ok(String msg) => Get.snackbar(
         '成功',
         msg,
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
+        backgroundColor: HomePromptColors.success,
+        colorText: HomePromptColors.label,
         duration: const Duration(seconds: 1),
       );
 }

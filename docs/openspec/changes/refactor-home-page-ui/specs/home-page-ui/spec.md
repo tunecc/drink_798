@@ -53,7 +53,7 @@ The home page SHALL use distinct surface roles for the page background, a restin
 
 ### Requirement: Text keeps a legible hierarchy
 
-The home page SHALL render text at no fewer than three distinct hierarchy levels; body and caption text MUST reach at least 4.5:1 contrast against the surface they sit on, headings MUST reach at least 3:1, and text drawn on an accent fill or gradient MUST reach 4.5:1 against the lightest point of that fill. De-emphasized text MUST express its lower rank through size or weight rather than through an opacity that falls below these floors.
+The home page SHALL render text at no fewer than three distinct hierarchy levels; body and caption text MUST reach at least 4.5:1 contrast against the surface they sit on, headings MUST reach at least 3:1, and text drawn on an accent fill or gradient MUST reach 4.5:1 against the lightest point of that fill. Any prompt the page raises over itself MUST sit on its own opaque surface and clear the same 4.5:1 floor against it. De-emphasized text MUST express its lower rank through size or weight rather than through an opacity that falls below these floors.
 
 #### Scenario: Hierarchy levels are distinguishable
 
@@ -67,6 +67,13 @@ The home page SHALL render text at no fewer than three distinct hierarchy levels
 - **THEN** the secondary line resolves through one named de-emphasized foreground role for the surface it sits on, rather than an opacity applied ad hoc at each call site
 - **AND** it still clears the 4.5:1 floor above against that surface, so the role is chosen for legibility and not for rank alone
 - **AND** its visual weight stays below the headline it belongs to
+
+#### Scenario: Prompts the page raises stay legible
+
+- **WHEN** the home page raises a prompt over itself — a success, a warning, an error, or a plain blocking notice
+- **THEN** the prompt sits on its own opaque surface and its label clears 4.5:1 against that surface in both colour schemes
+- **AND** the three semantic kinds keep visually distinct hues, so the colour itself still says which kind of prompt it is
+- **AND** a blocking notice carries none of those hues, so it cannot be mistaken for one of them
 
 #### Scenario: Text on the accent state stays readable at its weakest point
 

@@ -8,9 +8,11 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:drink_water_app/core/models/device_model.dart';
+import 'package:drink_water_app/core/services/drink_api_service.dart';
 import 'package:drink_water_app/core/theme/app_theme.dart';
 import 'package:drink_water_app/features/home/home_controller.dart';
 import 'package:drink_water_app/features/home/home_page.dart';
+import 'package:drink_water_app/features/home/home_prompt_colors.dart';
 import 'package:drink_water_app/features/scanner/scanner_page.dart';
 
 import 'fake_home_api_service.dart';
@@ -1767,6 +1769,213 @@ void main() {
         expectElevatedSurface(tester, '确认退出');
         await tester.tap(find.text('取消'));
         await settle(tester);
+      }
+    });
+  });
+
+  group('round 5 prompts', () {
+    GetSnackBar snack(WidgetTester tester) =>
+        tester.widget<GetSnackBar>(find.byType(GetSnackBar));
+
+    // GetSnackBar 没有 colorText 这个字段：Get.snackbar 的 colorText 是被揉进
+    // 标题与正文的 TextStyle 里的，所以只能读渲染出来的那段文字。
+    Color snackLabel(WidgetTester tester, String message) => textColorAt(
+      tester,
+      find.descendant(
+        of: find.byType(GetSnackBar),
+        matching: find.text(message),
+      ),
+    );
+
+    /// 色相（度）。提示条靠颜色本身表达"是哪一类"，所以三色相必须分得开。
+    double hueOf(Color c) {
+      final max = [c.r, c.g, c.b].reduce(math.max);
+      final min = [c.r, c.g, c.b].reduce(math.min);
+      final d = max - min;
+      if (d == 0) return 0.0;
+      final h =
+          max == c.r
+              ? 60 * (((c.g - c.b) / d) % 6)
+              : max == c.g
+              ? 60 * (((c.b - c.r) / d) + 2)
+              : 60 * (((c.r - c.g) / d) + 4);
+      return (h + 360) % 360;
+    }
+
+    /// 彩度（0 = 纯灰，1 = 最饱和）。规格那句"中性提示不带任何语义色相"用它量：
+    /// 灰的底 hueOf 也返回 0，单看色相会和错误色撞在一起。
+    double chromaOf(Color c) {
+      final max = [c.r, c.g, c.b].reduce(math.max);
+      final min = [c.r, c.g, c.b].reduce(math.min);
+      return max == 0 ? 0 : (max - min) / max;
+    }
+
+    testWidgets('the three prompt kinds are legible and keep distinct hues', (
+      tester,
+    ) async {
+      // 规格那句没有模式限定词，"both colour schemes" 就得两种都量。
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        final kinds = <String, ({Color bg, Color fg})>{};
+
+        // 1. 会话过期 → 警告色
+        Get.reset();
+        final expired = HangingDeviceListApiService(
+          devices: const [
+            {'id': '0', 'name': '登录已过期'},
+          ],
+        );
+        await pumpHomePage(tester, api: expired, brightness: brightness);
+        expired.release();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        kinds['warning'] = (
+          bg: snack(tester).backgroundColor,
+          fg: snackLabel(tester, '登录已过期，请重新登录'),
+        );
+        await dismissSnack(tester);
+
+        // 2. 开始接水被服务端拒绝 → 错误色
+        Get.reset();
+        await pumpHomePage(
+          tester,
+          brightness: brightness,
+          api: FakeHomeApiService(
+            startResult: const DrinkResult(
+              success: false,
+              code: -100,
+              message: '系统错误',
+            ),
+          ),
+        );
+        await tester.tap(find.byKey(primaryActionKey));
+        await tester.pump();
+        kinds['error'] = (
+          bg: snack(tester).backgroundColor,
+          fg: snackLabel(tester, '系统错误'),
+        );
+        await dismissSnack(tester);
+
+        // 3. 开始接水成功 → 成功色
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.tap(find.byKey(primaryActionKey));
+        await tester.pump();
+        kinds['success'] = (
+          bg: snack(tester).backgroundColor,
+          fg: snackLabel(tester, '开始接水'),
+        );
+        // 收个尾把接水状态关掉：轮询用的是周期 Timer，不解散会活到测试结束之后。
+        await tester.tap(find.byKey(primaryActionKey));
+        await dismissSnack(tester);
+
+        for (final entry in kinds.entries) {
+          expect(
+            entry.value.bg.a,
+            1.0,
+            reason:
+                '$brightness 下 ${entry.key} 提示的底是半透明的，标签实际压在哪一档背景上说不准',
+          );
+          expect(
+            contrast(entry.value.fg, entry.value.bg),
+            greaterThanOrEqualTo(4.5),
+            reason: '$brightness 下 ${entry.key} 提示的标签压在自己的底上读不出',
+          );
+          // 色相差要成立，先要每一块真的带色：三块灰的色相都是 0，
+          // 只比色相距离的话，两块无色的底也能蒙过这一段。
+          expect(
+            chromaOf(entry.value.bg),
+            greaterThanOrEqualTo(0.3),
+            reason:
+                '$brightness 下 ${entry.key} 的底几乎没有彩度，色相承载不了「是哪一类提示」',
+          );
+        }
+        final names = kinds.keys.toList();
+        for (var i = 0; i < names.length; i++) {
+          for (var j = i + 1; j < names.length; j++) {
+            final a = hueOf(kinds[names[i]]!.bg);
+            final b = hueOf(kinds[names[j]]!.bg);
+            expect(
+              (a - b).abs(),
+              greaterThanOrEqualTo(20.0),
+              reason:
+                  '$brightness 下 ${names[i]} 与 ${names[j]} 色相差只有 ${(a - b).abs().round()}°，颜色不再表达是哪一类提示',
+            );
+          }
+        }
+      }
+    });
+
+    // 另有三处提示根本没写底色，落到 GetX 的默认底 Colors.grey.withOpacity(0.2)：
+    // 一层两成透明的灰 wash，标签颜色还不是我们自己定的（Get.snackbar 走
+    // colorText ?? iconColor ?? Colors.black）。规格那句是"页面 raised 的任何提示"，
+    // 所以这块默认面也得真量一次，不能靠"它本来就这样"过关。
+    testWidgets('prompts on the untouched default face stay legible too', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.tap(find.byKey(primaryActionKey));
+        await tester.pump();
+        await dismissSnack(tester);
+
+        await tester.tap(find.byKey(deviceTileKey('101')));
+        await tester.pump();
+        final s = snack(tester);
+        expect(
+          s.backgroundColor.a,
+          1.0,
+          reason: '$brightness 下默认提示底不是实底，白字压在哪一档背景上说不准',
+        );
+        expect(
+          contrast(snackLabel(tester, '正在接水中，请先结算'), s.backgroundColor),
+          greaterThanOrEqualTo(4.5),
+          reason: '$brightness 下默认底上的提示标签读不出',
+        );
+        // 规格里那句"中性提示不带任何语义色相"：这块底必须是无彩度的，
+        // 不能让人把「请先结算」看成成功／警告／错误里的哪一种。
+        expect(
+          chromaOf(s.backgroundColor),
+          lessThan(0.15),
+          reason: '$brightness 下中性提示带上了彩度，会和三类语义提示撞色',
+        );
+        // 关掉接水，周期轮询的 Timer 不能留到测试结束之后。
+        await tester.tap(find.byKey(primaryActionKey));
+        await dismissSnack(tester);
+      }
+    });
+
+    // 独立审查抓出来的第十一处：这条提示不在 HomeController 里，而是页面自己的
+    // 备注对话框保存后 raised 的，前面十点全按控制器找就会整个漏掉它。
+    testWidgets('the note-save prompt the page raises itself is legible', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.longPress(find.byKey(deviceTileKey('102')));
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 700));
+        await tester.tap(find.text('保存'));
+        await tester.pump();
+        final s = snack(tester);
+        expect(
+          s.backgroundColor.a,
+          1.0,
+          reason: '$brightness 下备注保存提示的底是半透明的',
+        );
+        expect(
+          contrast(snackLabel(tester, '备注已保存'), s.backgroundColor),
+          greaterThanOrEqualTo(4.5),
+          reason: '$brightness 下备注保存提示的标签读不出',
+        );
+        // 同一类语义必须同一块底：这条和控制器里的成功提示不能各走各的。
+        expect(
+          hueOf(s.backgroundColor),
+          closeTo(hueOf(HomePromptColors.success), 1),
+          reason: '$brightness 下备注保存提示和成功提示不是同一类颜色',
+        );
+        await dismissSnack(tester);
       }
     });
   });

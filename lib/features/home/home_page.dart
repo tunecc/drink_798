@@ -9,6 +9,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../core/models/device_model.dart';
 import 'home_controller.dart';
+import 'home_prompt_colors.dart';
 
 /// 页面结构锚点。widget 测试靠这些 key 取"实际绘制的表面与文字颜色"，
 /// 所以改名或删掉会直接让验收断言失效，不是可选装饰。
@@ -71,7 +72,7 @@ abstract final class _HomeT {
   // 强调面：白色标签在最浅停靠点仍有 4.80，旧 #00D4FF 只有 1.77。
   static const accentStart = Color(0xFF0277BD);
   static const accentEnd = Color(0xFF00619E);
-  static const settle = Color(0xFFB45309);
+  static const settle = HomePromptColors.warning;
 
   // 墨色：次要文字用 α.60，因为主题里的 black54 压在新页面本体上只有 4.44。
   static const inkLight = Color(0xDD000000);
@@ -86,7 +87,8 @@ abstract final class _HomeT {
 
   // 不可用态：按 WCAG 1.4.3 属于豁免，但仍要与可用态一眼可辨。
   // 危险操作用 red800/red200 一档：Colors.red 压在白卡片上只有 3.72:1。
-  static const destructiveLight = Color(0xFFC62828);
+  // 浅色取提示条的错误色同一份，两处不能各写一个红。
+  static const destructiveLight = HomePromptColors.error;
   static const destructiveDark = Color(0xFFFF8A80);
 
   static const disabledLight = Color(0xFFC6D3DE);
@@ -1462,6 +1464,8 @@ class _NoteEditDialogState extends State<_NoteEditDialog> {
               '备注已保存',
               snackPosition: SnackPosition.BOTTOM,
               duration: const Duration(seconds: 1),
+              backgroundColor: HomePromptColors.success,
+              colorText: HomePromptColors.label,
             );
           },
           child: const Text('保存'),

@@ -232,7 +232,13 @@ The scenario now constrains what it was always trying to constrain: one named de
 
 These were surfaced by the review passes. Each sits outside the boundary the user set (home page body plus its own sheets and dialogs, no global theme edits, no behaviour change), so they are recorded rather than silently passed over.
 
-- `HomeController` prompts: the snackbar bodies are white labels on `Colors.orange` (**2.16:1**), `Colors.red` (**3.68:1**) and `Colors.green` (**2.78:1**) — `home_controller.dart:111`, `:321`, `:454-468`. They predate the redesign and are emitted by the controller rather than the page's own widget tree, but they are the last sub-floor text the home screen puts on screen. A follow-up should move them onto the page's `destructive` / `settle` roles.
+- ~~`HomeController` prompts~~ — recorded here in round 3, then **brought into scope by the user** ("修复 snackbar 的对比度问题") and fixed in [Build round 5](#build-round-5--the-prompts-the-page-raises-over-itself-authorised-scope-extension).
+- `LoginController` prompts carry the same pattern this round fixed on home: nine sites pass
+  `backgroundColor: Colors.red` / `Colors.green` with `colorText: Colors.white`, i.e. the measured
+  3.68:1 and 2.78:1 pair (`login_controller.dart:66`, `:97`, `:106`, `:116`, `:147`, `:159`, `:169`,
+  `:192`, `:201`). Found while grepping for other prompt sites, not fixed here: the login page is
+  inside the boundary the user drew as untouchable, and its own change (`refactor-login-page-ui`) is
+  already archived. Recorded so the next pass at login can pick it up rather than rediscover it.
 - `ScannerPage` overflows horizontally by 12px at 320×568 with a 1.3 text scale (`scanner_page.dart:108`). Reproduced by the home suite when the add-device entry is actually tapped; the small-screen assertion therefore proves the home page's reachability and pops back at a normal size instead of carrying another page's overflow.
 - The about dialog still shows a hardcoded `版本: 1.0.4` while `pubspec.yaml` is at 1.0.6.
 - `main.dart` forces `statusBarIconBrightness: Brightness.dark`, which puts black status icons over the dark band on a dark-scheme device.
@@ -250,5 +256,85 @@ The closing integration check returned "ready to archive" but listed one genuine
 Named here rather than left implicit, because each one is a place where "the tests are green" means less than it looks.
 
 1. **Requirement 2's two-channel rule is enforced on the four named surface roles** (page, resting card, selected card, elevated sheet). The leading icon chip and the in-progress status chip are single-channel by fill (1.214 light / 1.390 dark against their row, 1.398 for the in-progress chip) — they are decorative insets inside a surface that already separates, not one of the four roles, so they are compliant. If a future change promotes them to surface roles they need a second channel.
-2. **Requirement 3 is verified on enumerated pairs**, not by sweeping every `Text` in the tree. A sweep would have to exempt the controller's out-of-boundary snackbars and any text drawn on the accent gradient, and a blanket gate that silently skips cases is worse than an explicit list. Each new text pair therefore needs its assertion added; the enumeration is the contract.
+2. **Requirement 3 is verified on enumerated pairs**, not by sweeping every `Text` in the tree. A sweep would have to exempt any text drawn on the accent gradient and every prompt face, and a blanket gate that silently skips cases is worse than an explicit list. Each new text pair therefore needs its assertion added; the enumeration is the contract. The prompt faces joined that enumeration in round 5 (below) rather than staying exempt.
 3. **"Keeps animating" is proven as presence and absence**, not as motion: the in-card `LinearProgressIndicator` is asserted present while a session runs and absent when idle, which catches removal but not a frozen value.
+
+## Build round 5 — the prompts the page raises over itself (authorised scope extension)
+
+The user named the remaining item ("修复 snackbar 的对比度问题"), which moves it from the out-of-scope
+list into this change. The boundary still holds: nothing in `core/theme/` changes, so the login and
+scanner pages look exactly as before. What changes is that home now owns the faces of the prompts it
+puts on screen.
+
+**Decision: one holder, four faces.** `lib/features/home/home_prompt_colors.dart` declares
+`warning #B45309`, `error #C62828`, `success #2E7D32` and `notice #303030`, all read with
+`Colors.white` at **5.022 / 5.622 / 5.127 / 13.198**. It lives in `features/home/` and not in
+`core/theme/` because these roles are home's own: the page already had an amber settle face and a
+red destructive face, and a prompt meaning the same thing must be the same colour. `_HomeT.settle`
+and `_HomeT.destructiveLight` now *point at* `HomePromptColors.warning` / `.error` instead of
+re-declaring the hexes, so the button and the prompt of the same meaning cannot drift apart.
+
+**Eleven call sites.** Seven prompts already carried an explicit face — two `Colors.orange`
+(session expired, in `loadDevices` and in `_fail`), four `Colors.red` (`_fail`, add-device ×2,
+`_err`) and one `Colors.green` (`_ok`) — and now read the holder. Four more carried no face at all:
+`toggleReorderMode`, `selectDevice` and `startDrinking`'s no-selection guard in the controller, plus
+the note-save prompt the page's own dialog raises (`home_page.dart`, title `成功`). Text, title,
+`SnackPosition.BOTTOM` and duration are untouched at every one of the eleven; only colour changed.
+
+**Why the four unstyled prompts had to be pinned, stated accurately.** They inherit `Get.snackbar`'s
+fallback face, `Colors.grey.withOpacity(0.2)` — not the opaque `#303030` the `GetSnackBar`
+constructor default suggests, because the extension resolves a null background to that 20 %-alpha
+wash before building the snack. Their label was never white either: `Get.snackbar` builds it from
+`colorText ?? iconColor ?? Colors.black`, and `iconColor` is `theme.iconTheme.color`, which this app
+sets only inside `AppBarTheme`. So neither end of the pairing was ours — the face was translucent and
+the ink came from whichever theme role happened to resolve. A *white* label on that wash would
+composite to 1.359:1 over the light page base and about 14.1:1 over the dark one; the pre-fix label
+was whatever the theme handed back, which is precisely the thing Requirement 3's new clause says the
+page must not leave to chance. All four now declare a face and an ink from the holder: the three
+blocking notices take `notice #303030` (13.20:1 with `label`), the note-save prompt takes
+`success #2E7D32`, the same face the controller's `_ok` uses, so "saved" cannot look like one thing
+in the page and another in the controller. `notice` is deliberately achromatic — a blocking notice is
+not a failure, and amber would collide with the session-expired warning — so it sits outside the hue
+rule, which applies to the three semantic kinds. Because a distance in *hue* is meaningless without
+chroma (three greys all report hue 0 and would pass a distance check by accident), the suite floors
+each semantic face at chroma ≥ 0.3 and requires the neutral face to stay below 0.15.
+
+**TDD record.** RED, observed: `fvm flutter test --no-pub test/features/home/home_page_ui_test.dart`
+→ 45 passed, 2 failed, and the failures are exactly the behaviour 11.1 asks for —
+`the three prompt kinds are legible and keep distinct hues` reported **2.1553** on the warning face
+and `prompts stay legible over the dark page too` reported **3.6824** on the error face. Because the
+kinds loop aborts at its first failure, the success face's **2.780** (`Colors.green`) is a figure
+computed from the same formula before the run, not a second observed RED; it is covered by the
+assertion that now passes. Two further REDs were observed later, each on its own run: the neutral
+face failed on the opacity clause with `Actual: <0.2>`, and after the independent review named the
+note-save prompt the new test failed the same clause with `Actual: <0.2>` in `Brightness.light`
+before `home_page.dart` was changed. GREEN: the full suite **122 passed**,
+`fvm flutter analyze --no-pub` reports **No issues found** (it also dropped `home_controller.dart`'s
+now-unused `package:flutter/material.dart` import).
+
+**What the review changed after it reported.** The first pass over the prompts measured one scheme
+only, so the kinds test and the neutral-face test now walk `Brightness.light` and
+`Brightness.dark`, which is what "in both colour schemes" in Requirement 3 says; the
+`testWidgets('prompts stay legible over the dark page too')` case folded into that loop rather than
+surviving as a fourth copy.
+
+### Accepted limits added in round 5
+
+1. **Warning-to-error hue slack is 25.9° against a 20° floor** (`#B45309` reports hue 25.9°,
+   `#C62828` reports 0°). It passes, but barely: re-tuning either the amber or the red by a few
+   degrees would fail the assertion, and that is a deliberate tripwire rather than a comfortable
+   margin.
+2. **The neutral face separates weakly in dark mode.** `#303030` over `pageDark` is a 1.458 fill step
+   but only 1.119 over `cardDark`, and a prompt carries no border or shadow. Requirement 3's prompt
+   clause asks for an opaque face and a 4.5:1 label, not for a surface step, so this is compliant —
+   it is worth knowing before anyone promotes a prompt to one of Requirement 2's surface roles.
+3. **Six of the eleven sites are covered by face, not by flow.** `_err`, `_fail`'s two branches,
+   add-device ×2 and the reorder guard all resolve to a constant this suite measures on another site
+   with the same title and position; only the measured sites' own routes are exercised. A prompt
+   added later that reuses one of the four constants inherits the guarantee; one that introduces a
+   new colour needs a new assertion.
+
+**Limits of the prompt assertions.** They read `GetSnackBar.backgroundColor` and the rendered label
+`TextStyle`, not composited pixels. For these four faces that is exact — every face is opaque and
+the app sets no `backgroundGradient` or `boxShadows` on a prompt — but a future prompt that uses a
+gradient or a translucent face would need the pixel-sampling treatment the page surfaces get.

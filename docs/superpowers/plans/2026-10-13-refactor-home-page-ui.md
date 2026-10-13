@@ -262,6 +262,36 @@ written down: single-channel decorative chips are not one of the four named surf
 Requirement 3 is verified on enumerated pairs rather than a whole-tree sweep, and the progress
 indicator is proven present/absent rather than in motion.
 
+## Group 11 — Round 5, the prompts the page raises over itself
+
+Scope extension the user authorised by name ("修复 snackbar 的对比度问题"). Still no `AppTheme`
+touch: the prompts are raised from `HomeController`, so only the home feature changes.
+
+<!-- comet-task-ref:768b34b4-b3bc-4ba3-8bd9-68a6e625fb78 -->
+### 11.1 Measure each prompt against its own face
+`GetSnackBar.backgroundColor` is the face the label sits on, and `snackLabel()` reads the rendered
+`Text` because GetX folds `colorText` into the title/body styles rather than exposing it. Assert the
+face is fully opaque, the label clears 4.5:1, the three semantic kinds differ by at least 20° of hue
+*on faces that actually carry colour* (chroma ≥ 0.3, otherwise three greys pass a hue distance by
+accident) and the neutral face stays achromatic — walking `Brightness.light` and `Brightness.dark`,
+because the spec clause carries no mode qualifier. RED was expected at 2.155 / 3.682 / 2.780.
+
+<!-- comet-task-ref:0fd0910f-af23-4d02-a346-18242e42b8f4 -->
+### 11.2 One holder, four faces
+`HomePromptColors` holds warning `#B45309` (5.022), error `#C62828` (5.622), success `#2E7D32`
+(5.127) and a neutral `#303030` (13.198), all read with `Colors.white`. `_HomeT.settle` and
+`_HomeT.destructiveLight` now point at the same constants, so the button face and the prompt of the
+same meaning cannot drift. Measuring the prompts found four sites that never set a face at all —
+three blocking guards in the controller and the note-save prompt raised from the page's own dialog —
+each inheriting GetX's `Colors.grey.withOpacity(0.2)` face plus an ink resolved from the theme rather
+than chosen, which is why a neutral role exists and why the saved note reuses `success`. Text, title,
+position and duration of all eleven prompts are unchanged.
+
+<!-- comet-task-ref:fea080e7-1b1c-482c-bb09-7925b0563afc -->
+### 11.3 Record the extension
+Design gets the round-5 numbers and the reason the holder lives in `features/home/` instead of
+`core/theme/`; the delta spec already carries the new scenario.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.
