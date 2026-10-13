@@ -7,42 +7,204 @@ import 'package:ionicons/ionicons.dart';
 import 'package:modal_bottom_sheet/modal_bottom_sheet.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../core/theme/app_theme.dart';
 import 'home_controller.dart';
+
+/// 页面结构锚点。widget 测试靠这些 key 取"实际绘制的表面与文字颜色"，
+/// 所以改名或删掉会直接让验收断言失效，不是可选装饰。
+const homeBackgroundKey = Key('homeBackground');
+const statusCardKey = Key('statusCard');
+const statusIconChipKey = Key('statusIconChip');
+const primaryActionKey = Key('primaryAction');
+const layoutToggleKey = Key('layoutToggle');
+const reorderToggleKey = Key('reorderToggle');
+const deviceManageSheetKey = Key('deviceManageSheet');
+const settingsSheetKey = Key('settingsSheet');
+const aboutAppIconKey = Key('aboutAppIcon');
+const emptyScanActionKey = Key('emptyScanAction');
+
+Key deviceTileKey(String id) => Key('deviceTile-$id');
+
+/// 设备项右侧的备注编辑按钮容器：命中区基线就钉在这个 key 上。
+Key deviceEditKey(String id) => Key('deviceEdit-$id');
+
+/// 首页专用视觉 token，数值与推导见
+/// docs/openspec/changes/refactor-home-page-ui/design.md 的 D3/D4/D8。
+///
+/// 刻意不写进 AppTheme：那会连带改掉登录页与扫码页的全局默认值。
+/// 每个"承载文字的面 / 文字"配对都按 WCAG 相对亮度实算过，改动数值必须
+/// 同步重跑 test/features/home/home_page_ui_test.dart 的对比度断言。
+abstract final class _HomeT {
+  // 浅色：页面本体比卡片暗一档，白卡片才浮得起来（page→card 1.174）。
+  static const pageLight = Color(0xFFE4EEF8);
+  static const cardLight = Color(0xFFFFFFFF);
+  static const tintLight = Color(0xFFDCEBF9);
+  static const bandTopLight = Color(0xFFC5E0F7);
+  static const hairlineLight = Color(0x2E9FB4C9);
+
+  // 深色：靠"抬亮"分层（page→card 1.154，card→selected 1.193）。
+  static const pageDark = Color(0xFF0F1417);
+  static const cardDark = Color(0xFF1A222B);
+  static const selectedDark = Color(0xFF22303E);
+  // 深色图标底与选中底必须分开：两者都取 #22303E 时，选中条目的图标底糊成一片。
+  static const tintDark = Color(0xFF2A3947);
+  static const bandTopDark = Color(0xFF15293C);
+  static const hairlineDark = Color(0x3D3A4A5A);
+
+  // 强调面：白色标签在最浅停靠点仍有 4.80，旧 #00D4FF 只有 1.77。
+  static const accentStart = Color(0xFF0277BD);
+  static const accentEnd = Color(0xFF00619E);
+  static const settle = Color(0xFFB45309);
+
+  // 墨色：次要文字用 α.60，因为主题里的 black54 压在新页面本体上只有 4.44。
+  static const inkLight = Color(0xDD000000);
+  static const inkSecondaryLight = Color(0x99000000);
+  // 顶带 #C5E0F7 比页面本体更深，标签压在上面是下限：#1565A8 只有 4.45。
+  static const brandInkLight = Color(0xFF0F5C99);
+  static const neutralGlyphLight = Color(0xFF5A6B7B);
+  static const inkDark = Color(0xFFFFFFFF);
+  static const inkSecondaryDark = Color(0xB3FFFFFF);
+  static const brandInkDark = Color(0xFF64B5F6);
+  static const neutralGlyphDark = Color(0xFF9AA7B4);
+
+  // 不可用态：按 WCAG 1.4.3 属于豁免，但仍要与可用态一眼可辨。
+  // 危险操作用 red800/red200 一档：Colors.red 压在白卡片上只有 3.72:1。
+  static const destructiveLight = Color(0xFFC62828);
+  static const destructiveDark = Color(0xFFFF8A80);
+
+  static const disabledLight = Color(0xFFC6D3DE);
+  static const disabledInkLight = Color(0xFF4A5765);
+  static const disabledDark = Color(0xFF232B33);
+  static const disabledInkDark = Color(0xFF9AA7B4);
+
+  static const radiusCard = 24.0;
+  static const radiusTile = 14.0;
+  static const radiusChip = 12.0;
+}
+
+/// 首页表面色的按主题分支取值，避免每处都写三元判断。
+class _HomePalette {
+  const _HomePalette.dark()
+    : page = _HomeT.pageDark,
+      card = _HomeT.cardDark,
+      selected = _HomeT.selectedDark,
+      tint = _HomeT.tintDark,
+      bandTop = _HomeT.bandTopDark,
+      hairline = _HomeT.hairlineDark,
+      ink = _HomeT.inkDark,
+      inkSecondary = _HomeT.inkSecondaryDark,
+      brandInk = _HomeT.brandInkDark,
+      neutralGlyph = _HomeT.neutralGlyphDark,
+      disabled = _HomeT.disabledDark,
+      disabledInk = _HomeT.disabledInkDark,
+      destructive = _HomeT.destructiveDark,
+      isDark = true;
+
+  const _HomePalette.light()
+    : page = _HomeT.pageLight,
+      card = _HomeT.cardLight,
+      selected = _HomeT.cardLight,
+      tint = _HomeT.tintLight,
+      bandTop = _HomeT.bandTopLight,
+      hairline = _HomeT.hairlineLight,
+      ink = _HomeT.inkLight,
+      inkSecondary = _HomeT.inkSecondaryLight,
+      brandInk = _HomeT.brandInkLight,
+      neutralGlyph = _HomeT.neutralGlyphLight,
+      disabled = _HomeT.disabledLight,
+      disabledInk = _HomeT.disabledInkLight,
+      destructive = _HomeT.destructiveLight,
+      isDark = false;
+
+  static _HomePalette of(BuildContext context) =>
+      Theme.of(context).brightness == Brightness.dark
+      ? const _HomePalette.dark()
+      : const _HomePalette.light();
+
+  /// 小屏或大字号时收紧留白：固定 padding 配固定高度在这种尺寸会直接把
+  /// 卡片顶出可视区（RenderFlex overflow），收紧一档即可回到可容纳范围。
+  static bool isCompact(BuildContext context) =>
+      MediaQuery.sizeOf(context).height < 640 ||
+      MediaQuery.textScalerOf(context).scale(14) > 16.8;
+
+  final Color page;
+  final Color card;
+  final Color selected;
+  final Color tint;
+  final Color bandTop;
+  final Color hairline;
+  final Color ink;
+  final Color inkSecondary;
+  final Color brandInk;
+  final Color neutralGlyph;
+  final Color disabled;
+  final Color disabledInk;
+  final Color destructive;
+  final bool isDark;
+
+  /// 选中态是否用提亮填充表达。浅色下不换填充：淡蓝 tint 相对页面只有
+  /// 1.118，选中反而把卡片粘回背景，所以浅色改用描边+勾选+抬升两个通道。
+  bool get selectionTintsFill => isDark;
+
+  Color tileFill({required bool isSelected}) =>
+      isSelected && selectionTintsFill ? selected : card;
+
+  LinearGradient get idleBackground => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [bandTop, Color.lerp(bandTop, page, 0.55)!, page],
+    stops: const [0.0, 0.42, 1.0],
+  );
+
+  LinearGradient get activeBackground => LinearGradient(
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+    colors: [
+      Color.alphaBlend(_HomeT.accentStart.withValues(alpha: 0.28), page),
+      Color.alphaBlend(_HomeT.accentEnd.withValues(alpha: 0.18), page),
+      page,
+    ],
+    stops: const [0.0, 0.5, 1.0],
+  );
+
+  LinearGradient get accentFill => const LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [_HomeT.accentStart, _HomeT.accentEnd],
+  );
+}
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(HomeController());
+    // build 可能被反复调用，控制器只在首次注册时创建；
+    // 测试先注入替身再泵页面，这里的分支保证它不被真实单例顶掉。
+    final controller = Get.isRegistered<HomeController>()
+        ? Get.find<HomeController>()
+        : Get.put(HomeController());
 
     return Scaffold(
+      // 本体色由页面自己给定，不用全局 scaffoldBackgroundColor：
+      // 加载态、overscroll 发光和抽屉底衬都跟着走，才不会露出第二层灰。
+      backgroundColor: _HomePalette.of(context).page,
       body: Stack(
         children: [
-          // 背景渐变
-          Obx(() => AnimatedContainer(
-            duration: const Duration(milliseconds: 800),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: controller.isDrinking.value
-                    ? [
-                        const Color(0xFF00D4FF).withValues(alpha:0.3),
-                        const Color(0xFF0099CC).withValues(alpha:0.5),
-                        Theme.of(context).scaffoldBackgroundColor,
-                      ]
-                    : [
-                        Theme.of(context).scaffoldBackgroundColor,
-                        Theme.of(context).scaffoldBackgroundColor,
-                      ],
-                stops: controller.isDrinking.value
-                    ? const [0.0, 0.5, 1.0]
-                    : const [0.0, 1.0],
+          // 背景渐变：空闲=品牌锚点，接水中=水色渐变；两者都以本体色收尾。
+          Positioned.fill(
+            child: Obx(() => AnimatedContainer(
+              key: homeBackgroundKey,
+              duration: const Duration(milliseconds: 800),
+              decoration: BoxDecoration(
+                gradient: _HomePalette.of(context).idleBackground,
               ),
-            ),
-          )),
+              foregroundDecoration: controller.isDrinking.value
+                  ? BoxDecoration(
+                      gradient: _HomePalette.of(context).activeBackground,
+                    )
+                  : null,
+            )),
+          ),
 
           // 气泡动画
           Obx(() => controller.isDrinking.value
@@ -72,6 +234,8 @@ class HomePage extends StatelessWidget {
 
   /// 顶部导航栏
   Widget _buildAppBar(BuildContext context, HomeController controller) {
+    final p = _HomePalette.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
       child: Row(
@@ -82,21 +246,22 @@ class HomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: AppTheme.primaryColor.withValues(alpha:0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  color: p.tint,
+                  borderRadius: BorderRadius.circular(_HomeT.radiusChip),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.water_drop_rounded,
-                  color: AppTheme.primaryColor,
+                  color: p.brandInk,
                   size: 24,
                 ),
               ),
               const SizedBox(width: 12),
-              const Text(
+              Text(
                 '智能饮水',
                 style: TextStyle(
                   fontSize: 20,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w700,
+                  color: p.ink,
                 ),
               ),
             ],
@@ -105,12 +270,12 @@ class HomePage extends StatelessWidget {
             children: [
               IconButton(
                 onPressed: controller.loadDevices,
-                icon: const Icon(Ionicons.refresh_outline),
+                icon: Icon(Ionicons.refresh_outline, color: p.neutralGlyph),
                 tooltip: '刷新',
               ),
               IconButton(
                 onPressed: () => _showSettingsSheet(context, controller),
-                icon: const Icon(Ionicons.settings_outline),
+                icon: Icon(Ionicons.settings_outline, color: p.neutralGlyph),
                 tooltip: '设置',
               ),
             ],
@@ -122,32 +287,34 @@ class HomePage extends StatelessWidget {
 
   /// 主要内容
   Widget _buildContent(BuildContext context, HomeController controller) {
+    final compact = _HomePalette.isCompact(context);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: compact ? 16 : 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 20),
-          
+          SizedBox(height: compact ? 8 : 20),
+
           // 状态显示
           _buildStatusCard(context, controller),
-          
-          const SizedBox(height: 24),
-          
+
+          SizedBox(height: compact ? 14 : 24),
+
           // 设备选择区域
           _buildDeviceSection(context, controller),
-          
-          const Spacer(),
-          
+
+          SizedBox(height: compact ? 12 : 20),
+
           // 操作按钮
           _buildActionButton(context, controller),
-          
-          const SizedBox(height: 20),
-          
+
+          SizedBox(height: compact ? 10 : 20),
+
           // 底部功能按钮
           _buildBottomActions(context, controller),
-          
-          const SizedBox(height: 20),
+
+          SizedBox(height: compact ? 10 : 20),
         ],
       ),
     );
@@ -157,34 +324,28 @@ class HomePage extends StatelessWidget {
   Widget _buildStatusCard(BuildContext context, HomeController controller) {
     return Obx(() {
       final isDrinking = controller.isDrinking.value;
-      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final p = _HomePalette.of(context);
 
       return AnimatedContainer(
+        key: statusCardKey,
         duration: const Duration(milliseconds: 300),
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(_HomePalette.isCompact(context) ? 16 : 22),
         decoration: BoxDecoration(
-          gradient: isDrinking
-              ? const LinearGradient(
-                  colors: [Color(0xFF00D4FF), Color(0xFF0099CC)],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                )
-              : null,
-          color: isDrinking ? null : Theme.of(context).cardColor,
-          borderRadius: BorderRadius.circular(24),
-          border: !isDrinking && isDark
-              ? Border.all(
-                  color: Colors.grey.shade800,
-                  width: 0.5,
-                )
-              : null,
+          // 承载文字的面只在接水中用渐变，且浅色对为 #0277BD→#00619E：
+          // 白色标签在最浅一端仍有 4.80:1。
+          gradient: isDrinking ? p.accentFill : null,
+          color: isDrinking ? null : p.card,
+          borderRadius: BorderRadius.circular(_HomeT.radiusCard),
+          border: isDrinking
+              ? null
+              : Border.all(color: p.hairline, width: 1),
           boxShadow: [
             BoxShadow(
               color: isDrinking
-                  ? AppTheme.primaryColor.withValues(alpha:0.3)
-                  : Colors.black.withValues(alpha:isDark ? 0.3 : 0.05),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
+                  ? _HomeT.accentEnd.withValues(alpha: 0.28)
+                  : p.ink.withValues(alpha: 0.07),
+              blurRadius: 18,
+              offset: const Offset(0, 8),
             ),
           ],
         ),
@@ -194,18 +355,21 @@ class HomePage extends StatelessWidget {
             Row(
               children: [
                 Container(
+                  key: statusIconChipKey,
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: isDrinking
-                        ? Colors.white.withValues(alpha:0.2)
-                        : AppTheme.primaryColor.withValues(alpha:0.1),
+                        ? Colors.white.withValues(alpha: 0.18)
+                        : p.tint,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Icon(
-                    isDrinking
-                        ? Ionicons.water
-                        : Ionicons.water_outline,
-                    color: isDrinking ? Colors.white : AppTheme.primaryColor,
+                    isDrinking ? Ionicons.water : Ionicons.water_outline,
+                    // 图标是非文字元素，底线 3.0：tint 底上要用深一档的品牌墨，
+                    // 主题主色 #2196F3 压在淡蓝底上只有 2.57，深一档才够 3.0。
+                    color: isDrinking
+                        ? Colors.white
+                        : p.brandInk,
                     size: 28,
                   ),
                 ),
@@ -216,19 +380,20 @@ class HomePage extends StatelessWidget {
                     Text(
                       isDrinking ? '正在接水中' : '准备就绪',
                       style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: isDrinking ? Colors.white : null,
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: isDrinking ? Colors.white : p.ink,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       isDrinking ? '接完后点击结算' : '选择设备开始接水',
                       style: TextStyle(
-                        fontSize: 14,
-                        color: isDrinking
-                            ? Colors.white.withValues(alpha:0.8)
-                            : (isDark ? Colors.grey[400] : Colors.grey[600]),
+                        fontSize: 13,
+                        fontWeight: FontWeight.w400,
+                        // 降层级靠字号与字重，不靠透明度：白色 α.85 压在强调面上
+                        // 只有 3.92:1。
+                        color: isDrinking ? Colors.white : p.inkSecondary,
                       ),
                     ),
                   ],
@@ -250,24 +415,28 @@ class HomePage extends StatelessWidget {
 
   /// 设备选择区域
   Widget _buildDeviceSection(BuildContext context, HomeController controller) {
+    final p = _HomePalette.of(context);
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   '我的设备',
                   style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 17,
+                    fontWeight: FontWeight.w700,
+                    color: p.ink,
                   ),
                 ),
               ),
               Obx(() {
                 final isGrid = controller.layoutMode.value == 'grid';
                 return IconButton(
+                  key: layoutToggleKey,
                   tooltip: isGrid ? '单列布局' : '双列布局',
                   onPressed: controller.isReordering.value
                       ? null
@@ -275,12 +444,14 @@ class HomePage extends StatelessWidget {
                   icon: Icon(
                     isGrid ? Ionicons.list_outline : Ionicons.grid_outline,
                     size: 20,
+                    color: p.neutralGlyph,
                   ),
                 );
               }),
               Obx(() {
                 final reordering = controller.isReordering.value;
                 return IconButton(
+                  key: reorderToggleKey,
                   tooltip: reordering ? '完成排序' : '调整顺序',
                   onPressed: controller.toggleReorderMode,
                   icon: Icon(
@@ -288,12 +459,13 @@ class HomePage extends StatelessWidget {
                         ? Ionicons.checkmark
                         : Ionicons.swap_vertical_outline,
                     size: 20,
-                    color: reordering ? AppTheme.primaryColor : null,
+                    color: reordering ? p.brandInk : p.neutralGlyph,
                   ),
                 );
               }),
               TextButton.icon(
                 onPressed: controller.scanAndAddDevice,
+                style: TextButton.styleFrom(foregroundColor: p.brandInk),
                 icon: const Icon(Ionicons.add_circle_outline, size: 20),
                 label: const Text('添加'),
               ),
@@ -321,49 +493,65 @@ class HomePage extends StatelessWidget {
 
   /// 空设备卡片
   Widget _buildEmptyDeviceCard(BuildContext context, HomeController controller) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final p = _HomePalette.of(context);
+    final compact = _HomePalette.isCompact(context);
 
-    return Container(
-      padding: const EdgeInsets.all(32),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.withValues(alpha:0.2),
-          style: isDark ? BorderStyle.solid : BorderStyle.solid,
-          width: isDark ? 1 : 1,
+    // 外层可滚 + 居中：小屏或大字号下这张固定内容的卡顶不住时，
+    // 让它能滚而不是把 Column 撑爆。
+    return Center(
+      child: SingleChildScrollView(
+        child: Container(
+          padding: EdgeInsets.all(compact ? 20 : 32),
+          decoration: BoxDecoration(
+            color: p.card,
+            borderRadius: BorderRadius.circular(_HomeT.radiusTile),
+            border: Border.all(color: p.hairline, width: 1),
+            boxShadow: [
+              BoxShadow(
+                color: p.ink.withValues(alpha: 0.06),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                Ionicons.hardware_chip_outline,
+                size: 48,
+                color: p.neutralGlyph,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                '暂无设备',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: p.ink,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '扫描设备上的二维码添加',
+                style: TextStyle(
+                  fontSize: 13,
+                  color: p.inkSecondary,
+                ),
+              ),
+              const SizedBox(height: 20),
+              FilledButton.icon(
+                key: emptyScanActionKey,
+                style: FilledButton.styleFrom(
+                  backgroundColor: _HomeT.accentStart,
+                ),
+                onPressed: controller.scanAndAddDevice,
+                icon: const Icon(Ionicons.scan_outline),
+                label: const Text('扫码添加'),
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        children: [
-          Icon(
-            Ionicons.hardware_chip_outline,
-            size: 48,
-            color: isDark ? Colors.grey[600] : Colors.grey[400],
-          ),
-          const SizedBox(height: 16),
-          const Text(
-            '暂无设备',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            '扫描设备上的二维码添加',
-            style: TextStyle(
-              fontSize: 14,
-              color: isDark ? Colors.grey[400] : Colors.grey[600],
-            ),
-          ),
-          const SizedBox(height: 20),
-          FilledButton.icon(
-            onPressed: controller.scanAndAddDevice,
-            icon: const Icon(Ionicons.scan_outline),
-            label: const Text('扫码添加'),
-          ),
-        ],
       ),
     );
   }
@@ -395,7 +583,7 @@ class HomePage extends StatelessWidget {
     return Obx(() {
       final device = controller.deviceList[index];
       final isSelected = controller.selectedDeviceIndex.value == index;
-      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final p = _HomePalette.of(context);
 
       return GestureDetector(
         onTap: controller.isReordering.value
@@ -405,23 +593,26 @@ class HomePage extends StatelessWidget {
             ? null
             : () => _showNoteEditDialog(context, controller, device),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          key: deviceTileKey(device.id),
+          // vertical 11：改版前选中态是 2px 描边、行高 60；这里必须不低于它。
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
+            // 浅色下选中不换填充（淡蓝 tint 对页面只有 1.118，选中反而糊回去），
+            // 由描边 + 勾选 + 抬升两个通道表达；深色仍提亮一档。
+            color: p.tileFill(isSelected: isSelected),
+            borderRadius: BorderRadius.circular(_HomeT.radiusTile),
             border: Border.all(
-              color: isSelected
-                  ? AppTheme.primaryColor
-                  : (isDark
-                      ? Colors.grey.shade800
-                      : Colors.grey.withValues(alpha:0.2)),
-              width: isSelected ? 2 : 0.5,
+              // 选中描边是非文字指示元素，底线 3.0：primary 蓝压在本体色上只有 2.66。
+              color: isSelected ? p.brandInk : p.hairline,
+              width: isSelected ? 1.6 : 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha:isDark ? 0.25 : 0.04),
-                blurRadius: 6,
-                offset: const Offset(0, 2),
+                color: isSelected
+                    ? _HomeT.accentStart.withValues(alpha: 0.22)
+                    : p.ink.withValues(alpha: 0.06),
+                blurRadius: isSelected ? 14 : 8,
+                offset: const Offset(0, 3),
               ),
             ],
           ),
@@ -430,16 +621,12 @@ class HomePage extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: isSelected
-                      ? AppTheme.primaryColor.withValues(alpha:0.1)
-                      : (isDark ? Colors.grey.shade800 : Colors.grey[100]),
+                  color: p.tint,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: Icon(
                   Ionicons.hardware_chip_outline,
-                  color: isSelected
-                      ? AppTheme.primaryColor
-                      : (isDark ? Colors.grey[400] : Colors.grey),
+                  color: isSelected ? p.brandInk : p.neutralGlyph,
                   size: 20,
                 ),
               ),
@@ -452,7 +639,8 @@ class HomePage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.w600,
+                        isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: p.ink,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -464,17 +652,17 @@ class HomePage extends StatelessWidget {
                   onTap: () =>
                       _showNoteEditDialog(context, controller, device),
                   child: Container(
+                    key: deviceEditKey(device.id),
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: isDark
-                          ? Colors.grey.shade800.withValues(alpha:0.8)
-                          : Colors.grey[100]!.withValues(alpha:0.8),
+                      color: p.card,
                       borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: p.hairline, width: 1),
                     ),
                     child: Icon(
                       Ionicons.create_outline,
                       size: 14,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      color: p.neutralGlyph,
                     ),
                   ),
                 ),
@@ -483,7 +671,7 @@ class HomePage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor,
+                      color: _HomeT.accentStart,
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(
@@ -499,7 +687,7 @@ class HomePage extends StatelessWidget {
                 Icon(
                   Ionicons.menu_outline,
                   size: 20,
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                  color: p.neutralGlyph,
                 ),
               ],
             ],
@@ -537,34 +725,39 @@ class HomePage extends StatelessWidget {
     return Obx(() {
       final device = controller.deviceList[index];
       final isSelected = controller.selectedDeviceIndex.value == index;
-      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final p = _HomePalette.of(context);
 
       return GestureDetector(
         onTap: () => controller.selectDevice(index),
         onLongPress: () =>
             _showNoteEditDialog(context, controller, device),
         child: Container(
+          key: deviceTileKey(device.id),
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardColor,
-            borderRadius: BorderRadius.circular(12),
+            color: p.tileFill(isSelected: isSelected),
+            borderRadius: BorderRadius.circular(_HomeT.radiusTile),
             border: Border.all(
-              color: isSelected
-                  ? AppTheme.primaryColor
-                  : (isDark
-                      ? Colors.grey.shade800
-                      : Colors.grey.withValues(alpha:0.2)),
-              width: isSelected ? 2 : 0.5,
+              // 选中描边是非文字指示元素，底线 3.0：primary 蓝压在本体色上只有 2.66。
+              color: isSelected ? p.brandInk : p.hairline,
+              width: isSelected ? 1.6 : 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: isSelected
+                    ? _HomeT.accentStart.withValues(alpha: 0.22)
+                    : p.ink.withValues(alpha: 0.06),
+                blurRadius: isSelected ? 14 : 8,
+                offset: const Offset(0, 3),
+              ),
+            ],
           ),
           child: Row(
             children: [
               Icon(
                 Ionicons.hardware_chip_outline,
                 size: 18,
-                color: isSelected
-                    ? AppTheme.primaryColor
-                    : (isDark ? Colors.grey[400] : Colors.grey),
+                color: isSelected ? p.brandInk : p.neutralGlyph,
               ),
               const SizedBox(width: 8),
               Expanded(
@@ -575,7 +768,8 @@ class HomePage extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 13,
                     fontWeight:
-                        isSelected ? FontWeight.bold : FontWeight.w600,
+                        isSelected ? FontWeight.w700 : FontWeight.w600,
+                    color: p.ink,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
@@ -585,7 +779,7 @@ class HomePage extends StatelessWidget {
                 const Icon(
                   Ionicons.checkmark_circle,
                   size: 16,
-                  color: AppTheme.primaryColor,
+                  color: _HomeT.accentStart,
                 ),
             ],
           ),
@@ -599,7 +793,7 @@ class HomePage extends StatelessWidget {
     BuildContext context,
     HomeController controller,
   ) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final p = _HomePalette.of(context);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -609,8 +803,9 @@ class HomePage extends StatelessWidget {
           child: Text(
             '拖动调整顺序',
             style: TextStyle(
-              fontSize: 12,
-              color: isDark ? Colors.grey[400] : Colors.grey[600],
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+              color: p.inkSecondary,
             ),
           ),
         ),
@@ -651,16 +846,39 @@ class HomePage extends StatelessWidget {
     device,
   ) {
     final textController = TextEditingController(text: device.note ?? '');
+    final p = _HomePalette.of(context);
+    // 主题的输入框底是纯白 / #1F1F1F，压在对话框上分不出边界；这里用本体色，
+    // 比对话框面低一档（1.174），副文字压在上面仍有 5.48。
+    final fieldBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(_HomeT.radiusChip),
+      borderSide: BorderSide(color: p.hairline),
+    );
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('编辑备注 - ${device.formattedName}'),
+        // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
+        // 在新的本体色旁边会露出第三层灰。
+        backgroundColor: p.card,
+        title: Text(
+          '编辑备注 - ${device.formattedName}',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: p.ink),
+        ),
         content: TextField(
           controller: textController,
-          decoration: const InputDecoration(
+          style: TextStyle(color: p.ink),
+          decoration: InputDecoration(
             hintText: '为设备添加备注',
-            prefixIcon: Icon(Ionicons.create_outline),
+            hintStyle: TextStyle(color: p.inkSecondary),
+            prefixIcon: Icon(Ionicons.create_outline, color: p.neutralGlyph),
+            filled: true,
+            fillColor: p.page,
+            counterStyle: TextStyle(color: p.inkSecondary),
+            enabledBorder: fieldBorder,
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(_HomeT.radiusChip),
+              borderSide: BorderSide(color: p.brandInk, width: 1.6),
+            ),
           ),
           maxLength: 20,
           autofocus: true,
@@ -671,6 +889,8 @@ class HomePage extends StatelessWidget {
             child: const Text('取消'),
           ),
           FilledButton(
+            // 主题的 primary 底配白字只有 3.13:1，实色按钮统一走深一档的品牌蓝。
+            style: FilledButton.styleFrom(backgroundColor: _HomeT.accentStart),
             onPressed: () {
               controller.saveDeviceNote(device.id, textController.text);
               Navigator.pop(context);
@@ -689,41 +909,95 @@ class HomePage extends StatelessWidget {
   }
 
   /// 操作按钮
+  ///
+  /// 渐变由外层 DecoratedBox 绘制，按钮本身留透明底：
+  /// 这样 FilledButton 的 onPressed==null 禁用语义、ripple、focus
+  /// 和标签布局全部保留（见 design.md D6）。
   Widget _buildActionButton(BuildContext context, HomeController controller) {
     return Obx(() {
       final isDrinking = controller.isDrinking.value;
       final hasDevice = controller.currentDevice != null;
-      
-      return SizedBox(
-        width: double.infinity,
-        height: 64,
-        child: FilledButton(
-          onPressed: hasDevice
-              ? (isDrinking ? controller.stopDrinking : controller.startDrinking)
-              : null,
-          style: FilledButton.styleFrom(
-            backgroundColor: isDrinking ? Colors.orange : AppTheme.primaryColor,
-            disabledBackgroundColor: Colors.grey[300],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(
-                isDrinking ? Ionicons.stop_circle : Ionicons.play_circle,
-                size: 28,
-              ),
-              const SizedBox(width: 12),
-              Text(
-                isDrinking ? '结算' : '开始接水',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+      final p = _HomePalette.of(context);
+      final compact = _HomePalette.isCompact(context);
+      final radius = BorderRadius.circular(compact ? 22 : 26);
+
+      final decoration = !hasDevice
+          ? BoxDecoration(
+              color: p.disabled,
+              borderRadius: radius,
+            )
+          : isDrinking
+          ? BoxDecoration(
+              color: _HomeT.settle,
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: _HomeT.settle.withValues(alpha: 0.30),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
-              ),
-            ],
+              ],
+            )
+          : BoxDecoration(
+              gradient: p.accentFill,
+              borderRadius: radius,
+              boxShadow: [
+                BoxShadow(
+                  color: _HomeT.accentEnd.withValues(alpha: 0.32),
+                  blurRadius: 22,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            );
+
+      final labelColor = hasDevice ? Colors.white : p.disabledInk;
+
+      return DecoratedBox(
+        key: primaryActionKey,
+        decoration: decoration,
+        child: SizedBox(
+          width: double.infinity,
+          height: compact ? 56 : 64,
+          child: FilledButton(
+            onPressed: hasDevice
+                ? (isDrinking ? controller.stopDrinking : controller.startDrinking)
+                : null,
+            // 圆角必须与外层一致，否则 ripple 会按主题默认的 16 被裁掉一角。
+            style: FilledButton.styleFrom(
+                  backgroundColor: Colors.transparent,
+                  // 不给 disabledBackgroundColor 的话，M3 默认会给禁用态铺一层
+                  // onSurface@0.12，正好盖掉外层的中性底与标签配色。
+                  disabledBackgroundColor: Colors.transparent,
+                  shadowColor: Colors.transparent,
+                  elevation: 0,
+                  padding: EdgeInsets.zero,
+                  shape: RoundedRectangleBorder(borderRadius: radius),
+                ).copyWith(
+                  // 强调面上按压波纹要用白色，主题默认的 onSurface 叠色在深色
+                  // 底上几乎是黑的。
+                  overlayColor: WidgetStatePropertyAll(
+                    Colors.white.withValues(alpha: 0.24),
+                  ),
+                ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  isDrinking ? Ionicons.stop_circle : Ionicons.play_circle,
+                  size: 26,
+                  color: labelColor,
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  isDrinking ? '结算' : '开始接水',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: labelColor,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       );
@@ -732,16 +1006,25 @@ class HomePage extends StatelessWidget {
 
   /// 底部功能按钮
   Widget _buildBottomActions(BuildContext context, HomeController controller) {
+    final p = _HomePalette.of(context);
+    final style = TextButton.styleFrom(
+      // 次级入口是文字，压在本体色上必须过 4.5；默认 primary 蓝只有 2.66。
+      foregroundColor: p.brandInk,
+      textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+    );
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         TextButton.icon(
+          style: style,
           onPressed: () => _showDeviceManageSheet(context, controller),
           icon: const Icon(Ionicons.grid_outline, size: 18),
           label: const Text('管理设备'),
         ),
         const SizedBox(width: 20),
         TextButton.icon(
+          style: style,
           onPressed: controller.scanAndAddDevice,
           icon: const Icon(Ionicons.scan_outline, size: 18),
           label: const Text('扫码添加'),
@@ -752,16 +1035,18 @@ class HomePage extends StatelessWidget {
 
   /// 显示设备管理弹窗
   void _showDeviceManageSheet(BuildContext context, HomeController controller) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final p = _HomePalette.of(context);
 
     showCupertinoModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        key: deviceManageSheetKey,
+        // 抽屉面 = 卡片面：沿用全局 scaffold 底会和新的本体色只差 1.06。
+        color: p.card,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
         child: SafeArea(
           child: Column(
@@ -772,16 +1057,17 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[700] : Colors.grey[300],
+                  color: p.hairline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '设备管理',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: p.ink,
                 ),
               ),
               const SizedBox(height: 16),
@@ -794,10 +1080,13 @@ class HomePage extends StatelessWidget {
                         Icon(
                           Ionicons.hardware_chip_outline,
                           size: 48,
-                          color: isDark ? Colors.grey[600] : Colors.grey[400],
+                          color: p.neutralGlyph,
                         ),
                         const SizedBox(height: 16),
-                        const Text('暂无设备'),
+                        Text(
+                          '暂无设备',
+                          style: TextStyle(fontSize: 15, color: p.ink),
+                        ),
                       ],
                     ),
                   );
@@ -817,24 +1106,32 @@ class HomePage extends StatelessWidget {
                         leading: Container(
                           padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[800] : Colors.grey[100],
-                            borderRadius: BorderRadius.circular(12),
+                            color: p.tint,
+                            borderRadius: BorderRadius.circular(_HomeT.radiusChip),
                           ),
                           child: Icon(
                             Ionicons.hardware_chip_outline,
-                            color: isDark ? Colors.grey[400] : Colors.grey,
+                            color: p.neutralGlyph,
                           ),
                         ),
-                        title: Text(device.formattedName),
+                        title: Text(
+                          device.formattedName,
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: p.ink,
+                          ),
+                        ),
                         subtitle: Text(
                           device.note?.isNotEmpty == true
                               ? '${device.note} · ID: ${device.id}'
                               : 'ID: ${device.id}',
+                          style: TextStyle(fontSize: 13, color: p.inkSecondary),
                         ),
                         trailing: IconButton(
-                          icon: const Icon(
+                          icon: Icon(
                             Ionicons.trash_outline,
-                            color: Colors.red,
+                            color: p.destructive,
                           ),
                           onPressed: () {
                             _showDeleteConfirm(context, controller, device);
@@ -855,6 +1152,8 @@ class HomePage extends StatelessWidget {
                   icon: const Icon(Ionicons.add),
                   label: const Text('添加新设备'),
                   style: FilledButton.styleFrom(
+                    // 主题的 primary 底配白字只有 3.13:1，实色按钮统一深一档。
+                    backgroundColor: _HomeT.accentStart,
                     minimumSize: const Size(double.infinity, 50),
                   ),
                 ),
@@ -871,6 +1170,9 @@ class HomePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
+        // 在新的本体色旁边会露出第三层灰。
+        backgroundColor: _HomePalette.of(context).card,
         title: const Text('确认删除'),
         content: Text('确定要删除设备 "${device.formattedName}" 吗？'),
         actions: [
@@ -883,7 +1185,9 @@ class HomePage extends StatelessWidget {
               Navigator.pop(context);
               controller.removeDevice(device);
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: _HomePalette.of(context).destructive,
+            ),
             child: const Text('删除'),
           ),
         ],
@@ -893,14 +1197,17 @@ class HomePage extends StatelessWidget {
 
   /// 显示设置弹窗
   void _showSettingsSheet(BuildContext context, HomeController controller) {
+    final p = _HomePalette.of(context);
+
     showCupertinoModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Material(
-        color: Theme.of(context).scaffoldBackgroundColor,
+        key: settingsSheetKey,
+        color: p.card,
         borderRadius: const BorderRadius.only(
-          topLeft: Radius.circular(20),
-          topRight: Radius.circular(20),
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
         ),
         child: SafeArea(
           child: Column(
@@ -911,30 +1218,40 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: Colors.grey[300],
+                  color: p.hairline,
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
               const SizedBox(height: 20),
-              const Text(
+              Text(
                 '设置',
                 style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: p.ink,
                 ),
               ),
               const SizedBox(height: 16),
               ListTile(
-                leading: const Icon(Ionicons.information_circle_outline),
-                title: const Text('关于'),
+                leading: Icon(
+                  Ionicons.information_circle_outline,
+                  color: p.brandInk,
+                ),
+                title: Text(
+                  '关于',
+                  style: TextStyle(fontSize: 15, color: p.ink),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _showAboutDialog(context);
                 },
               ),
               ListTile(
-                leading: const Icon(Ionicons.log_out_outline, color: Colors.red),
-                title: const Text('退出登录', style: TextStyle(color: Colors.red)),
+                leading: Icon(Ionicons.log_out_outline, color: p.destructive),
+                title: Text(
+                  '退出登录',
+                  style: TextStyle(color: p.destructive),
+                ),
                 onTap: () {
                   Navigator.pop(context);
                   _showLogoutConfirm(context, controller);
@@ -950,20 +1267,26 @@ class HomePage extends StatelessWidget {
 
   /// 关于对话框
   void _showAboutDialog(BuildContext context) {
+    final p = _HomePalette.of(context);
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
+        // 在新的本体色旁边会露出第三层灰。
+        backgroundColor: p.card,
         title: Row(
           children: [
             Container(
+              key: aboutAppIconKey,
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppTheme.primaryColor.withValues(alpha:0.1),
-                borderRadius: BorderRadius.circular(10),
+                color: p.tint,
+                borderRadius: BorderRadius.circular(_HomeT.radiusChip),
               ),
-              child: const Icon(
+              child: Icon(
                 Icons.water_drop_rounded,
-                color: AppTheme.primaryColor,
+                color: p.brandInk,
               ),
             ),
             const SizedBox(width: 12),
@@ -981,8 +1304,8 @@ class HomePage extends StatelessWidget {
             Text(
               '官方广告太多，所以做了这个简洁版',
               style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey[600],
+                fontSize: 13,
+                color: p.inkSecondary,
               ),
             ),
             const SizedBox(height: 16),
@@ -990,12 +1313,12 @@ class HomePage extends StatelessWidget {
               onTap: () => _launchUrl('https://github.com/tunecc/drink_798'),
               child: Row(
                 children: [
-                  Icon(Ionicons.logo_github, size: 18, color: Colors.grey[700]),
+                  Icon(Ionicons.logo_github, size: 18, color: p.brandInk),
                   const SizedBox(width: 8),
-                  const Text(
+                  Text(
                     'GitHub 开源地址',
                     style: TextStyle(
-                      color: AppTheme.primaryColor,
+                      color: p.brandInk,
                       decoration: TextDecoration.underline,
                     ),
                   ),
@@ -1027,6 +1350,9 @@ class HomePage extends StatelessWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
+        // 对话框底色取自页面 token：主题的 surface 是全局 #F5F9FF，
+        // 在新的本体色旁边会露出第三层灰。
+        backgroundColor: _HomePalette.of(context).card,
         title: const Text('确认退出'),
         content: const Text('确定要退出登录吗？'),
         actions: [
@@ -1039,7 +1365,9 @@ class HomePage extends StatelessWidget {
               Navigator.pop(context);
               controller.logout();
             },
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            style: TextButton.styleFrom(
+              foregroundColor: _HomePalette.of(context).destructive,
+            ),
             child: const Text('退出'),
           ),
         ],
@@ -1121,14 +1449,16 @@ class _BubbleAnimationState extends State<_BubbleAnimation>
                   height: bubble.size,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
+                    // 气泡压在新的深水渐变上，用白色系才读得出"水里冒泡"；
+                    // 旧的 primary 蓝半透明在新底色上几乎看不见。
                     gradient: RadialGradient(
                       colors: [
-                        Colors.white.withValues(alpha:0.3),
-                        AppTheme.primaryColor.withValues(alpha:0.2),
+                        Colors.white.withValues(alpha: 0.34),
+                        Colors.white.withValues(alpha: 0.14),
                       ],
                     ),
                     border: Border.all(
-                      color: AppTheme.primaryColor.withValues(alpha:0.3),
+                      color: Colors.white.withValues(alpha: 0.42),
                       width: 1,
                     ),
                   ),

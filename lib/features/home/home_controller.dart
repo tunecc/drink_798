@@ -52,7 +52,11 @@ DrinkFailurePrompt drinkFailurePrompt(
 
 /// 主页控制器
 class HomeController extends GetxController {
-  final DrinkApiService _apiService = DrinkApiService();
+  /// [apiService] 仅供测试注入替身；生产代码保持省略，沿用同一份单例。
+  HomeController({DrinkApiService? apiService})
+    : _apiService = apiService ?? DrinkApiService();
+
+  final DrinkApiService _apiService;
   SharedPreferences? _prefs;
 
   // 设备列表
@@ -70,6 +74,14 @@ class HomeController extends GetxController {
   // 状态
   final RxBool isLoading = false.obs;
   final RxBool isDrinking = false.obs;
+
+  /// 设备列表请求是否在途。普通字段而不是 Rx：它不驱动界面，
+  /// 只用来挡住连点刷新造成的并发请求（后到的结果会覆盖前一条列表）。
+  bool _loadInFlight = false;
+
+  /// 在途期间又有人要求重载。不能直接丢掉：扫码添加后就是靠这一次重载
+  /// 把新设备列出来。当前请求返回后补跑一次。
+  bool _reloadQueued = false;
 
   // 定时器
   Timer? _statusTimer;
@@ -98,6 +110,11 @@ class HomeController extends GetxController {
 
   /// 加载设备列表
   Future<void> loadDevices() async {
+    if (_loadInFlight) {
+      _reloadQueued = true;
+      return;
+    }
+    _loadInFlight = true;
     isLoading.value = true;
     try {
       final devices = await _apiService.getDeviceList();
@@ -133,7 +150,13 @@ class HomeController extends GetxController {
     } catch (e) {
       _err('加载设备失败');
     } finally {
+      _loadInFlight = false;
       isLoading.value = false;
+    }
+    // 登录过期那条分支已经在 try 里 return 了，不会走到这里补跑。
+    if (_reloadQueued) {
+      _reloadQueued = false;
+      return loadDevices();
     }
   }
 
