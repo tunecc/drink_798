@@ -2,6 +2,8 @@
 comet_change: refactor-home-page-ui
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-10-14-refactor-home-page-ui
+status: final
 ---
 
 # Design

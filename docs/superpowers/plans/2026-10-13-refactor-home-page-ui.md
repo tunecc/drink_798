@@ -2,6 +2,7 @@
 change: refactor-home-page-ui
 design-doc: docs/openspec/changes/refactor-home-page-ui/design.md
 base-ref: 88167acde28002cb9bd768d551f2397884638b32
+archived-with: 2026-10-14-refactor-home-page-ui
 ---
 
 # Implementation Plan — refactor-home-page-ui
