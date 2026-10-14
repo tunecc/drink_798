@@ -8,7 +8,7 @@ canonical_spec: openspec
 
 ## Context
 
-`lib/features/home/home_page.dart` is 1156 lines holding the page, both bottom sheets, four dialogs and the bubble animation. Four facts shape the approach:
+`lib/features/home/home_page.dart` is 1155 lines holding the page, both bottom sheets, four dialogs and the bubble animation. Four facts shape the approach:
 
 - The idle background is a bug-shaped gradient: `colors` is `[scaffoldBackgroundColor, scaffoldBackgroundColor]` when `isDrinking` is false, so the `AnimatedContainer` paints one flat `#F5F9FF`, and white `cardColor` on it is a surface ratio of **1.057** — measurable, but far below anything a user reads as layering.
 - The accent colors already in use fail WCAG against their own text: white on the `#00D4FF → #0099CC` water gradient is **1.77–3.27:1** (worst at the light end), and white on `Colors.orange` (the 结算 state) is **2.16:1**. The page is not just flat, it is low-legibility exactly where it is loudest.
@@ -56,17 +56,20 @@ Every value below is a `static const` on a private `_HomeTokens` holder inside `
 
 | Role | Light | Dark | Adjacency proof |
 | --- | --- | --- | --- |
-| Page base | `#E4EEF8` | `#0F1417` | vs card **1.174** / **1.154** |
-| Band top (primary α .16 over base) | `#C5E0F7` | primary α .14 over base | vs page **1.163** |
-| Resting card / sheet | `#FFFFFF` | `#1A222B` | grabber + heavier shadow + barrier |
-| Selected card | `#FFFFFF` + `#2196F3` 1.6px border + `#DCEBF9` icon chip + solid check chip | `#22303E` + `#3A9BDC` border | card→page still **1.174**; dark card→selected **1.193** |
+| Page base | `#E4EEF8` | `#0A0F14` | vs card **1.174** light / **1.303** dark |
+| Band top | `#C5E0F7` | `#0D1A28` | one step of the background gradient, not a surface pair: **1.163** above the page base in light, **1.095** in dark. What the requirement governs is the card on the band — **1.365** light / **1.189** dark |
+| Resting card / sheet | `#FFFFFF` | `#1E2934` | grabber tint one step above its own face (**1.214** light / **1.390** dark), plus shadow and barrier |
+| Selected card | `#FFFFFF` + 1.6px border in the brand ink `#0F5C99` + `#DCEBF9` icon chip + solid check chip | `#283645` + 1.6px border in `#64B5F6` | light deliberately keeps the card fill (still **1.174** against the page) and expresses selection through border, marker and elevation; dark steps the fill **1.198** above the resting card. A selection border is a non-text indicator, so it holds the 3.0 floor on its own: **5.94** in light against the page base, **5.57** in dark against the selected fill |
 | Accent (in-progress card, enabled primary action) | `#0277BD → #00619E` | same | white label **4.80** at the lightest stop |
-| Settle action | `#B45309` | same | white label **5.02** |
-| Disabled action | `#C6D3DE` + `#5A6B7B` label | `#232B33` + `#7C8894` label | inactive; exempt under WCAG 1.4.3 |
+| Settle action | `#B45309` — the same constant as `HomePromptColors.warning` | same | white label **5.02** |
+| Destructive label | `#C62828` — the same constant as `HomePromptColors.error` | `#FF8A80` | **5.62** on the white card, **6.47** on the dark card |
+| Disabled action | `#C6D3DE` + `#4A5765` label | `#232B33` + `#9AA7B4` label | inactive; exempt under WCAG 1.4.3, and the label still clears **4.85** light / **5.84** dark against its own fill |
+
+These are the tokens that ship at HEAD. Round 6 corrected the D4 text table in place but left this one on the round-1 stack, and the whole-change review caught it: the dark page / card / selected values here were the pre-retune `#0F1417` / `#1A222B` / `#22303E`, the light selection border was recorded as the theme's `#2196F3` — which the code's own comment rejects at 2.66 against the page base — and the disabled inks were `#5A6B7B` / `#7C8894` instead of the shipped `#4A5765` / `#9AA7B4`. The two adjacency figures that only ever reproduced on that superseded stack (**1.154**, **1.193**) are gone from the table rather than annotated.
 
 Two corrections this table forced on the Open-stage draft:
 
-1. **Selected tiles do not change fill in light mode.** A tinted selection (`#F5FAFF`) measures only **1.118** against the new page base, i.e. selecting a device would visually glue the tile back into the background — the opposite of the intent. Selection is carried by border + icon-chip tint + solid check chip + elevation; dark mode keeps the fill tint because there it *strengthens* the step (1.193). The spec's selected-state scenario was patched to "at least two of fill, border, elevation, marker" (Spec Patch P2) to match the math.
+1. **Selected tiles do not change fill in light mode.** A tinted selection (`#F5FAFF`) measures only **1.118** against the new page base, i.e. selecting a device would visually glue the tile back into the background — the opposite of the intent. Selection is carried by border + icon-chip tint + solid check chip + elevation; dark mode keeps the fill tint because there it *strengthens* the step (1.198 above the resting card). The spec's selected-state scenario was patched to "at least two of fill, border, elevation, marker" (Spec Patch P2) to match the math.
 2. **The page base must not be lighter.** `#F5F9FF` yields 1.057 against white cards; no amount of shadow tuning makes that read as layering. `#E4EEF8` is the minimum change that clears 1.15.
 
 ### D4 — Text tokens, and why not `onSurfaceVariant`
@@ -107,7 +110,7 @@ Six named levels: screen title 20/w700, status headline 22/w700, status caption 
 
 ### D9 — Sheets and dialogs read the same tokens
 
-Both bottom sheets keep `showCupertinoModalBottomSheet` (already gives the drag-to-dismiss feel) and change paint only: the two `Material(color: Theme.of(context).scaffoldBackgroundColor)` sites become the sheet role (`#FFFFFF` / `#1A222B`), plus grabber, title and row tokens. `AlertDialog` resolves its background from `colorScheme.surface`, which is `#F5F9FF` today and would now read as a third gray, so each dialog passes `backgroundColor` = sheet role locally.
+Both bottom sheets keep `showCupertinoModalBottomSheet` (already gives the drag-to-dismiss feel) and change paint only: the two `Material(color: Theme.of(context).scaffoldBackgroundColor)` sites become the sheet role (`#FFFFFF` / `#1E2934`, the dark value set by the round-2 re-tune and recorded in "Verify round 2"), plus grabber, title and row tokens. `AlertDialog` resolves its background from `colorScheme.surface`, which is `#F5F9FF` today and would now read as a third gray, so each dialog passes `backgroundColor` = sheet role locally.
 
 *Alternatives considered:* migrating to `showModalBottomSheet` — rejected as churn with no visual gain; changing `colorScheme.surface` globally — rejected, it would repaint the login page.
 
@@ -136,7 +139,7 @@ Relationship assertions, not literal hex: a `contrast(a, b)` / `surfaceRatio(a, 
 - [Numeric token assertions can harden into hex-locking and break on the next palette tweak] → assert ratios and forbidden legacy values only; token literals appear in one `_HomeTokens` block.
 - [Changing the accent water gradient from `#00D4FF/#0099CC` to `#0277BD/#00619E` is a visible brand shift, darker and less "cyan"] → it is the only way to keep white labels at 4.5:1; the brighter cyan survives as the in-progress icon and bubble tint where it carries no text.
 - [Touching `HomeController`'s constructor touches a file with passing tests] → the parameter is optional and defaults exactly as today; `drink_failure_prompt_test.dart` only exercises the top-level function; the whole suite must stay green.
-- [1156 lines of churn can silently drop an interaction] → the "existing interactions remain reachable" requirement is checked item by item in tasks, and the empty-list, reorder and in-progress branches each get their own case.
+- [1155 lines of churn can silently drop an interaction] → the "existing interactions remain reachable" requirement is checked item by item in tasks, and the empty-list, reorder and in-progress branches each get their own case.
 - [A transparent `FilledButton` over a gradient can lose its pressed overlay] → explicit overlay color plus matched radius; if the overlay still does not read on a given palette, fall back to a solid two-token brand fill on the wrapper rather than replacing the button widget.
 - [Both brightness modes double the assertion surface] → one parameterized pump, run twice per scenario group.
 
@@ -147,7 +150,7 @@ No data or API migration: `device_list_layout`, `device_order`, `device_note_<id
 ## Spec Patches applied
 
 - **P1** — "measurable fill step" quantified: adjacent surface roles differ by ≥1.15:1 and are additionally separated by border or shadow.
-- **P2** — selected tile scenario relaxed to "at least two of fill, border, elevation and marker", with the measured reason kept in the scenario (a tinted light-mode selection would drop below the P1 floor against the page base).
+- **P2** — selected tile scenario relaxed to "at least two of fill, border, elevation and marker"; the scenario states the rule only, and the measured reason (a tinted light-mode selection would drop below the P1 floor against the page base) lives in D3 below rather than in the spec.
 - **P3** — text over an accent fill or gradient must reach 4.5:1 at the *lightest* point of that gradient, and de-emphasis must come from size or weight rather than from alpha below the floor.
 - **P4** — new requirement: the page renders without overflow and with all controls reachable at 320×568 with a 1.3 text scale.
 - **P5** — round 3: *Secondary text is not brighter than primary text* stopped naming a global theme token and started naming the property (one de-emphasized role per surface, clearing the 4.5 floor). Recorded in "Spec patch (round 3)".
@@ -213,7 +216,7 @@ What was actually wrong and how it changed:
 | Dialog action labels | no `foregroundColor`, so the theme's `primary #2196F3` painted them | page brand ink on all four (`取消` x3, `确定`) | **3.12:1** on the white dialog face, under Requirement 3's 4.5 body floor. This was the one place the redesign left a theme default in a home-owned dialog; brand ink gives 6.97 light / 6.67 dark. |
 | D3 `hairlineLight` | `0x2E9FB4C9` | `0x4D7E96AE` | Composited against the surfaces it separates: **1.133** on the white card, **1.099** on the page base, **1.079** on the brand band — all below 1.15, so the "second channel" of every light card was really just a 7%-alpha shadow. The new value measures **1.344 / 1.297 / 1.242** in the same order. |
 | Note field | one channel (fill 1.174 against the dialog face, border **1.099** against its own fill) | same fill, border lifted with the hairline to 1.297 | Requirement 2 applies to the field too; it was the same drawn-but-invisible defect class round 2 fixed on cards and the grabber. |
-| `channelsOf` | fill from the lightest gradient stop; elevation = any shadow with α > 0 | fill from the stop **closest** to the backdrop; elevation needs α ≥ 0.12 *and* blur *and* offset *and* a ≥1.05 mark on the surface behind | Two unfalsifiable paths: taking the lightest stop judged a gradient surface at its best case, and a 6%-alpha shadow certified itself as an elevation channel. Both were load-bearing for the light cards, which is why the stricter harness went red before any token changed. Of the two numeric gates the **α ≥ 0.12** one is the operative bound: a black shadow at α 0.07 already leaves a 1.062 mark, so the 1.05 floor only screens out fully diffuse or zero-offset shadows. |
+| `channelsOf` | fill from the lightest gradient stop; elevation = any shadow with α > 0 | fill from the stop **closest** to the backdrop; elevation needs α ≥ 0.12 *and* blur *and* offset *and* a ≥1.05 mark on the surface behind | Two unfalsifiable paths: taking the lightest stop judged a gradient surface at its best case, and a 6%-alpha shadow certified itself as an elevation channel. Both were load-bearing for the light cards, which is why the stricter harness went red before any token changed. Of the two numeric gates the **α ≥ 0.12** one is the operative bound: a black shadow at α 0.07 already leaves a 1.171 mark against white, so the 1.05 floor only screens out fully diffuse or zero-offset shadows. |
 | `surfaceBehind` | nearest `MaterialType.card` ancestor, matched by a Finder | innermost opaque Material, walked with `visitAncestorElements` | Filtering by type made a solid button's label measure against the white dialog behind it (1.000) instead of against the surface it is painted on, so the predicate is now opacity. The walk replaces the Finder: `_AncestorWidgetFinder` yields innermost-first, so a "keep the last match" loop silently returned the **outermost** opaque Material — the opposite of what the first version of this fix claimed. A M3 `FilledButton` carries its fill on the `ButtonStyle`, not on any ancestor Material, so solid button labels are verified by `_expectSolidActionLegible`, which reads `style.backgroundColor.resolve`; that path is exercised by the note dialog's 保存. |
 | Headline dominance assertion | compared the two labels' contrast ratios | compares font size and weight | Both lines clear 4.5, so a ratio comparison passed for a reason unrelated to dominance; dominance lives in size and weight only. |
 | Small-screen reachability | `findsOneWidget` | rect centre inside the 320×568 viewport, plus a real tap on the layout toggle | "In the tree" is not "reachable"; a widget positioned off-screen satisfies `findsOneWidget`. |
@@ -257,7 +260,7 @@ The closing integration check returned "ready to archive" but listed one genuine
 
 Named here rather than left implicit, because each one is a place where "the tests are green" means less than it looks.
 
-1. **Requirement 2's two-channel rule is enforced on the four named surface roles** (page, resting card, selected card, elevated sheet). The leading icon chip and the in-progress status chip are single-channel by fill (1.214 light / 1.390 dark against their row, 1.398 for the in-progress chip) — they are decorative insets inside a surface that already separates, not one of the four roles, so they are compliant. If a future change promotes them to surface roles they need a second channel.
+1. **Requirement 2's two-channel rule is enforced on the four named surface roles** (page, resting card, selected card, elevated sheet). The leading icon chip and the in-progress status chip are single-channel by fill — 1.214 light / 1.390 dark against the resting card, and 1.348 against the lightest stop of the in-progress gradient (1.457 at the darkest). Those three pairs are computed from the tokens, not asserted: the suite gates the *glyph on the chip* against its composited face, never the chip against what it sits in. Both chips are decorative insets inside a surface that already separates, not one of the four roles, so they are compliant. If a future change promotes them to surface roles they need a second channel and a test.
 2. **Requirement 3 is verified on enumerated pairs**, not by sweeping every `Text` in the tree. A sweep would have to exempt any text drawn on the accent gradient and every prompt face, and a blanket gate that silently skips cases is worse than an explicit list. Each new text pair therefore needs its assertion added; the enumeration is the contract. The prompt faces joined that enumeration in round 5 (below) rather than staying exempt.
 3. **"Keeps animating" is proven as presence and absence**, not as motion: the in-card `LinearProgressIndicator` is asserted present while a session runs and absent when idle, which catches removal but not a frozen value.
 
@@ -365,3 +368,48 @@ dark card, six of eleven sites covered by sharing a measured constant rather tha
 and Requirement 3 is still verified on enumerated pairs: the new single-role test enumerates the
 de-emphasized labels rather than sweeping every `Text`, because a sweep would have to exempt the
 accent-gradient labels and would fail for reasons unrelated to legibility.
+
+## Build round 7 (final integration review over `88167ac..590d08b`)
+
+The review found no behaviour, boundary or contrast defect — the page, the prompt faces and the
+eleven call sites all re-derived clean, and the untouched-boundary check on `lib/core/theme/`,
+`lib/features/login/` and `lib/features/scanner/` was still empty. What it did find was six records
+and assertion items, every one of them the same class round 6 was meant to retire: a number written
+down once and never re-measured after the palette moved.
+
+| Item | Was | Now | Kind |
+| --- | --- | --- | --- |
+| D3 surface-role table | the round-1 dark stack (`#0F1417` page / `#1A222B` card / `#22303E` selected), a `#2196F3` 1.6px light selected border, and adjacency figures 1.154 / 1.193 | the shipped tokens: dark page `#0A0F14`, card `#1E2934`, selected `#283645` with the `#64B5F6` border, light selected border `#0F5C99`; card→page 1.303 dark, card→selected 1.198, and the band-vs-page pair labelled as a gradient step (1.163 light / 1.095 dark) rather than a surface-role adjacency | correction. Round 6 applied exactly this rule to D4 and left D3 alone, which is the inconsistency the review named: the two tables described the same palette at two different depths of history. |
+| Sheet role named in D9 | `#1A222B`, the pre-retune dark card | `#1E2934`, with a pointer to the round-2 record | correction — same class as D3: a decision section kept naming a token the palette had already moved past |
+| Sheet separation from the old global background | "只差 1.06" in the sheet comment, the same number in a test reason string, and 1.06 in this plan | 1.111 (`#F5F9FF` against `#E4EEF8`) in all three | correction |
+| Reorder pill comment | "离本体色 4.4、离白条目 4.6" | the measured 3.51 against the band top, 4.09 against the page base, 4.80 against a white item | correction — the old pair was never computed; it was prose written to justify a decision the 4.5 floor already justified |
+| Shadow mark on a white card | "a black shadow at α 0.07 leaves a 1.062 mark" | 1.171, which is why the suite gates on α ≥ 0.12 rather than on the mark | correction |
+| Requirement 4's *Device selected* scenario | names the play icon; nothing asserted it | the enabled-action test now requires `Ionicons.play_circle`, and the settle test requires `stop_circle` with play absent | coverage guard, passed on first write |
+| `sizes.length >= 4` | a five-value set check that cannot fail, because the five sizes (22 / 20 / 17 / 15 / 13) are pinned item by item three lines above it | deleted; the item-by-item pins stay | assertion that proved nothing |
+| Context line "1156 lines" and the matching risk line | 1156 | 1155, the count at `88167ac` | correction |
+| P2 ledger entry | claimed the selected-tile scenario "keeps the measured reason" | the scenario carries the rule (at least two of fill, border, elevation, marker); the measured reason lives in D3 | wording fix — the scenario has no number in it |
+
+### Recorded rather than fixed
+
+Four points where changing the code costs more than the risk it removes, so they are stated with
+their failure mode instead of patched:
+
+- **The two decorative chips' fill steps are computed, not asserted.** The leading icon chip is 1.214
+  light / 1.390 dark against the resting card; the in-progress chip is 1.348 against the lightest stop
+  of the accent gradient and 1.457 at the darkest (round 7 replaced the 1.398 this record had carried,
+  which reproduces on neither stop). No test measures either pair: the suite gates the *glyph on the
+  chip*, so a palette tweak that merged a chip into its surface would stay green. Both chips are
+  decorative insets inside a surface that already separates, which is why they sit outside
+  Requirement 2's two-channel rule — the acceptance is that the rule covers the four named roles only.
+- **The about dialog's `版本:` anchor.** Two tests locate that dialog by its version line, and the
+  literal `版本: 1.0.4` in `home_page.dart` is a recorded out-of-scope defect (`pubspec.yaml` says
+  1.0.6+6). `expectElevatedSurface` and the dismissal check now match on `版本:` with
+  `textContaining`, so the assertions survive the day the version string is fixed and do not become a
+  false failure caused by a defect this change already declared out of bounds.
+- **`dialogMaterial.last`** in the about-dialog surface check takes the last `Material` inside the
+  `Dialog` subtree. If a future dialog nests a second opaque Material with its own distinct colour
+  (an ink-well, a button face), `.last` reads *that* face and the 1.15 gate can pass while the dialog
+  surface itself regresses; if the nested Material has no colour, the `?? base` fallback makes the
+  same check fail for a reason unrelated to the surface being measured. Accepted because today's four
+  dialogs each have exactly one Material with a non-null colour, and the failure mode is a loud false
+  alarm in the likelier branch.

@@ -246,8 +246,11 @@ double cornerRadius(Material m) {
 /// 圆角顶边、以及身后页面确实被压暗或盖住。按面上任一段文字定位，
 /// 对话框没有 key。
 void expectElevatedSurface(WidgetTester tester, String onSurface) {
+  // textContaining 而不是 text：这样"版本: 1.0.4"这一行了结版本号之后，
+  // 传 '版本:' 就能继续测，不至于让一条已记录的界外缺陷把断言弄假失效。
+  final label = find.textContaining(onSurface);
   Material? face;
-  tester.element(find.text(onSurface)).visitAncestorElements((e) {
+  tester.element(label).visitAncestorElements((e) {
     final w = e.widget;
     if (w is Material && (w.color?.a ?? 0) >= 0.99) {
       face = w;
@@ -258,7 +261,7 @@ void expectElevatedSurface(WidgetTester tester, String onSurface) {
   final m = face;
   if (m == null) throw StateError('no opaque surface behind "$onSurface"');
   expect(
-    contrast(m.color!, backgroundAt(tester, find.text(onSurface))),
+    contrast(m.color!, backgroundAt(tester, label)),
     greaterThanOrEqualTo(1.15),
     reason: '$onSurface 所在的面离它盖住的页面底色分不开',
   );
@@ -656,15 +659,8 @@ void main() {
       expect(await sizeOf(tester, '我的设备'), 17.0);
       expect(await sizeOf(tester, '1-101'), 15.0);
       expect(await sizeOf(tester, '选择设备开始接水'), 13.0);
-
-      final sizes = {
-        await sizeOf(tester, '准备就绪'),
-        await sizeOf(tester, '智能饮水'),
-        await sizeOf(tester, '我的设备'),
-        await sizeOf(tester, '1-101'),
-        await sizeOf(tester, '选择设备开始接水'),
-      };
-      expect(sizes.length, greaterThanOrEqualTo(4));
+      // 五个层级逐个钉死就是 D8 的字号常量，"层级互不相同"由这五个值本身保证，
+      // 不需要再套一句永远成立的集合大小检查。
       expect(
         tester.widget<Text>(find.text('准备就绪')).style!.fontWeight,
         FontWeight.w700,
@@ -840,6 +836,16 @@ void main() {
       final rect = tester.getRect(find.byKey(primaryActionKey));
       expect(rect.height, greaterThanOrEqualTo(64.0));
       expect(rect.width, greaterThanOrEqualTo(320.0), reason: '主操作必须占满一行');
+
+      // Requirement 4 的 *Device selected* 条款点名了播放图标，之前没人认它。
+      expect(
+        find.descendant(
+          of: find.byKey(primaryActionKey),
+          matching: find.byIcon(Ionicons.play_circle),
+        ),
+        findsOneWidget,
+        reason: '可用态主操作少了规格点名的播放图标',
+      );
     });
 
     testWidgets('unselected device leaves the action inactive and untappable', (
@@ -882,6 +888,24 @@ void main() {
         isNot(const Color(0xFFFF9800).toARGB32()),
       );
       expect(find.text('结算'), findsOneWidget);
+      // 同一个控件切到结算态要连图标一起切，规格那句"switches to the settle
+      // state"讲的就是这一整组表达。
+      expect(
+        find.descendant(
+          of: find.byKey(primaryActionKey),
+          matching: find.byIcon(Ionicons.stop_circle),
+        ),
+        findsOneWidget,
+        reason: '结算态没有换上自己的图标',
+      );
+      expect(
+        find.descendant(
+          of: find.byKey(primaryActionKey),
+          matching: find.byIcon(Ionicons.play_circle),
+        ),
+        findsNothing,
+        reason: '结算态仍挂着播放图标，切换没有真的发生',
+      );
     });
 
     testWidgets('tapping starts and settles through the injected service', (
@@ -929,7 +953,7 @@ void main() {
       expect(
         contrast(material.color!, base),
         greaterThanOrEqualTo(1.15),
-        reason: '抽屉沿用全局 #F5F9FF，和新的本体色只差 1.06，浮不起来',
+        reason: '抽屉沿用全局 #F5F9FF，离新本体色只有 1.111，浮不起来',
       );
       await closeOverlay(tester);
     });
@@ -1757,11 +1781,11 @@ void main() {
         await openSheet(tester, find.byTooltip('设置'));
         await tester.tap(find.text('关于'));
         await settle(tester);
-        expectElevatedSurface(tester, '版本: 1.0.4');
+        expectElevatedSurface(tester, '版本:');
         await tester.tap(find.text('确定'));
         await settle(tester);
         // 上一张还压着 AbsorbPointer 的话，下面那次开抽屉会被吞掉。
-        expect(find.text('版本: 1.0.4'), findsNothing);
+        expect(find.textContaining('版本:'), findsNothing);
 
         await openSheet(tester, find.byTooltip('设置'));
         await tester.tap(find.text('退出登录'));

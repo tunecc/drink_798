@@ -834,7 +834,7 @@ class HomePage extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 8),
           // 规格要求排序提示落在"和平常浏览不同的一块面"上。card 底 + hairline
           // 描边和静止条目长得一模一样，看着像浏览态本身；这里改成品牌色模式条，
-          // 离本体色 4.4、离白条目 4.6，白字压在最浅停靠点仍有 4.80。
+          // 离顶带 3.51、离本体色 4.09、离白条目 4.80，白字压在自己最浅停靠点也有 4.80。
           child: Container(
             key: reorderHintKey,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
@@ -1030,7 +1030,7 @@ class HomePage extends StatelessWidget {
       backgroundColor: Colors.transparent,
       builder: (context) => Material(
         key: deviceManageSheetKey,
-        // 抽屉面 = 卡片面：沿用全局 scaffold 底会和新的本体色只差 1.06。
+        // 抽屉面 = 卡片面：沿用全局 scaffold 底（#F5F9FF）离新本体色只有 1.111。
         color: p.card,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),

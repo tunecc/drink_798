@@ -120,7 +120,7 @@ Verify: no overflow exception; action, layout toggle and add entry reachable.
 
 <!-- comet-task-ref:ef23fb9f-79b7-4cf2-b9d5-0fc9e4af7248 -->
 ### 6.1 Device management sheet assertions
-Verify: RED on the missing sheet key and on the 1.06 sheet-vs-page separation.
+Verify: RED on the missing sheet key and on the 1.111 sheet-vs-page separation (the old global #F5F9FF against the new page base).
 
 <!-- comet-task-ref:8ca25930-8a90-47d0-925c-13b841c22c30 -->
 ### 6.2 Sheet tokens
@@ -323,6 +323,39 @@ in-flight coalescing is real and already disclosed in the Build amendments table
 not the code. Also: four dialogs, not five; the round-5 spec patch belongs in the Spec Patches
 ledger; and the figures the integration review could not reproduce get re-measured rather than
 restated.
+
+## Group 13 — Round 7, the whole-change review's fix-list
+
+The final integration review over `88167ac..590d08b` found no behaviour, boundary or contrast defect,
+but six records/assertion items. Every figure below was re-derived with the suite's own math before
+being written down.
+
+<!-- comet-task-ref:995883e6-8f0e-4e95-9a24-76fb8e2fb3bf -->
+### 13.1 Bring D3 back in line with what ships
+D3 still described the round-1 dark stack (`#0F1417` / `#1A222B`) and a `#2196F3` selected border the
+code comments themselves reject at 2.66, and its adjacency figures (1.154 / 1.193) only reproduce on
+that superseded stack. Rewrite the row to the shipped tokens and the shipped 1.303 / 1.198, the way
+round 6 already did for D4.
+
+<!-- comet-task-ref:53cbb97e-e1a6-4e68-9632-de45f0c891b1 -->
+### 13.2 Correct the remaining wrong figures where they live
+The sheet sits 1.111 above the old global background, not 1.06 — one correction in three places (the
+sheet comment, the test reason string, this plan). The reorder pill comment must carry the measured
+3.51 / 4.09 / 4.80 instead of the invented 4.4 / 4.6, and a black shadow at α 0.07 leaves a 1.171
+mark rather than 1.062, which is why the α ≥ 0.12 gate is the operative one.
+
+<!-- comet-task-ref:f75c9ca3-9a17-4027-8f6d-45a26948fca9 -->
+### 13.3 Close the two assertion gaps
+Requirement 4's *Device selected* scenario names the play icon and nothing asserts it; and
+`sizes.length >= 4` cannot fail, because the five font sizes are pinned item by item three lines
+above it. Add the icon assertion, delete the redundant one.
+
+<!-- comet-task-ref:39f70d2a-1178-47cd-8b44-896abb50b329 -->
+### 13.4 Record where a code change costs more than the risk it removes
+State, rather than fix: the in-progress chip's 1.348 fill step is computed from tokens and no test
+measures it; the P2 entry belongs in the ledger as the rule the scenario carries; the about dialog's
+`版本:` anchor is shared by two tests and its stale version string is a recorded out-of-scope defect;
+`dialogMaterial.last` would silently read the wrong face if a second dialog ever stacked.
 
 ## Riskiest coupling
 
