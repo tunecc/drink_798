@@ -357,6 +357,33 @@ measures it; the P2 entry belongs in the ledger as the rule the scenario carries
 `版本:` anchor is shared by two tests and its stale version string is a recorded out-of-scope defect;
 `dialogMaterial.last` would silently read the wrong face if a second dialog ever stacked.
 
+## Group 14 — Round 8, what the round-7 review still caught
+
+The independent whole-change review over `88167ac..3ddb1f0` returned FAIL with 0 CRITICAL / 2
+IMPORTANT / 6 MINOR and no behaviour, boundary or shipped-contrast defect. Every finding was
+recomputed before being accepted; all eight reproduced.
+
+<!-- comet-task-ref:ce7d195d-5048-4d43-a077-2631605523f6 -->
+### 14.1 Test the grid half of the item-state scenario
+Requirement 5's scenario says both layouts keep "tapping an item still selects it and long-pressing
+still opens the note editor". The sweep walks those two steps in single column only, so the two-column
+builders' handlers were never exercised — extend the grid test with a tap, the marker on the newly
+selected tile, and a long-press that opens its note editor.
+
+<!-- comet-task-ref:b8c8101b-08d5-4567-a31b-d54c660c706a -->
+### 14.2 Headings need their own enumeration entries, and one test's name is stale
+Requirement 3 sets a 3.0 floor for headings and the pair list measured none of the two headings the
+page renders; and the blocking-notice case still carries the round-5 name and comment describing a
+face (`GetX`'s translucent grey) that no site raises any more. Add both heading floors, rename the
+case, and assert the notice face by identity rather than only by opacity, chroma and label contrast.
+
+<!-- comet-task-ref:b263e5ad-31b9-4a3f-90d0-9a7a24774d42 -->
+### 14.3 Four records that still do not reproduce
+20 scenarios, not 16; D6's radius is the built 26 (22 compact) although the amendment table already
+claimed the correction; D8 claims a `textTheme`-copy mechanism the file does not contain; the
+superseded dark hairline composites to 1.115 under the harness's rounding, not 1.113; and 25.96° is a
+hue *distance* whose slack over the 20° floor is 5.96°, conflated in two places.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.

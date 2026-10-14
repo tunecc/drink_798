@@ -601,6 +601,20 @@ void main() {
           reason: label,
         );
       }
+
+      // 规格那句 "headings MUST reach at least 3:1" 点名的是标题档，之前只枚举了
+      // 正文与次级文字。页面上站得住的两个标题是状态卡标题和页面主标题，逐个补进
+      // 这份枚举 —— 我们的验收口径就是"枚举即契约"，漏一行等于没这条。
+      expect(
+        contrastOn(textColorIn(tester, statusCardKey, '准备就绪'), card),
+        greaterThanOrEqualTo(3.0),
+        reason: '状态卡标题达不到标题档的 3.0 下限',
+      );
+      expect(
+        contrastOnPageText(effectiveTextColor(tester, '智能饮水'), base, band),
+        greaterThanOrEqualTo(3.0),
+        reason: '页面主标题达不到标题档的 3.0 下限',
+      );
     });
 
     testWidgets('brand glyph on a tinted chip clears the 3.0 non-text floor', (
@@ -714,6 +728,32 @@ void main() {
         ),
         findsOneWidget,
       );
+
+      // 规格那句"两种布局都保持条目状态"里含交互：点条目仍选中、长按仍开备注框。
+      // 整轮回归只在单列里走过这两步，双列的处理器此前没人碰过。
+      await tester.tap(find.byKey(deviceTileKey('102')));
+      await tester.pump();
+      expect(Get.find<HomeController>().currentDevice!.id, '102');
+      expect(
+        find.descendant(
+          of: find.byKey(deviceTileKey('102')),
+          matching: find.byIcon(Ionicons.checkmark_circle),
+        ),
+        findsOneWidget,
+        reason: '双列里选中的条目没换上同一套选中表达',
+      );
+
+      await tester.longPress(find.byKey(deviceTileKey('102')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+      expect(
+        find.text('编辑备注 - 1-102'),
+        findsOneWidget,
+        reason: '双列里长按打不开备注编辑器',
+      );
+      await tester.tap(find.text('取消'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
     });
 
     testWidgets('reorder mode keeps handles and the selected device', (
@@ -1929,11 +1969,12 @@ void main() {
       }
     });
 
-    // 另有三处提示根本没写底色，落到 GetX 的默认底 Colors.grey.withOpacity(0.2)：
+    // 这三处提示在改造前根本没写底色，落到 GetX 的默认底 Colors.grey.withOpacity(0.2)：
     // 一层两成透明的灰 wash，标签颜色还不是我们自己定的（Get.snackbar 走
-    // colorText ?? iconColor ?? Colors.black）。规格那句是"页面 raised 的任何提示"，
-    // 所以这块默认面也得真量一次，不能靠"它本来就这样"过关。
-    testWidgets('prompts on the untouched default face stay legible too', (
+    // colorText ?? iconColor ?? Colors.black）。第 5 轮给它们各自钉上了 notice 面，
+    // 所以这里量的不再是那块默认灰，而是规格点名的"中性提示"本身：实底、4.5、
+    // 并且不带任何语义色相，不会被看成成功／警告／错误里的哪一种。
+    testWidgets('the plain blocking notice stays legible and carries no hue', (
       tester,
     ) async {
       for (final brightness in [Brightness.light, Brightness.dark]) {
@@ -1949,12 +1990,18 @@ void main() {
         expect(
           s.backgroundColor.a,
           1.0,
-          reason: '$brightness 下默认提示底不是实底，白字压在哪一档背景上说不准',
+          reason: '$brightness 下中性提示的底不是实底，白字压在哪一档背景上说不准',
+        );
+        // 同一类中性提示共用同一块面：三处 guard 不能各挑一个灰。
+        expect(
+          s.backgroundColor.toARGB32(),
+          HomePromptColors.notice.toARGB32(),
+          reason: '$brightness 下中性提示没走 notice 这一块面',
         );
         expect(
           contrast(snackLabel(tester, '正在接水中，请先结算'), s.backgroundColor),
           greaterThanOrEqualTo(4.5),
-          reason: '$brightness 下默认底上的提示标签读不出',
+          reason: '$brightness 下中性提示的标签读不出',
         );
         // 规格里那句"中性提示不带任何语义色相"：这块底必须是无彩度的，
         // 不能让人把「请先结算」看成成功／警告／错误里的哪一种。

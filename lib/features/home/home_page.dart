@@ -66,7 +66,7 @@ abstract final class _HomeT {
   // 深色图标底与选中底必须分开：两者都取同一块时，选中条目的图标底糊成一片。
   static const tintDark = Color(0xFF31404F);
   static const bandTopDark = Color(0xFF0D1A28);
-  // α.24 的旧描边压在新卡片上合成后只差 1.11，等于没画；提到 α.35 才有第二条通道。
+  // α.24 的旧描边压在新卡片上合成后只差 1.115，等于没画；提到 α.35 才有第二条通道。
   static const hairlineDark = Color(0x594C6076);
 
   // 强调面：白色标签在最浅停靠点仍有 4.80，旧 #00D4FF 只有 1.77。

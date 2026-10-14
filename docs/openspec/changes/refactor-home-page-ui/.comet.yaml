@@ -14,7 +14,7 @@ base_ref: 88167acde28002cb9bd768d551f2397884638b32
 design_doc: docs/openspec/changes/refactor-home-page-ui/design.md
 plan: docs/superpowers/plans/2026-10-13-refactor-home-page-ui.md
 verify_result: pending
-verify_failures: 6
+verify_failures: 7
 verification_report: docs/superpowers/reports/2026-10-13-refactor-home-page-ui-verify.md
 branch_status: pending
 created_at: 2026-10-13
@@ -28,4 +28,4 @@ handoff_hash: 156123607647805824ae74c1d4975141bfaf804f9a5f17d66cf63ff69a5ac0dd
 classic_profile: full
 classic_migration: 1
 run_id: 726d3b17-09bc-4c60-bef2-8f36dfb81914
-check_epoch: 15
+check_epoch: 17

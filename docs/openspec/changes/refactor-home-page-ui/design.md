@@ -94,7 +94,7 @@ De-emphasis below the floor is expressed through size and weight, never through 
 
 The control stays a `FilledButton` so `onPressed: null` continues to produce the correct disabled semantics, ripple, focus traversal and label/icon layout. Its gradient comes from a wrapping `DecoratedBox` while the button itself sets `backgroundColor: Colors.transparent`, `elevation: 0` and `shadowColor: Colors.transparent`; Flutter paints the `DecoratedBox` before its child, so the ink overlay lands on top of the gradient.
 
-The mandatory detail: the button's `shape` radius must equal the wrapper's (24), otherwise the ripple is clipped to `AppTheme`'s 16 and the pressed state visibly cuts the corner. Height 64. When disabled the wrapper paints the flat neutral fill and the label moves to the neutral label token.
+The mandatory detail: the button's `shape` radius must equal the wrapper's, otherwise the ripple is clipped to `AppTheme`'s 16 and the pressed state visibly cuts the corner. Both read one shared `BorderRadius` variable, 26 normally and 22 on the compact branch (the draft said 24; the Build amendments table records the correction). Height 64. When disabled the wrapper paints the flat neutral fill and the label moves to the neutral label token.
 
 *Alternatives considered:* an `InkWell` over a gradient container — rejected, it loses `Semantics(enabled: false)` and needs manual focus; a solid `FilledButton` with only a glow shadow — rejected, the gradient is the visible part of the request; `ShaderMask` over the button — rejected, it also masks the ink and any child icon tint.
 
@@ -106,7 +106,7 @@ The mandatory detail: the button's `shape` radius must equal the wrapper's (24),
 
 ### D8 — Type scale as constants
 
-Six named levels: screen title 20/w700, status headline 22/w700, status caption 13/w400 (secondary token), section title 17/w700, item title 15/w600, secondary action 13/w500. Applied through `Theme.of(context).textTheme` copies where possible so `GoogleFonts.notoSansSc` keeps winning.
+Six named levels: screen title 20/w700, status headline 22/w700, status caption 13/w400 (secondary token), section title 17/w700, item title 15/w600, secondary action 13/w500. Shipped as inline `TextStyle`s on the page's own text (the design's first draft said "through `textTheme` copies where possible" — no `textTheme` lookup exists in the file; the family still comes from the inherited `DefaultTextStyle`, so `GoogleFonts.notoSansSc` keeps winning and only the mechanism claim was wrong). The five sizes are asserted item by item, which is what keeps a palette-only edit from silently flattening the scale.
 
 ### D9 — Sheets and dialogs read the same tokens
 
@@ -201,7 +201,7 @@ What was actually wrong and how it changed:
 | --- | --- | --- | --- |
 | D3 dark surface stack | page `#0F1417` / band `#15293C` / card `#1A222B` / selected `#22303E` / tint `#2A3947` | `#0A0F14` / `#0D1A28` / `#1E2934` / `#283645` / `#31404F` | The band was *lighter* than the card and the status card sits on the band, so the pair the requirement names measured **1.082** against the 1.15 floor. Ordering is now page < band < card: card/band 1.189, card/page 1.303, selected/card 1.198, tint/selected 1.160, tint/card 1.390. |
 | separation assertion | compared with `pageBaseColor()` — the gradient's last stop | compares with `backgroundBehind(key)`, the gradient sampled at the widget's own vertical centre | The page base is only painted at the very bottom of the screen. Measuring a card that sits in the band against the base asserted a surface the card never touches, which is how the 1.082 violation survived a green suite. |
-| "second channel" assertion | `border != null \|\| boxShadow.isNotEmpty` | `channelsOf()` measures each channel: fill step ≥ 1.15 against the real backdrop, border *composited over that backdrop* ≥ 1.15, shadow with non-zero alpha **and** blur **and** offset | The old form is true for every card ever built. Measuring the border is what exposed the dark hairline: `α.24 #3A4A5A` over the new card composites to **1.113**, i.e. a line that is drawn but not visible, so it is now `α.35 #4C6076` (1.311 on the card, 1.341 on the page). |
+| "second channel" assertion | `border != null \|\| boxShadow.isNotEmpty` | `channelsOf()` measures each channel: fill step ≥ 1.15 against the real backdrop, border *composited over that backdrop* ≥ 1.15, shadow with non-zero alpha **and** blur **and** offset | The old form is true for every card ever built. Measuring the border is what exposed the dark hairline: `α.24 #3A4A5A` over the new card composites to **1.115** (channels 37, 49, 61), i.e. a line that is drawn but not visible, so it is now `α.35 #4C6076` (1.311 on the card, 1.341 on the page). The value this row first recorded was 1.113, which only reproduces when the 8-bit rounding the harness applies is skipped — the same error class round 6 retired on the light hairline, caught by the round-7 review. |
 | D3 selection marker | `accentStart` fill + white glyph in both modes | light unchanged; dark uses brand ink fill with page ink glyph | `accentStart` on the dark selected tile is **2.57** (floor 3.0) and a white glyph on it is unreadable. Dark inverts it: fill 5.57 against the tile, glyph 8.69 against the fill. |
 | D8 note-edit chip | `color: p.card` | `color: p.tint` | A resting tile *is* `p.card`, so the chip was **1.000** against the surface it sits in — the edit affordance existed only as a 1px hairline. |
 | D8 sheet grabber | `p.hairline` | `p.tint` | Found by the assertion written for this round: the hairline on the light sheet face is **1.133**, so the grabber the spec names was effectively invisible. Tint gives 1.214 (light) / 1.390 (dark). |
@@ -325,10 +325,11 @@ surviving as a fourth copy.
 
 ### Accepted limits added in round 5
 
-1. **Warning-to-error hue slack is 25.9° against a 20° floor** (`#B45309` reports hue 25.9°,
-   `#C62828` reports 0°). It passes, but barely: re-tuning either the amber or the red by a few
-   degrees would fail the assertion, and that is a deliberate tripwire rather than a comfortable
-   margin.
+1. **Warning-to-error hue distance is 25.96° against a 20° floor, so the slack is 5.96°**
+   (`#B45309` reports hue 25.96°, `#C62828` reports 0°). It passes, but barely: re-tuning either the
+   amber or the red by a few degrees toward each other would fail the assertion, and that is a
+   deliberate tripwire rather than a comfortable margin. Earlier copies of this record called the
+   distance "25.9° of slack", which conflated the two; the test prints the distance rounded to 26°.
 2. **The neutral face separates weakly in dark mode.** `#303030` over `pageDark` is a 1.458 fill step
    but only 1.119 over `cardDark`, and a prompt carries no border or shadow. Requirement 3's prompt
    clause asks for an opaque face and a 4.5:1 label, not for a surface step, so this is compliant —
@@ -363,8 +364,9 @@ prompt maths and the GetX fallback face independently, and confirmed all eleven 
 
 ### What round 6 did not change
 
-Round 5's accepted limits stand unchanged (25.9° of hue slack, the neutral face's 1.119 step over the
-dark card, six of eleven sites covered by sharing a measured constant rather than by their own route),
+Round 5's accepted limits stand unchanged (5.96° of hue slack over the 20° floor, the neutral face's
+1.119 step over the dark card, six of eleven sites covered by sharing a measured constant rather than
+by their own route),
 and Requirement 3 is still verified on enumerated pairs: the new single-role test enumerates the
 de-emphasized labels rather than sweeping every `Text`, because a sweep would have to exempt the
 accent-gradient labels and would fail for reasons unrelated to legibility.
