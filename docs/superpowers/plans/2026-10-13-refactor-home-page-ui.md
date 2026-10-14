@@ -384,6 +384,24 @@ claimed the correction; D8 claims a `textTheme`-copy mechanism the file does not
 superseded dark hairline composites to 1.115 under the harness's rounding, not 1.113; and 25.96° is a
 hue *distance* whose slack over the 20° floor is 5.96°, conflated in two places.
 
+## Group 15 — Round 9, the re-check's own findings
+
+The scoped re-check over `3ddb1f0..01964ee` confirmed 7 of the 8 round-8 items closed and reported
+that the fix round itself left two defects of the same class behind.
+
+<!-- comet-task-ref:63fa8c7e-db13-4b33-8629-254eaadd6a36 -->
+### 15.1 Retire the last "radius 24"
+`tasks.md` 5.2 still carried the draft radius while `design.md`'s amendment row already claimed the
+documented value had been corrected to the built 26 (22 compact). Fix the copy, and say so in the
+record — a ledger line that claims a correction which never happened is worse than the wrong number.
+
+<!-- comet-task-ref:05540957-c71b-4480-bf5d-4278d6e5c13a -->
+### 15.2 The heading floor needs its dark row
+Round 8 added the two heading floors to the enumerated pair list in light mode only, while Requirement
+7's "no text pair falls below the contrast floor above" carries no mode qualifier. Both headings are
+now gated at 3.0 in the dark scheme too; they pass trivially (white on `#1E2934`), so this is a
+coverage guard, not a discovered defect.
+
 ## Riskiest coupling
 
 Everything depends on the `#E4EEF8` page base: it is what separates white cards (1.174) and what breaks `black54` secondary text (4.44). Changing that one value requires re-running 2.4, 2.5 and 4.1 rather than assuming they still hold.

@@ -415,3 +415,27 @@ their failure mode instead of patched:
   same check fail for a reason unrelated to the surface being measured. Accepted because today's four
   dialogs each have exactly one Material with a non-null colour, and the failure mode is a loud false
   alarm in the likelier branch.
+
+## Build rounds 8 and 9 (the round-7 review's fix-list, then its own re-check)
+
+Round 7's review of `88167ac..3ddb1f0` reported 0 CRITICAL / 2 IMPORTANT / 6 MINOR and cleared
+behaviour, boundary, security and every shipped contrast figure. All eight findings were recomputed
+before being accepted — all eight reproduced — and the dispositions are:
+
+| Item | Severity | Disposition |
+| --- | --- | --- |
+| Requirement 5's scenario clause "tapping an item still selects it and long-pressing still opens the note editor" was walked only in the single-column layout, so the two-column builders' handlers had no test | IMPORTANT | asserted in `grid layout expresses the same selection language`: tap a second grid tile, check the controller's `currentDevice` moved and the `checkmark_circle` marker followed, then long-press and check that device's note editor opens. Falsifiable on both halves — `checkmark_circle` exists only in `_buildGridDeviceItem` (the list uses `Ionicons.checkmark`), and the dialog title is device-specific. |
+| The verification report's own scenario count | IMPORTANT | 20, not 16 (`grep -c '^#### Scenario'` = 3+3+4+3+2+2+1+1+1); the report's coverage table already listed 20 rows, so the summary contradicted it. |
+| Requirement 3's 3.0 heading floor had no heading in the enumerated pair list | MINOR | `准备就绪` on the card face and `智能饮水` against both the page base and the band (the stricter `min` of the two) added in light; round 9's re-check then required the dark pair too, since Requirement 7 carries no mode qualifier. |
+| A test still named and commented for the translucent default face round 5 replaced | MINOR | renamed to *the plain blocking notice stays legible and carries no hue*, its reason strings rewritten to name the notice role, and it now asserts that face by ARGB identity in both schemes rather than only opacity + chroma + label contrast. |
+| Dark hairline recorded as compositing to 1.113 | MINOR | 1.115 (channels 37, 49, 61). 1.113 is exactly what the math gives **without** the harness's 8-bit rounding — the same error class round 6 retired on the light hairline, and it also appears in the `home_page.dart` token comment (1.11 → 1.115). |
+| D6 and the report saying the button radius is 24 | MINOR | one shared `BorderRadius` variable at `home_page.dart:910`, 26 normally / 22 compact. Round 9's re-check then caught that `tasks.md` 5.2 still said 24 while the amendment table claimed the correction had been made — corrected, and noted here because a ledger line asserting a fix that never happened is worse than the original wrong number. |
+| "25.9° of hue slack" | MINOR | amber `#B45309` reports HSL hue 25.96° and red `#C62828` 0°, so 25.96° is the *distance* and the slack over the 20° floor is 5.96°; the test prints the distance rounded to 26°. |
+| D8 claiming the type scale is "applied through `Theme.of(context).textTheme` copies where possible" | MINOR | no `textTheme` lookup exists in the file (`grep -c textTheme` = 0). The scale ships as inline `TextStyle`s and the family is inherited through `DefaultTextStyle`, so `GoogleFonts.notoSansSc` still wins and only the mechanism claim was wrong. |
+
+**TDD disclosure for both rounds (recorded here, not only in the gitignored checkpoint files):** every
+assertion added in rounds 8 and 9 is a coverage guard written against behaviour and colours that
+already ship, and each passed on first write. None of them is an observed RED, and none is described
+anywhere as one. The one thing rounds 8–9 proved about the product was negative: the grid handlers and
+the dark heading floors held, so no source change was needed for them — the only `lib/` edit across
+both rounds is a comment character (1.11 → 1.115 at `home_page.dart:69`).

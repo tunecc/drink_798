@@ -1303,6 +1303,26 @@ void main() {
       await pumpHomePage(tester, brightness: Brightness.dark);
       final base = pageBaseColor(tester);
 
+      // 标题档的 3.0 在深色里也要过：规格那句 "no text pair falls below the contrast
+      // floor above" 不带模式限定词，浅色补过的两条枚举这里同样得有一条。
+      expect(
+        contrastOn(
+          textColorIn(tester, statusCardKey, '准备就绪'),
+          surfaceColor(decorationAt(tester, statusCardKey)),
+        ),
+        greaterThanOrEqualTo(3.0),
+        reason: '深色状态卡标题达不到标题档的 3.0 下限',
+      );
+      expect(
+        contrastOnPageText(
+          effectiveTextColor(tester, '智能饮水'),
+          base,
+          pageBandColor(tester),
+        ),
+        greaterThanOrEqualTo(3.0),
+        reason: '深色页面主标题达不到标题档的 3.0 下限',
+      );
+
       final resting = decorationAt(tester, deviceTileKey('102'));
       final selected = decorationAt(tester, deviceTileKey('101'));
       expect(
