@@ -103,19 +103,26 @@ here so an archive reader does not have to assemble them from nine tables.
   distinct colour, a loud false alarm if it carries none — accepted for today's four dialogs.
 - Text scale is exercised up to 1.3 because that is the number the spec names; type sizes are pinned as
   literals by D8.
-- `版本:` is the anchor two tests share while the dialog's literal `版本: 1.0.4` is a recorded
-  out-of-scope defect; the finders use `textContaining` so fixing the string cannot break them.
+- `版本:` is the anchor two tests share, because the dialog's version line is a literal. That literal
+  was recorded as stale (`版本: 1.0.4` against `1.0.6+6`) and was corrected to `1.0.7` in the release
+  commit without touching either test — which is the prefix-matching choice being proven rather than
+  argued.
 - Rounds 8 and 9 added coverage guards, not observed RED: every assertion they introduced passed on
   first write, and the only `lib/` edit across both rounds is a comment character.
 - Taste is not a test: the suite proves relationships and floors; the on-device pass
-  (`fvm flutter run`) stays with the user by their recorded preference.
+  (`fvm flutter run`) stays with the user by their recorded preference. That pass was made on
+  2026-10-14 by the user driving the app on an iPhone 14 Pro simulator, and reported as good — the
+  record here says so because it is the one acceptance gate no automated check could close.
 
 ## 6. Reported, deliberately out of scope
 
 - `LoginController` raises nine white-on-`Colors.red`/`Colors.green` prompts
   (`login_controller.dart:66,97,106,116,147,159,169,192,201`) — outside this change's boundary.
 - `ScannerPage` overflows by 12px at 320×568 with a 1.3 text scale.
-- The about dialog hardcodes `版本: 1.0.4` while `pubspec.yaml` is at `1.0.6+6`.
+- ~~The about dialog hardcodes `版本: 1.0.4` while `pubspec.yaml` is at `1.0.6+6`.~~ Closed at the 1.0.7
+  release commit (the user asked for it there): the line now reads `版本: 1.0.7`. It is still a literal
+  rather than a value derived from the build, so it must be edited on every release — that part stays
+  out of this change's boundary.
 - `main.dart:15` forces `statusBarIconBrightness: Brightness.dark`, wrong over a dark band.
 
 ## 7. Final integration review and its disposition
@@ -169,5 +176,7 @@ analyzer clean; `openspec validate` valid; handoff FRESH; the boundary holds (em
 re-derive has been re-derived with the harness's own rounding, and the four cases where rounding was
 got wrong are recorded rather than quietly re-edited.
 
-Ready to archive. Archive commits stay local — nothing is pushed. On-device visual acceptance is the
-user's own pass: `fvm flutter run`.
+**Archived.** The archive commit is `ab9bc62` on `main` (`docs/openspec/changes/archive/2026-10-14-refactor-home-page-ui/`,
+main spec `docs/openspec/specs/home-page-ui/spec.md` merged from the delta), and it stays local —
+nothing was pushed and no PR was opened. The user's own on-device pass, the one gate this suite never
+claimed to cover, came back good on 2026-10-14.

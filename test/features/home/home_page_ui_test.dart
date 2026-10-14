@@ -246,8 +246,8 @@ double cornerRadius(Material m) {
 /// 圆角顶边、以及身后页面确实被压暗或盖住。按面上任一段文字定位，
 /// 对话框没有 key。
 void expectElevatedSurface(WidgetTester tester, String onSurface) {
-  // textContaining 而不是 text：这样"版本: 1.0.4"这一行了结版本号之后，
-  // 传 '版本:' 就能继续测，不至于让一条已记录的界外缺陷把断言弄假失效。
+  // textContaining 而不是 text：这一行带着版本号，用前缀定位的话，每次发版都要
+  // 顺手改测试；只认「版本:」就能一直测下去。
   final label = find.textContaining(onSurface);
   Material? face;
   tester.element(label).visitAncestorElements((e) {
