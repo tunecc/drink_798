@@ -2,8 +2,8 @@
 
 - Change: `docs/openspec/changes/refactor-home-page-ui`
 - verify_mode: full · review_mode: standard · build_mode: autonomous · tdd_mode: tdd
-- Baseline: `88167ac` → `350ea7b` — implementation `9d3edf7`, rounds 2–6 `978537f`·`3b889e2`·`345ad5f`·`137dc3a`·`590d08b`, round 7 `3ddb1f0`, round 8 `01964ee`, round 9 `350ea7b`
-- Method: `openspec-verify-change` across Completeness, Correctness and Coherence, plus the change's one final integration review and a scoped re-check of that review's fix round
+- Baseline: `88167ac` → `7d30503` — implementation `9d3edf7`, rounds 2–6 `978537f`·`3b889e2`·`345ad5f`·`137dc3a`·`590d08b`, round 7 `3ddb1f0`, round 8 `01964ee`, round 9 `350ea7b`, verification report `7d30503`
+- Method: `openspec-verify-change` across Completeness, Correctness and Coherence, plus three independent reviews — the whole-change final integration review, a scoped re-check of that review's fix round, and a final sign-off on the last increment (§7)
 - Line numbers refer to the tree at `350ea7b`. Test cases are cited by name because names survive every round; bare numbers did not survive rounds 8 and 9.
 - Outcome: **PASS**
 
@@ -27,8 +27,8 @@ absorbed as an accepted deviation without being either fixed or recorded with it
 
 | Requirement | Scenario | Test(s) in `test/features/home/home_page_ui_test.dart` |
 | --- | --- | --- |
-| R1 Idle page keeps a brand anchor | Idle page top region | `idle page anchors the top instead of one flat fill` (439), `the idle gradient lands exactly on the scaffold colour` (1782) |
-| | Idle page bottom region | 439 (its bottom sampler reads the gradient at the widget's own position, not the gradient's last stop), plus `resting card separates from the page by fill plus a second channel` (466) |
+| R1 Idle page keeps a brand anchor | Idle page top region | `idle page anchors the top instead of one flat fill` (439) — no two-stop no-op gradient survives anywhere on the page, the page base is provably not the global `#F5F9FF`, and at least one painted layer is darker (more saturated) than the base, which is the anchor |
+| | Idle page bottom region | `the idle gradient lands exactly on the scaffold colour` (1782) — in both schemes the gradient's stop at t=1.0 equals the `Scaffold` background, so no hard edge appears above the safe area; the card that sits there is measured against the surface actually painted behind it (`resting card separates from the page by fill plus a second channel`, 466, which samples per position) |
 | | Session in progress keeps its own accent state | `in-progress background and bubbles survive the new palette` (1220), `accent state stays readable at the lightest point of its gradient` (635) |
 | R2 Adjacent surfaces stay separable | Resting card on the page background | 466, dark copy `dark mode keeps the same separation` (490) |
 | | Selected card differs from resting card | `selection changes two channels and never glues the tile back` (518), `selection marker clears 3.0 against the tile and 4.5 for its glyph` (1446), `selection still reads after the hue is stripped away` (1511) |
@@ -36,7 +36,7 @@ absorbed as an accepted deviation without being either fixed or recorded with it
 | R3 Text keeps a legible hierarchy | Hierarchy levels are distinguishable | `the page carries five distinct hierarchy levels` (668) — five sizes pinned item by item, weights beside them |
 | | Secondary text is not brighter than primary text | `text on its own surface clears the contrast floors` (555), `de-emphasized text resolves through one role per face` (2083) |
 | | Prompts the page raises stay legible | `the three prompt kinds are legible and keep distinct hues` (1897), `the plain blocking notice stays legible and carries no hue` (1997), `the note-save prompt the page raises itself is legible` (2041) |
-| | Text on the accent state at its weakest point | 635, measured at the lightest stop in both schemes |
+| | Text on the accent state at its weakest point | 635, measured against the lightest stop of the accent gradient. Honest scope: it pumps the light scheme only, as does `in-progress background and bubbles survive the new palette` (1220); `_HomeT.accentFill` is a `const` shared by both palettes and the label is an unconditional `Colors.white`, so the figure transfers to dark without a dark pump — recorded in §5 as a coverage limit rather than claimed as both-scheme proof |
 | R4 Primary action is focal and states availability | Device selected | `enabled action is the focal control and its label clears 4.5` (860) — height, full-row width, label contrast and the scenario's own `Ionicons.play_circle` |
 | | No device selected | `unselected device leaves the action inactive and untappable` (891), `the disabled action paints nothing of its own` (1261) |
 | | Session in progress | `settle state keeps its label readable` (912) — `stop_circle` present, `play_circle` absent — and `the in-card progress bar exists only while water is running` (1763) |
@@ -59,7 +59,7 @@ dark heading row rather than inheriting the light one.
 | D6 gradient behind a real `FilledButton` | `home_page.dart:949–962` | `backgroundColor: Colors.transparent`, `elevation: 0`, `shadowColor: Colors.transparent`; wrapper and button read one shared `BorderRadius` variable (`home_page.dart:910`), 26 / 22 compact |
 | D7 tiles keep structure, only paint changes | tile builders + test 686 | `GestureDetector`/`Container` and `ReorderableListView` retained; note chip 26×26 baseline asserted |
 | D8 type scale | `_HomeT` + test 668 | six levels as inline `TextStyle`s (22/w700, 20/w700, 17/w700, 15/w600, 13/w400, 13/w500); family inherited through `DefaultTextStyle`, so `GoogleFonts.notoSansSc` still wins |
-| D9 sheets and dialogs read the page tokens | `home_page.dart:1030` + four `AlertDialog` `backgroundColor` sites | dark sheet role `#1E2934`; `showCupertinoModalBottomSheet` kept |
+| D9 sheets and dialogs read the page tokens | `home_page.dart:1034` (the sheet `Material`'s `color: p.card`) + four `AlertDialog` `backgroundColor` sites | dark sheet role `#1E2934`; `showCupertinoModalBottomSheet` kept, its own `backgroundColor` staying transparent |
 | D10 compact branch | `_HomePalette.isCompact` (`home_page.dart:145–147`) | height < 640 **or** `textScaler.scale(14) > 16.8`; asserted at 320×568 @ 1.3 |
 | D11 test seam | `home_controller.dart:56`, `home_page.dart:210–212` | optional ctor param + `Get.isRegistered` guard; test 375 proves no real request |
 | D12 keys | `home_page.dart` key constants | 64 `byKey` lookups in the suite |
@@ -90,6 +90,10 @@ here so an archive reader does not have to assemble them from nine tables.
 - The two decorative chips' fill steps (in-progress 1.348 / 1.457, tint 1.214 light / 1.390 dark) are
   computed from the tokens and asserted by nobody; the suite gates the glyph on the chip. Both chips
   are insets inside a surface that already separates, so they sit outside the two-channel rule.
+- The accent text floor is **pumped in the light scheme only** (tests 635 and 1220). It transfers to
+  dark because `_HomeT.accentFill` is one `const` shared by both palettes and the label is an
+  unconditional `Colors.white`, but nothing in the suite renders the in-progress card in dark, so a
+  future change that branches the accent fill by scheme would not be caught here.
 - "Keeps animating" is proven as presence/absence of the in-card progress indicator, not as motion.
 - Snackbar hue separation: amber and red sit 25.96° apart against the suite's 20° floor, so the slack
   is 5.96° and the test prints the distance rounded to 26°; the neutral face sits 1.119 above the dark
@@ -136,6 +140,26 @@ grid marker assertion can only pass in two-column layout because `checkmark_circ
 `_buildGridDeviceItem` (`home_page.dart:812`) while the list uses `Ionicons.checkmark` (`:710`), and
 the long-press assertion resolves through the grid tile's own `onLongPress` (`:764`) into a
 device-specific dialog title.
+
+**Review 3 — final sign-off on the increment `01964ee..7d30503`.**
+Verdict **PASS**, 0 CRITICAL / 0 IMPORTANT / 1 MINOR plus one nit, all of them about this report
+rather than the product. It confirmed the increment touched six paths and no `lib/` file, that both
+round-8 leftovers are closed (the only surviving "24"s are ledger lines that describe the retired
+draft, and the dark headings measure the faces they paint on — white on `#1E2934` recomputes to 14.77,
+the headline 17.57 through `contrastOnPageText`'s min over base and band), that the new assertions
+fail loudly rather than green when a colour or widget goes missing (no self-reads, `StateError` on a
+null ink, `gradient!` on a null face, no `skip:` in the file), and that 20+ of this report's own
+counts and `(line)` citations reproduce — including the guard's 14 checks, which it confirmed is a
+fixed rule count rather than something derived from this change.
+
+Its findings were two claims this rewrite had just introduced, both corrected above rather than
+excused: §2 attributed per-position gradient sampling to test 439, whose body contains no sampler at
+all (the bottom-region proof is 1782, one row away), and §2 described test 635's accent measurement as
+"both schemes" when it pumps light only. The `home_page.dart:1030` citation was one line short of the
+sheet face. Every count in this report was regenerated from the tree rather than copied forward — task
+count from `grep -c '^- \[x\]'`, scenario count from `grep -c '^#### Scenario'`, the `byKey` count from
+`grep -c byKey`, and each `(line)` citation from the `testWidgets('` declarations — because review 2
+had just caught this document quoting the previous round's numbers.
 
 ## Final assessment
 
