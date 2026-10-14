@@ -876,10 +876,10 @@ void main() {
         ),
         greaterThanOrEqualTo(4.5),
       );
-      // 旧的 Colors.orange 白字只有 2.16:1
+      // 旧的 Colors.orange（#FF9800）白字只有 2.16:1
       expect(
         surfaceColor(wrapper).toARGB32(),
-        isNot(const Color(0xFFFFA000).toARGB32()),
+        isNot(const Color(0xFFFF9800).toARGB32()),
       );
       expect(find.text('结算'), findsOneWidget);
     });
@@ -1093,7 +1093,7 @@ void main() {
       expect(
         contrastOn(effectiveTextColor(tester, 'GitHub 开源地址'), dialogColor),
         greaterThanOrEqualTo(4.5),
-        reason: '对话框里的链接仍是 primary 蓝，只有 3.13:1',
+        reason: '对话框里的链接仍是 primary 蓝，只有 3.12:1',
       );
       expect(
         contrast(
@@ -1112,7 +1112,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 400));
 
-      // 设备管理抽屉里的实色按钮：主题给的 primary 底配白字只有 3.13:1。
+      // 设备管理抽屉里的实色按钮：主题给的 primary 底配白字只有 3.12:1。
       await tester.tap(find.text('管理设备'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 700));
@@ -1131,7 +1131,7 @@ void main() {
           tester.widget<Material>(find.byKey(settingsSheetKey)).color!,
         ),
         greaterThanOrEqualTo(4.5),
-        reason: 'Colors.red 压在卡片白上只有 3.72:1',
+        reason: 'Colors.red 压在卡片白上只有 3.68:1',
       );
       await tester.tap(find.text('退出登录'));
       await tester.pump();
@@ -1979,10 +1979,181 @@ void main() {
       }
     });
   });
+
+  group('round 6 claims', () {
+    Future<void> settle(WidgetTester tester) async {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 700));
+    }
+
+    // 集成审查指出：Requirement 3 那句"每个面一个命名角色，而不是一处一个透明度"
+    // 和 Requirement 6 那句"行内容 + 图标"都没有断言撑着。前者是这条规格的立身之本
+    // ——只要各调用点自己写 alpha，值就散，规格形同虚设，所以要量。
+    testWidgets('de-emphasized text resolves through one role per face', (
+      tester,
+    ) async {
+      for (final brightness in [Brightness.light, Brightness.dark]) {
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        final card = surfaceColor(decorationAt(tester, statusCardKey));
+        final caption = textColorIn(tester, statusCardKey, '选择设备开始接水');
+
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.tap(find.text('管理设备'));
+        await settle(tester);
+        final sheet = tester.widget<Material>(find.byKey(deviceManageSheetKey));
+        final subtitle = textColorIn(tester, deviceManageSheetKey, 'ID: 101');
+        await tester.tapAt(const Offset(200, 60));
+        await settle(tester);
+
+        Get.reset();
+        await pumpHomePage(tester, devices: const [], brightness: brightness);
+        final emptyHint = effectiveTextColor(tester, '扫描设备上的二维码添加');
+
+        Get.reset();
+        await pumpHomePage(tester, brightness: brightness);
+        await tester.longPress(find.byKey(deviceTileKey('102')));
+        await settle(tester);
+        final field = tester.widget<TextField>(find.byType(TextField));
+        final dialogHint = field.decoration!.hintStyle!.color!;
+        final dialogCounter = field.decoration!.counterStyle!.color!;
+        final fieldFill = field.decoration!.fillColor!;
+        await tester.tap(find.text('取消'));
+        await settle(tester);
+
+        // 「关于」框里那行说明也压在同一块卡片面上，它是第六个弱化标签；
+        // 不把它一起量，规格那句"一处一个透明度"就还有一个漏点。
+        await tester.tap(find.byTooltip('设置'));
+        await settle(tester);
+        await tester.tap(find.text('关于'));
+        await settle(tester);
+        final aboutInk = effectiveTextColor(
+          tester,
+          '官方广告太多，所以做了这个简洁版',
+        );
+        await tester.tap(find.text('确定'));
+        await settle(tester);
+
+        // 抽屉面就是 card 角色，否则下面"同一档墨"的比较没有共同基准。
+        expect(
+          sheet.color!.toARGB32(),
+          card.toARGB32(),
+          reason: '$brightness 抽屉面已不是卡片角色',
+        );
+        expect(
+          subtitle.toARGB32(),
+          caption.toARGB32(),
+          reason: '$brightness 抽屉行副标题自己另用了一档弱化墨',
+        );
+        expect(
+          emptyHint.toARGB32(),
+          caption.toARGB32(),
+          reason: '$brightness 空态提示自己另用了一档弱化墨',
+        );
+        expect(
+          dialogCounter.toARGB32(),
+          dialogHint.toARGB32(),
+          reason: '$brightness 备注框的计数器和提示文字不是同一档',
+        );
+        expect(
+          dialogHint.toARGB32(),
+          caption.toARGB32(),
+          reason: '$brightness 对话框另起了一档弱化墨',
+        );
+        expect(
+          aboutInk.toARGB32(),
+          caption.toARGB32(),
+          reason: '$brightness 「关于」框的说明文字另起了一档弱化墨',
+        );
+        expect(
+          contrastOn(caption, card),
+          greaterThanOrEqualTo(4.5),
+          reason: '$brightness 那一档弱化墨在自己的面上读不出（也是深色模式的门槛）',
+        );
+        // 提示与计数器实际压在备注框自己的填充面（p.page）上，不是对话框面，
+        // 所以门槛要按它真正吃到的那块面算。
+        expect(
+          contrastOn(dialogHint, fieldFill, backdrop: card),
+          greaterThanOrEqualTo(4.5),
+          reason: '$brightness 备注框的提示文字在自己的填面上读不出',
+        );
+      }
+    });
+
+    testWidgets('the sheets carry the rows and icons the spec names', (
+      tester,
+    ) async {
+      Get.reset();
+      SharedPreferences.setMockInitialValues({'device_note_101': '茶水间'});
+      await pumpHomePage(tester);
+
+      await tester.tap(find.text('管理设备'));
+      await settle(tester);
+      final sheet = find.byKey(deviceManageSheetKey);
+      // 有备注的行是"备注 · ID"，没有的行只剩 ID：两条分支都要在场。
+      // 行标题是 formattedName，它把"栋"换成"-"，所以这里是 1-101 而不是 1栋101。
+      expect(
+        find.descendant(of: sheet, matching: find.text('1-101')),
+        findsOneWidget,
+      );
+      expect(find.text('茶水间 · ID: 101'), findsOneWidget);
+      expect(
+        find.descendant(of: sheet, matching: find.text('1-102')),
+        findsOneWidget,
+      );
+      expect(find.text('ID: 102'), findsOneWidget);
+      await tester.tapAt(const Offset(200, 60));
+      await settle(tester);
+
+      await tester.tap(find.byTooltip('设置'));
+      await settle(tester);
+      for (final entry in {
+        '关于': Ionicons.information_circle_outline,
+        '退出登录': Ionicons.log_out_outline,
+      }.entries) {
+        final row = find.ancestor(
+          of: find.text(entry.key),
+          matching: find.byType(ListTile),
+        );
+        expect(row, findsOneWidget, reason: '${entry.key} 不在设置抽屉里');
+        expect(
+          find.descendant(of: row, matching: find.byIcon(entry.value)),
+          findsOneWidget,
+          reason: '${entry.key} 那一行少了它的图标',
+        );
+      }
+    });
+
+    // 覆盖护栏，不是观测到的 RED：这两对在深色里本来就达标，
+    // 只是先前只在浅色量过，而设计记录写的是"两种模式"。
+    testWidgets('the tinted chip glyph clears the non-text floor in dark', (
+      tester,
+    ) async {
+      Get.reset();
+      await pumpHomePage(tester, brightness: Brightness.dark);
+      final chip = decorationAt(tester, statusIconChipKey);
+      final icon = tester.widget<Icon>(
+        find.descendant(
+          of: find.byKey(statusIconChipKey),
+          matching: find.byType(Icon),
+        ),
+      );
+      expect(
+        contrastOn(
+          icon.color ?? Colors.black,
+          surfaceColor(chip),
+          backdrop: surfaceColor(decorationAt(tester, statusCardKey)),
+        ),
+        greaterThanOrEqualTo(3.0),
+        reason: '深色模式图标底把字形吃掉了',
+      );
+    });
+  });
 }
 
 /// 断言页面上的实色操作按钮：自带底色 token（不落回主题的 primary 底，
-/// 那里白字只有 3.13:1），且标签相对该底色过 4.5:1。
+/// 那里白字只有 3.12:1），且标签相对该底色过 4.5:1。
 ///
 /// `FilledButton.icon` 的实际 runtime type 是私有子类，`find.byType(FilledButton)`
 /// 认不出它，所以按 `is FilledButton` 谓词找。

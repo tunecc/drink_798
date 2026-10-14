@@ -51,7 +51,7 @@ abstract final class _HomeT {
   static const cardLight = Color(0xFFFFFFFF);
   static const tintLight = Color(0xFFDCEBF9);
   static const bandTopLight = Color(0xFFC5E0F7);
-  // α.24 的淡边压在白卡 1.130 / 本体 1.104 / 品牌带 1.078，三条全在 1.15 以下：
+  // α.18 的淡边压在白卡 1.133 / 本体 1.099 / 品牌带 1.079，三条全在 1.15 以下：
   // 描边画了但看不出画，"两条通道"实际只剩一档填充差。提到 α.30 才有第二条。
   static const hairlineLight = Color(0x4D7E96AE);
 
@@ -86,7 +86,7 @@ abstract final class _HomeT {
   static const neutralGlyphDark = Color(0xFF9AA7B4);
 
   // 不可用态：按 WCAG 1.4.3 属于豁免，但仍要与可用态一眼可辨。
-  // 危险操作用 red800/red200 一档：Colors.red 压在白卡片上只有 3.72:1。
+  // 危险操作用 red800/red200 一档：Colors.red 压在白卡片上只有 3.68:1。
   // 浅色取提示条的错误色同一份，两处不能各写一个红。
   static const destructiveLight = HomePromptColors.error;
   static const destructiveDark = Color(0xFFFF8A80);
@@ -161,8 +161,9 @@ class _HomePalette {
   final Color destructive;
   final bool isDark;
 
-  /// 选中态是否用提亮填充表达。浅色下不换填充：淡蓝 tint 相对页面只有
-  /// 1.118，选中反而把卡片粘回背景，所以浅色改用描边+勾选+抬升两个通道。
+  /// 选中态是否用提亮填充表达。浅色下不换填充：当年试过的淡蓝 `#F5FAFF`
+  /// 相对页面本体只有 1.118，选中反而把卡片粘回背景，所以浅色改用
+  /// 描边+勾选+抬升两个通道。
   bool get selectionTintsFill => isDark;
 
   Color tileFill({required bool isSelected}) =>
@@ -620,10 +621,13 @@ class HomePage extends StatelessWidget {
             : () => _showNoteEditDialog(context, controller, device),
         child: Container(
           key: deviceTileKey(device.id),
-          // vertical 11：改版前选中态是 2px 描边、行高 60；这里必须不低于它。
+          // vertical 11：命中面积只增不减 —— 测试把 60.0（选中）/ 57.0（未选）
+          // 钉成下限。这两个数是改版后实测的，不是从旧几何推的：Container 的
+          // 装饰描边不参与布局，改版前无论 2px 还是 1.6px 描边，行高都是
+          // 36 + 2×10 = 56，所以这道护栏比要求更严，而不是"等于旧值"。
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
           decoration: BoxDecoration(
-            // 浅色下选中不换填充（淡蓝 tint 对页面只有 1.118，选中反而糊回去），
+            // 浅色下选中不换填充（当年那版淡蓝 `#F5FAFF` 对页面只有 1.118，选中反而糊回去），
             // 由描边 + 勾选 + 抬升两个通道表达；深色仍提亮一档。
             color: p.tileFill(isSelected: isSelected),
             borderRadius: BorderRadius.circular(_HomeT.radiusTile),
@@ -1042,8 +1046,8 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  // 拖拽条走 tint：比抽屉面深 1.24（深色 1.39）。
-                  // 它当初定下来时 hairline 压在白卡上只有 1.13，肉眼看不见；
+                  // 拖拽条走 tint：比抽屉面深 1.214（深色 1.390）。
+                  // 它当初定下来时 hairline 压在白卡上只有 1.133，肉眼看不见；
                   // round 3 把 hairline 提到 1.34 之后 tint 仍是更深的那一档。
                   color: p.tint,
                   borderRadius: BorderRadius.circular(2),
@@ -1140,7 +1144,7 @@ class HomePage extends StatelessWidget {
                   icon: const Icon(Ionicons.add),
                   label: const Text('添加新设备'),
                   style: FilledButton.styleFrom(
-                    // 主题的 primary 底配白字只有 3.13:1，实色按钮统一深一档。
+                    // 主题的 primary 底配白字只有 3.12:1，实色按钮统一深一档。
                     backgroundColor: _HomeT.accentStart,
                     minimumSize: const Size(double.infinity, 50),
                   ),
@@ -1212,8 +1216,8 @@ class HomePage extends StatelessWidget {
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  // 拖拽条走 tint：比抽屉面深 1.24（深色 1.39）。
-                  // 它当初定下来时 hairline 压在白卡上只有 1.13，肉眼看不见；
+                  // 拖拽条走 tint：比抽屉面深 1.214（深色 1.390）。
+                  // 它当初定下来时 hairline 压在白卡上只有 1.133，肉眼看不见；
                   // round 3 把 hairline 提到 1.34 之后 tint 仍是更深的那一档。
                   color: p.tint,
                   borderRadius: BorderRadius.circular(2),
@@ -1454,7 +1458,7 @@ class _NoteEditDialogState extends State<_NoteEditDialog> {
           child: const Text('取消'),
         ),
         FilledButton(
-          // 主题的 primary 底配白字只有 3.13:1，实色按钮统一走深一档的品牌蓝。
+          // 主题的 primary 底配白字只有 3.12:1，实色按钮统一走深一档的品牌蓝。
           style: FilledButton.styleFrom(backgroundColor: _HomeT.accentStart),
           onPressed: () {
             widget.controller.saveDeviceNote(widget.device.id, _text.text);

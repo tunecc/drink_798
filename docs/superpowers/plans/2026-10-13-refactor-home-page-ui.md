@@ -90,7 +90,7 @@ Verify: 4.1 GREEN in both layouts and both modes.
 
 <!-- comet-task-ref:cda30d7b-0c49-4247-aee8-94f36e8701ed -->
 ### 4.3 Hit-area baseline guard
-Constraints: measured from the pre-change page — tile 59.2px tall, note chip 26×26, toolbar icon buttons 40×40, action 64px.
+Constraints: the floors the test asserts are measurements of the new build (60.0 / 57.0 rows, note chip 26×26, toolbar icon buttons 40×40, action 64px), which sit above the pre-change geometry (36 + 2×10 = 56) rather than being derived from it — see the D7 correction in design.md.
 Verify: every box ≥ baseline after the restyle.
 
 <!-- comet-task-ref:e69b2724-46f2-479e-a399-538ad0f6e4ca -->
@@ -101,7 +101,7 @@ Verify: empty card scrolls instead of overflowing (159px overflow observed first
 
 <!-- comet-task-ref:6a59640a-38d5-43d6-a7e1-d6b266820c1e -->
 ### 5.1 Action assertions
-Verify: RED on the missing `primaryAction` key, then on label contrast 3.13 and the inactive appearance.
+Verify: RED on the missing `primaryAction` key, then on label contrast 3.12 and the inactive appearance.
 
 <!-- comet-task-ref:9a06c5cd-95d9-4178-aeeb-66355c7418cc -->
 ### 5.2 Gradient behind a transparent `FilledButton`
@@ -205,7 +205,7 @@ all four dialogs clears 4.5 in both modes.
 
 <!-- comet-task-ref:b16bf9d6-7943-4aac-a0a9-ff1223c2fb57 -->
 ### 9.2 A hairline that is actually drawn
-RED: light border channel measured 1.078–1.130 against the surfaces it separates. Verify: the
+RED: light border channel measured 1.079–1.133 against the surfaces it separates. Verify: the
 measured border channel is true for the status card and a resting tile in both modes.
 
 <!-- comet-task-ref:82faa4f8-31c6-49d0-92dc-d85b84b3608e -->
@@ -291,6 +291,38 @@ position and duration of all eleven prompts are unchanged.
 ### 11.3 Record the extension
 Design gets the round-5 numbers and the reason the holder lives in `features/home/` instead of
 `core/theme/`; the delta spec already carries the new scenario.
+
+## Group 12 — Round 6, claims the suite must actually make
+
+Assertions, comments and records only; no product behaviour changes.
+
+<!-- comet-task-ref:0ff55bee-b690-4af9-bb16-073bf4514215 -->
+### 12.1 Test the two clauses that had no assertion
+Requirement 3 says de-emphasized text resolves through *one* named role per surface, which is a
+property no test proved, and Requirement 6's sheet clauses only ever checked a title and an icon
+count. Assert the single-role property by collecting the secondary labels on a surface and requiring
+one identical value, and assert the rows carry name plus note-or-id while 关于 / 退出登录 each keep
+their icon.
+
+<!-- comet-task-ref:1521f488-5eb5-41f9-abbb-2ac8c81c172f -->
+### 12.2 Measure those floors in dark too
+The idle secondary label and the tint-chip glyph were light-only. The design record promises both
+schemes, so the same floors get a dark pass — disclosed as a coverage guard, not an observed RED.
+
+<!-- comet-task-ref:f9efece3-8659-4d03-b450-480be649aff3 -->
+### 12.3 Fix the numbers in permanent artefacts
+3.72 → 3.68 for `Colors.red` on white (code comment and a test reason string); the replaced light
+hairline is α.18 with measured steps 1.133 / 1.099 / 1.079, not α.24 with 1.130 / 1.104; the grabber
+is 1.214 above the sheet face in both copies of that comment; the stale settle-fill guard should name
+the colour the pre-change page really used.
+
+<!-- comet-task-ref:89def7b0-d821-4e88-817d-f5794baaa82b -->
+### 12.4 Make the records say what the code does
+`proposal.md` and `design.md` still claim the controller gained no state or request change, while the
+in-flight coalescing is real and already disclosed in the Build amendments table — the wording goes,
+not the code. Also: four dialogs, not five; the round-5 spec patch belongs in the Spec Patches
+ledger; and the figures the integration review could not reproduce get re-measured rather than
+restated.
 
 ## Riskiest coupling
 
