@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/device_status.dart';
 
 /// 饮水操作的结果。
 ///
@@ -26,6 +27,30 @@ class DrinkResult {
   final String? message;
 
   /// 登录态过期。服务端以 -99 表示。
+  bool get isSessionExpired => code == -99;
+}
+
+/// 设备状态查询的结果：[DrinkResult] 的返回码语义加一个解析出的
+/// [DeviceStatus]。
+class DeviceStatusResult {
+  const DeviceStatusResult({
+    required this.success,
+    this.code,
+    this.message,
+    this.status,
+  });
+
+  final bool success;
+
+  /// 服务端返回码；网络异常等未取得响应时为 null。
+  final int? code;
+
+  /// 服务端返回的错误信息；成功时为 null。
+  final String? message;
+
+  /// 解析出的设备状态；响应形状异常时为 null。
+  final DeviceStatus? status;
+
   bool get isSessionExpired => code == -99;
 }
 
@@ -75,8 +100,9 @@ class DrinkApiService {
     _dio.httpClientAdapter = adapter;
   }
 
-  /// 支付类型。官方默认值，集中定义便于按实测调整。
-  static const int _paymentType = 0;
+  /// 支付类型。91 为钱包支付，21 为支付宝免密支付（与官方客户端运行时
+  /// 取值一致，经上游项目实测）。旧值 0 来自静态逆向、支付语义未确证。
+  static const int walletPaymentType = 91;
 
   /// 接水次数。官方默认值，集中定义便于按实测调整。
   static const int _drinkCount = 1;
@@ -331,6 +357,9 @@ class DrinkApiService {
   }
 
   /// 收藏/取消收藏设备
+  ///
+  /// `remove` 以 1/0 上线（与官方一致，上游实测形状）；
+  /// 布尔 true/false 的形式未实测过。
   Future<bool> toggleFavoriteDevice({
     required String deviceId,
     required bool isRemove,
@@ -338,7 +367,7 @@ class DrinkApiService {
     String url = "$_baseUrl/dev/favo";
     Options options = await _authOptions();
 
-    Map<String, dynamic> params = {"did": deviceId, "remove": isRemove};
+    Map<String, dynamic> params = {"did": deviceId, "remove": isRemove ? 1 : 0};
 
     try {
       Response response = await _dio.get(
@@ -353,7 +382,13 @@ class DrinkApiService {
   }
 
   /// 开始接水
-  Future<DrinkResult> startDrinking({required String deviceId}) async {
+  ///
+  /// [ptype] 缺省为钱包支付（91）；钱包余额不足等导致被拒时，调用方可
+  /// 回退支付宝免密支付（21）重发一次。
+  Future<DrinkResult> startDrinking({
+    required String deviceId,
+    int ptype = walletPaymentType,
+  }) async {
     String url = "$_baseUrl/dev/start";
     Options options = await _authOptions();
 
@@ -362,7 +397,7 @@ class DrinkApiService {
     Map<String, dynamic> params = {
       "did": deviceId,
       "upgrade": true,
-      "ptype": _paymentType,
+      "ptype": ptype,
       "args": "",
       "rcp": false,
       "cnt": _drinkCount,
@@ -382,11 +417,13 @@ class DrinkApiService {
   }
 
   /// 结束接水
+  ///
+  /// `rcp=false` 与官方客户端一致（上游实测形状）。
   Future<DrinkResult> stopDrinking({required String deviceId}) async {
     String url = "$_baseUrl/dev/end";
     Options options = await _authOptions();
 
-    Map<String, dynamic> params = {"did": deviceId};
+    Map<String, dynamic> params = {"did": deviceId, "rcp": false};
 
     try {
       Response response = await _dio.get(
@@ -417,11 +454,23 @@ class DrinkApiService {
   }
 
   /// 检查设备状态
+  ///
+  /// 出错时按“仍在使用”处理（返回 false），避免网络抖动导致提前自动结算。
   Future<bool> isDeviceAvailable({required String deviceId}) async {
+    final result = await deviceStatus(deviceId: deviceId);
+    if (!result.success || result.status == null) return false;
+    return result.status!.isAvailable;
+  }
+
+  /// 查询设备状态并解析为 [DeviceStatus]。
+  ///
+  /// 请求形状对齐官方客户端：`did` + `more=false`，不带 `promo`、
+  /// 不带 `sign`（上游实测形状）。
+  Future<DeviceStatusResult> deviceStatus({required String deviceId}) async {
     String url = "$_baseUrl/ui/app/dev/status";
     Options options = await _authOptions();
 
-    Map<String, dynamic> params = {"did": deviceId, "more": true, "promo": false};
+    Map<String, dynamic> params = {"did": deviceId, "more": false};
 
     try {
       Response response = await _dio.get(
@@ -429,10 +478,50 @@ class DrinkApiService {
         queryParameters: params,
         options: options,
       );
-      return response.data["data"]["device"]["gene"]["status"] == 99;
+      final data = response.data;
+      if (data is! Map || data['code'] != 0) {
+        final code = data is Map && data['code'] is int ? data['code'] : null;
+        final message = data is Map && data['msg'] is String ? data['msg'] : null;
+        return DeviceStatusResult(
+          success: false,
+          code: code,
+          message: message,
+        );
+      }
+      return DeviceStatusResult(
+        success: true,
+        code: 0,
+        status: DeviceStatus.fromJson(data['data']),
+      );
     } catch (e) {
-      // 出错时按“仍在使用”处理，避免网络抖动导致提前自动结算
-      return false;
+      return const DeviceStatusResult(success: false);
+    }
+  }
+
+  /// 扫码解析设备：用二维码末段换取真实设备 ID（`qr/use`）。
+  ///
+  /// 返回解析出的设备 ID；无法解析时为空串，调用方可回退二维码末段。
+  /// [qrId] 为空时直接返回空串，不发起请求。
+  Future<String> resolveQrDevice({required String qrId}) async {
+    if (qrId.isEmpty) return '';
+
+    String url = "$_baseUrl/qr/use";
+    Options options = await _authOptions();
+
+    try {
+      Response response = await _dio.get(
+        url,
+        queryParameters: {"id": qrId},
+        options: options,
+      );
+      final data = response.data;
+      if (data is! Map || data['code'] != 0) return '';
+      final payload = data['data'];
+      final dev = payload is Map ? payload['dev'] : null;
+      if (dev is! Map) return '';
+      return dev['id']?.toString() ?? '';
+    } catch (e) {
+      return '';
     }
   }
 }

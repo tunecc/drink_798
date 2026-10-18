@@ -8,6 +8,7 @@ import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:drink_water_app/core/models/device_model.dart';
+import 'package:drink_water_app/core/models/device_status.dart';
 import 'package:drink_water_app/core/services/drink_api_service.dart';
 import 'package:drink_water_app/core/theme/app_theme.dart';
 import 'package:drink_water_app/features/home/home_controller.dart';
@@ -963,6 +964,143 @@ void main() {
       await tester.pump();
       expect(api.stopCalls, 1);
       expect(controller.isDrinking.value, isFalse);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a wallet-payment rejection falls back to alipay once', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // 第一次（钱包 91）被拒，第二次（支付宝 21）成功。
+          startResult: const DrinkResult(
+            success: false,
+            code: -100,
+            message: '余额不足',
+          ),
+          secondStartResult: const DrinkResult(success: true, code: 0),
+          // 回退成功后轮询立即看到设备空闲，收起接水态，不留周期 Timer。
+          deviceAvailable: true,
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startPtypes, [91, 21], reason: '钱包失败后应只回退一次支付宝');
+      expect(controller.isDrinking.value, isTrue, reason: '回退成功应进入接水态');
+      await tester.pump(const Duration(seconds: 6));
+      expect(controller.isDrinking.value, isFalse, reason: '空闲轮询应收起接水态');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a session-expired start error does not retry with alipay', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          startResult: const DrinkResult(
+            success: false,
+            code: -99,
+            message: '登录状态已过期',
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startCalls, 1, reason: '登录过期不能拿支付宝再烧一次');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('an offline device blocks the start request itself', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          precheckStatus: const DeviceStatus(deviceStatus: 0, geneStatus: 0),
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startCalls, 0, reason: '离线设备不该发开始接水请求');
+      expect(controller.isDrinking.value, isFalse);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a disabled device blocks the start request itself', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          precheckStatus: const DeviceStatus(deviceStatus: 1, geneStatus: 98),
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startCalls, 0, reason: '禁用设备不该发开始接水请求');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a busy device enters settle state without re-starting', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // 预检发现 gene.status 非 99 且非 98 → 设备正在被使用。
+          precheckStatus: const DeviceStatus(deviceStatus: 1, geneStatus: 1),
+          // 轮询立即看到空闲，收起接水态，不留周期 Timer。
+          deviceAvailable: true,
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startCalls, 0, reason: '设备使用中不该再发开始请求');
+      expect(controller.isDrinking.value, isTrue, reason: '使用中应同步为可结算态');
+      await tester.pump(const Duration(seconds: 6));
+      expect(controller.isDrinking.value, isFalse, reason: '空闲轮询应收起接水态');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('double-tapping start only fires one round of requests', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(hangStatus: true),
+      );
+      final controller = Get.find<HomeController>();
+
+      unawaited(controller.startDrinking());
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.statusCalls, 1, reason: '并发开始只应有一次预检');
+      api.releaseStatus();
+      await tester.pump();
+      expect(api.startCalls, lessThanOrEqualTo(2));
       await dismissSnack(tester);
     });
   });

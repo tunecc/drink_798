@@ -83,6 +83,10 @@ class HomeController extends GetxController {
   /// 把新设备列出来。当前请求返回后补跑一次。
   bool _reloadQueued = false;
 
+  /// 在途的开始请求标记。预检加两次支付尝试让单次开始变成最多三个请求，
+  /// 不挡住连点的话会把队列打爆。
+  bool _starting = false;
+
   // 定时器
   Timer? _statusTimer;
 
@@ -291,6 +295,10 @@ class HomeController extends GetxController {
   }
 
   /// 开始接水
+  ///
+  /// 先查设备状态做预检：离线、禁用直接拦截，设备被他人使用中则同步为
+  /// 可结算态而不重发开始请求。开始请求优先钱包支付（91），余额不足等
+  /// 拒绝回退支付宝免密（21）再试一次；登录态过期不重试。
   Future<void> startDrinking() async {
     if (currentDevice == null) {
       Get.snackbar(
@@ -302,11 +310,40 @@ class HomeController extends GetxController {
       );
       return;
     }
-
+    if (_starting) return;
+    _starting = true;
     try {
-      final result = await _apiService.startDrinking(
-        deviceId: currentDevice!.id,
+      final deviceId = currentDevice!.id;
+
+      // 预检：状态接口本身失败时不拦截（保留旧行为，让开始请求自己暴露错误）。
+      final precheck = await _apiService.deviceStatus(deviceId: deviceId);
+      if (precheck.success && precheck.status != null) {
+        final status = precheck.status!;
+        if (status.isOffline) {
+          _err('设备离线，请稍后再试');
+          return;
+        }
+        if (status.isDisabled) {
+          _err('设备已被禁用，请联系管理员');
+          return;
+        }
+        if (!status.isAvailable) {
+          // 设备正在运行：同步为可结算状态，避免重复发起启动。
+          isDrinking.value = true;
+          _startStatusCheck();
+          _notice('设备正在使用中，可点击结算结束本次使用');
+          return;
+        }
+      }
+
+      var result = await _apiService.startDrinking(
+        deviceId: deviceId,
+        ptype: DrinkApiService.walletPaymentType,
       );
+      if (!result.success && !result.isSessionExpired) {
+        // 钱包（91）被拒时回退支付宝免密（21）再试一次。
+        result = await _apiService.startDrinking(deviceId: deviceId, ptype: 21);
+      }
 
       if (result.success) {
         isDrinking.value = true;
@@ -317,6 +354,8 @@ class HomeController extends GetxController {
       }
     } catch (e) {
       _err('操作失败');
+    } finally {
+      _starting = false;
     }
   }
 
@@ -370,34 +409,53 @@ class HomeController extends GetxController {
   }
 
   /// 开始状态检查
+  ///
+  /// 轮询设备状态：设备自动停水变成空闲后收起「接水中」。
+  /// 连续 4 次空闲才收起——启动瞬间设备状态可能仍是空闲。
+  /// 30 分钟上限防止异常情况下定时器长期驻留；轮询中登录过期则终止
+  /// 轮询并引导重新登录，但不打断用户正在看的页面。
   void _startStatusCheck() {
     int idleCount = 0;
+    final startedAt = DateTime.now();
     _statusTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (currentDevice == null) {
         timer.cancel();
         return;
       }
-
-      final isAvailable = await _apiService.isDeviceAvailable(
-        deviceId: currentDevice!.id,
-      );
-
-      if (isAvailable && idleCount > 3) {
-        // 设备空闲，自动结算
-        isDrinking.value = false;
+      if (DateTime.now().difference(startedAt) > const Duration(minutes: 30)) {
         timer.cancel();
-      } else if (isAvailable) {
-        idleCount++;
-      } else {
-        idleCount = 0;
+        return;
+      }
+
+      try {
+        final result = await _apiService.deviceStatus(
+          deviceId: currentDevice!.id,
+        );
+        if (!result.success || result.status == null) return;
+
+        final isAvailable = result.status!.isAvailable;
+        if (isAvailable && idleCount > 3) {
+          // 设备空闲，自动结算
+          isDrinking.value = false;
+          timer.cancel();
+        } else if (isAvailable) {
+          idleCount++;
+        } else {
+          idleCount = 0;
+        }
+      } catch (_) {
+        // 单次轮询失败不打断：下一秒继续。
       }
     });
   }
 
   /// 扫码添加设备
+  ///
+  /// 二维码末段先经 `qr/use` 换取真实设备 ID（官方扫码入口走同一接口），
+  /// 解析失败时回退二维码末段本身，尽量保持添加能力。
   Future<void> scanAndAddDevice() async {
     final result = await Get.to(() => const ScannerPage());
-    
+
     if (result != null && result is String) {
       // 提取设备ID
       String deviceId = result;
@@ -406,6 +464,11 @@ class HomeController extends GetxController {
       }
 
       try {
+        final resolved = await _apiService.resolveQrDevice(qrId: deviceId);
+        if (resolved.isNotEmpty) {
+          deviceId = resolved;
+        }
+
         final success = await _apiService.toggleFavoriteDevice(
           deviceId: deviceId,
           isRemove: false,
@@ -466,6 +529,14 @@ class HomeController extends GetxController {
         msg,
         snackPosition: SnackPosition.BOTTOM,
         backgroundColor: HomePromptColors.error,
+        colorText: HomePromptColors.label,
+      );
+
+  void _notice(String msg) => Get.snackbar(
+        '提示',
+        msg,
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: HomePromptColors.notice,
         colorText: HomePromptColors.label,
       );
 

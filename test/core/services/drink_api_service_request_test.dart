@@ -46,6 +46,8 @@ void main() {
     });
 
     test('发送六个业务参数且不含 stype', () async {
+      // ptype 对齐上游实测：91 为钱包支付，21 为支付宝免密。
+      // 本项目旧值 0 来自静态逆向、语义未确证；91/21 来自上游运行时取值。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.startDrinking(deviceId: 'device123');
@@ -54,13 +56,23 @@ void main() {
       expect(params, isNotNull);
       expect(params!['did'], 'device123');
       expect(params['upgrade'], true);
-      expect(params['ptype'], 0);
+      expect(params['ptype'], 91);
       expect(params['args'], '');
       expect(params['rcp'], false);
       expect(params['cnt'], 1);
       expect(params.containsKey('stype'), isFalse);
     });
 
+    test('显式传入 ptype 时按传入值发送', () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.startDrinking(deviceId: 'device123', ptype: 21);
+
+      expect(
+        adapter.captured?.queryParameters['ptype'],
+        21,
+      );
+    });
     test('startDrinking 不带 sign', () async {
       // 实测服务端不校验该接口签名：不带 sign 返回 code:0，
       // 带上按官方算法算出的 sign 反而返回「验签失败」。
@@ -113,7 +125,7 @@ void main() {
       DrinkApiService().setHttpClientAdapter(adapter);
     });
 
-    test('stopDrinking 携带 did 且不带 sign', () async {
+    test('stopDrinking 携带 did 与 rcp 且不带 sign', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.stopDrinking(deviceId: 'device123');
@@ -121,6 +133,7 @@ void main() {
       final params = adapter.captured?.queryParameters;
       expect(params, isNotNull);
       expect(params!['did'], 'device123');
+      expect(params['rcp'], false);
       expect(params.containsKey('sign'), isFalse);
     });
 
@@ -132,7 +145,8 @@ void main() {
       final params = adapter.captured?.queryParameters;
       expect(params, isNotNull);
       expect(params!['did'], 'device123');
-      expect(params['remove'], false);
+      // remove 以 1/0 上线，与官方(false=0)一致；旧的 true/false 上线未实测。
+      expect(params['remove'], 0);
       expect(params.containsKey('sign'), isFalse);
     });
 
@@ -186,6 +200,120 @@ void main() {
       expect(text, isNot(contains('cid')));
       expect(text, contains('un'));
       expect(text, contains('authCode'));
+    });
+  });
+
+  group('DrinkApiService 设备状态解析', () {
+    late _CapturingAdapter adapter;
+
+    setUp(() {
+      adapter = _CapturingAdapter();
+      SharedPreferences.setMockInitialValues({
+        'drink_water_app_token':
+            '{"uid":"87654321abcdefgh","eid":"e1","token":"abcdefgh12345678"}',
+        'drink_water_app_is_login': true,
+      });
+      DrinkApiService().setHttpClientAdapter(adapter);
+    });
+
+    test('deviceStatus 解析出离线 / 禁用 / 空闲 / 运行中', () async {
+      final api = DrinkApiService();
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":0,"gene":{"status":0}}}}';
+      var result = await api.deviceStatus(deviceId: 'd');
+      expect(result.success, isTrue);
+      expect(result.status!.isOffline, isTrue);
+      expect(result.status!.isAvailable, isFalse);
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":1,"gene":{"status":98}}}}';
+      result = await api.deviceStatus(deviceId: 'd');
+      expect(result.status!.isDisabled, isTrue);
+      expect(result.status!.isAvailable, isFalse);
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":1,"gene":{"status":99}}}}';
+      result = await api.deviceStatus(deviceId: 'd');
+      expect(result.status!.isAvailable, isTrue);
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":1,"gene":{"status":1}}}}';
+      result = await api.deviceStatus(deviceId: 'd');
+      expect(result.status!.isAvailable, isFalse);
+      expect(result.status!.isOffline, isFalse);
+      expect(result.status!.isDisabled, isFalse);
+    });
+
+    test('deviceStatus 服务端拒绝时透出 code 与 msg', () async {
+      adapter.responseBody = '{"code":-99,"msg":"登录状态已过期"}';
+
+      final api = DrinkApiService();
+      final result = await api.deviceStatus(deviceId: 'd');
+
+      expect(result.success, isFalse);
+      expect(result.code, -99);
+      expect(result.message, '登录状态已过期');
+      expect(result.isSessionExpired, isTrue);
+    });
+
+    test('deviceStatus 请求形状：did 与 more=false，无 promo、无 sign', () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.deviceStatus(deviceId: 'device123');
+
+      final params = adapter.captured?.queryParameters;
+      expect(params!['did'], 'device123');
+      expect(params['more'], false);
+      expect(params.containsKey('promo'), isFalse);
+      expect(params.containsKey('sign'), isFalse);
+    });
+
+    test('isDeviceAvailable 三态映射：离线与禁用不可用，空闲可用', () async {
+      final api = DrinkApiService();
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":0,"gene":{"status":0}}}}';
+      expect(await api.isDeviceAvailable(deviceId: 'd'), isFalse);
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":1,"gene":{"status":98}}}}';
+      expect(await api.isDeviceAvailable(deviceId: 'd'), isFalse);
+
+      adapter.responseBody =
+          '{"code":0,"data":{"device":{"status":1,"gene":{"status":99}}}}';
+      expect(await api.isDeviceAvailable(deviceId: 'd'), isTrue);
+    });
+
+    test('resolveQrDevice 从 qr/use 提取设备 ID', () async {
+      adapter.responseBody =
+          '{"code":0,"data":{"dev":{"id":"dev-9"}}}';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.resolveQrDevice(qrId: 'abc');
+
+      expect(result, 'dev-9');
+      expect(adapter.captured?.uri.path, contains('qr/use'));
+      expect(adapter.captured?.queryParameters['id'], 'abc');
+    });
+
+    test('resolveQrDevice 响应不含设备时回退为空串', () async {
+      adapter.responseBody = '{"code":0,"data":{}}';
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      expect(await api.resolveQrDevice(qrId: 'abc'), '');
+    });
+
+    test('resolveQrDevice 空编号直接拒绝且不发包', () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final capturedBefore = adapter.captured;
+
+      expect(await api.resolveQrDevice(qrId: ''), '');
+
+      expect(adapter.captured, same(capturedBefore), reason: '空编号不应发起请求');
     });
   });
 
