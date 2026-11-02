@@ -16,6 +16,7 @@ import 'home_prompt_colors.dart';
 const homeBackgroundKey = Key('homeBackground');
 const statusCardKey = Key('statusCard');
 const statusIconChipKey = Key('statusIconChip');
+const balanceSectionKey = Key('balanceSection');
 const primaryActionKey = Key('primaryAction');
 const layoutToggleKey = Key('layoutToggle');
 const reorderToggleKey = Key('reorderToggle');
@@ -326,7 +327,10 @@ class HomePage extends StatelessWidget {
           // 状态显示
           _buildStatusCard(context, controller),
 
-          SizedBox(height: compact ? 14 : 24),
+          SizedBox(height: compact ? 10 : 14),
+
+          // 余额条（登录后展示；未知值以占位符呈现）
+          _buildBalanceStrip(context, controller),
 
           // 设备选择区域
           _buildDeviceSection(context, controller),
@@ -345,6 +349,76 @@ class HomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// 余额条：钱包余额 + 积分，登录后展示。
+  ///
+  /// 复用状态卡的表面角色（card 底 + hairline 描边 + radiusCard 圆角），
+  /// 未知值以 `--` 占位，不做可交互元素。
+  Widget _buildBalanceStrip(BuildContext context, HomeController controller) {
+    return Obx(() {
+      if (!controller.balanceVisible.value) return const SizedBox.shrink();
+      final p = _HomePalette.of(context);
+      final compact = _HomePalette.isCompact(context);
+      final wallet = controller.walletBalance.value;
+      final score = controller.scoreBalance.value;
+
+      Widget cell(String label, String value) => Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: compact ? 11 : 12,
+                color: p.inkSecondary,
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: TextStyle(
+                fontSize: compact ? 16 : 18,
+                fontWeight: FontWeight.bold,
+                color: p.ink,
+              ),
+            ),
+          ],
+        ),
+      );
+
+      final strip = Container(
+        key: balanceSectionKey,
+        padding: EdgeInsets.symmetric(
+          horizontal: compact ? 14 : 18,
+          vertical: compact ? 10 : 14,
+        ),
+        decoration: BoxDecoration(
+          color: p.card,
+          borderRadius: BorderRadius.circular(_HomeT.radiusCard),
+          border: Border.all(color: p.hairline, width: 1),
+        ),
+        child: Row(
+          children: [
+            cell('钱包余额', wallet == null ? '--' : '¥${wallet.toStringAsFixed(2)}'),
+            Container(
+              width: 1,
+              height: compact ? 26 : 30,
+              margin: const EdgeInsets.symmetric(horizontal: 14),
+              color: p.hairline,
+            ),
+            cell('积分', score == null ? '--' : '$score'),
+          ],
+        ),
+      );
+      // 间距跟条一起出现，避免未登录时状态卡与设备区之间多出一段空隙。
+      return Column(
+        children: [
+          strip,
+          SizedBox(height: compact ? 14 : 24),
+        ],
+      );
+    });
   }
 
   /// 状态卡片

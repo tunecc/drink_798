@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../core/app_controller.dart';
 import '../../core/models/device_model.dart';
+import '../../core/models/settlement_bill.dart';
 import '../../core/utils/device_order.dart';
 import '../../core/services/drink_api_service.dart';
 import '../login/login_controller.dart';
@@ -27,10 +28,22 @@ class DrinkFailurePrompt {
   final bool isSessionExpired;
 }
 
+/// 钱包支付被拒时按服务端返回码给出可操作的提示。
+///
+/// 结算级联由服务端执行（积分 → 钱包 → 支付宝），客户端不切换支付方式，
+/// 因此这些拒绝都必须落到明确的用户动作上：充值或完成签约。
+const _paymentRejectionPrompts = <int, String>{
+  -52: '账户欠费，请充值后再使用',
+  -82: '本次接水需要支付，请确认账户余额或完成支付',
+  -88: '未签约支付宝代扣协议，请先在服务端完成签约后再使用',
+  -87: '代扣签约已过期，请重新签约后再使用',
+};
+
 /// 把服务端返回转换为用户可读的失败提示。
 ///
-/// 登录态过期（code -99）单独引导重新登录；其他业务错误透出服务端信息；
-/// 两者都缺失时退回 [fallback]。
+/// 登录态过期（code -99）单独引导重新登录；钱包支付被拒的已知码
+/// （-52/-82/-88/-87）给出可操作提示；其他业务错误透出服务端信息；
+/// 都没有时退回 [fallback]。
 DrinkFailurePrompt drinkFailurePrompt(
   DrinkResult result, {
   required String fallback,
@@ -40,6 +53,16 @@ DrinkFailurePrompt drinkFailurePrompt(
       title: '登录已过期',
       message: '请重新登录后再试',
       isSessionExpired: true,
+    );
+  }
+
+  final rejection =
+      result.code == null ? null : _paymentRejectionPrompts[result.code];
+  if (rejection != null) {
+    return DrinkFailurePrompt(
+      title: '失败',
+      message: rejection,
+      isSessionExpired: false,
     );
   }
 
@@ -75,6 +98,24 @@ class HomeController extends GetxController {
   final RxBool isLoading = false.obs;
   final RxBool isDrinking = false.obs;
 
+  /// 账户余额。null 表示未知/隐藏：未登录、接口失败或还没加载到。
+  final RxnDouble walletBalance = RxnDouble();
+  final RxnInt scoreBalance = RxnInt();
+
+  /// 余额区是否展示：登录后才展示（失败时以占位符呈现，不弹错误）。
+  final RxBool balanceVisible = false.obs;
+
+  /// 本次接水的开始时刻。结算账单必须不早于它，避免把别人的账单算进来。
+  /// 非本人发起的会话（预检发现占用）为 null，不做结算上报。
+  DateTime? _sessionStartedAt;
+
+  /// 结算上报轮询。出账有延迟：有界轮询账单列表，命中后拉详情拿积分抵扣。
+  Timer? _reportTimer;
+
+  /// 上报轮询的并发挡板与次数上限。
+  bool _reporting = false;
+  static const int _maxReportAttempts = 5;
+
   /// 设备列表请求是否在途。普通字段而不是 Rx：它不驱动界面，
   /// 只用来挡住连点刷新造成的并发请求（后到的结果会覆盖前一条列表）。
   bool _loadInFlight = false;
@@ -109,7 +150,30 @@ class HomeController extends GetxController {
   @override
   void onClose() {
     _statusTimer?.cancel();
+    _reportTimer?.cancel();
     super.onClose();
+  }
+
+  /// 拉取钱包与积分余额。
+  ///
+  /// 未登录时隐藏余额区；已登录但接口失败时保留已展示的旧值（首次
+  /// 加载时旧值本为 null，即占位符），都不弹错误打断用户。
+  Future<void> _loadBalances() async {
+    try {
+      if (!await _apiService.isLoggedIn()) {
+        balanceVisible.value = false;
+        walletBalance.value = null;
+        scoreBalance.value = null;
+        return;
+      }
+      balanceVisible.value = true;
+      final balance = await _apiService.accountBalance();
+      if (balance == null) return;
+      walletBalance.value = balance.walletYuan;
+      scoreBalance.value = balance.score;
+    } catch (_) {
+      // 刷新失败保留旧值，不清成占位符。
+    }
   }
 
   /// 加载设备列表
@@ -143,6 +207,9 @@ class HomeController extends GetxController {
       }
 
       deviceList.value = devices.map((e) => DeviceModel.fromJson(e)).toList();
+
+      // 余额与设备列表并行感知即可，不阻塞列表渲染。
+      unawaited(_loadBalances());
 
       // 加载备注
       await _loadDeviceNotes();
@@ -297,8 +364,9 @@ class HomeController extends GetxController {
   /// 开始接水
   ///
   /// 先查设备状态做预检：离线、禁用直接拦截，设备被他人使用中则同步为
-  /// 可结算态而不重发开始请求。开始请求优先钱包支付（91），余额不足等
-  /// 拒绝回退支付宝免密（21）再试一次；登录态过期不重试。
+  /// 可结算态而不重发开始请求。开始请求只发钱包支付（ptype=91），结算
+  /// 级联（积分 → 钱包 → 支付宝）由服务端执行，被拒按错误码如实提示，
+  /// 不存在支付方式回退；登录态过期不重试。
   Future<void> startDrinking() async {
     if (currentDevice == null) {
       Get.snackbar(
@@ -336,17 +404,17 @@ class HomeController extends GetxController {
         }
       }
 
-      var result = await _apiService.startDrinking(
+      // ptype=91（钱包支付）是唯一的开始请求类型：结算级联（积分 → 钱包
+      // → 支付宝）由服务端执行，被拒时按错误码如实提示，不存在回退。
+      final startedAt = DateTime.now();
+      final result = await _apiService.startDrinking(
         deviceId: deviceId,
         ptype: DrinkApiService.walletPaymentType,
       );
-      if (!result.success && !result.isSessionExpired) {
-        // 钱包（91）被拒时回退支付宝免密（21）再试一次。
-        result = await _apiService.startDrinking(deviceId: deviceId, ptype: 21);
-      }
 
       if (result.success) {
         isDrinking.value = true;
+        _sessionStartedAt = startedAt;
         _startStatusCheck();
         _ok('开始接水');
       } else {
@@ -362,17 +430,19 @@ class HomeController extends GetxController {
   /// 结束接水
   Future<void> stopDrinking() async {
     if (currentDevice == null) return;
+    final deviceId = currentDevice!.id;
 
     try {
-      final result = await _apiService.stopDrinking(
-        deviceId: currentDevice!.id,
-      );
+      final result = await _apiService.stopDrinking(deviceId: deviceId);
 
       _statusTimer?.cancel();
       isDrinking.value = false;
 
       if (result.success) {
         _ok('已结算');
+        // 结算已完成：先刷新余额，再等出账后上报消费明细。
+        unawaited(_loadBalances());
+        _startSettlementReport(deviceId);
       } else {
         _fail(result, fallback: '结算可能未成功，请检查');
       }
@@ -380,6 +450,72 @@ class HomeController extends GetxController {
       isDrinking.value = false;
       _statusTimer?.cancel();
     }
+  }
+
+  /// 结算上报：有界轮询账单列表，命中本次会话的账单后拉详情报三段金额。
+  ///
+  /// 出账有延迟且积分抵扣只在详情里（列表不含 promo），所以是
+  /// 列表 → 详情两步。窗口耗尽或详情始终拿不到时静默结束——积分全额
+  /// 抵扣的账单在列表里 payment 为零，只报列表会把 ¥0 误当全额，宁可不报。
+  void _startSettlementReport(String deviceId) {
+    // 读取即清除：会话起点只服务一次上报。预检「接管」的会话没有自己的
+    // 起点，不得复用上一次会话的起点把他人账单算进来。
+    final since = _sessionStartedAt;
+    _sessionStartedAt = null;
+    if (since == null) return;
+    _reportTimer?.cancel();
+    var attempts = 0;
+    _reportTimer = Timer.periodic(const Duration(seconds: 2), (timer) async {
+      if (_reporting) return;
+      _reporting = true;
+      attempts++;
+      try {
+        final bills = await _apiService.billList();
+        final candidate = SettlementBillParser.latestFromList(
+          bills,
+          deviceId: deviceId,
+          since: since,
+        );
+        if (candidate != null) {
+          final bill = await _apiService.billDetail(billId: candidate.billId);
+          final consumption = bill == null
+              ? null
+              : SettlementBillParser.fromDetail(bill, deviceId: deviceId);
+          if (consumption != null) {
+            timer.cancel();
+            _reportTimer = null;
+            _notice(_consumptionPrompt(consumption));
+            await _loadBalances();
+            return;
+          }
+        }
+        if (attempts >= _maxReportAttempts) {
+          timer.cancel();
+          _reportTimer = null;
+          await _loadBalances();
+        }
+      } catch (_) {
+        if (attempts >= _maxReportAttempts) {
+          timer.cancel();
+          _reportTimer = null;
+        }
+      } finally {
+        _reporting = false;
+      }
+    });
+  }
+
+  /// 消费明细的提示文案：无费用、积分抵扣、钱包支付三种信息按需出现。
+  String _consumptionPrompt(SettlementConsumption consumption) {
+    if (consumption.noCharge) return '本次未产生费用';
+    final total = consumption.totalYuan.toStringAsFixed(2);
+    if (consumption.scoreYuan <= 0) return '本次消费 ¥$total';
+    final score = consumption.scoreYuan.toStringAsFixed(2);
+    if (consumption.walletYuan <= 0) {
+      return '本次消费 ¥$total（积分抵扣 ¥$score）';
+    }
+    final wallet = consumption.walletYuan.toStringAsFixed(2);
+    return '本次消费 ¥$total（积分抵扣 ¥$score · 钱包支付 ¥$wallet）';
   }
 
   /// 按服务端返回码呈现失败原因。
@@ -438,6 +574,8 @@ class HomeController extends GetxController {
           // 设备空闲，自动结算
           isDrinking.value = false;
           timer.cancel();
+          // 非本人发起的会话没有会话起点，不做结算上报（见 _startSettlementReport）。
+          _startSettlementReport(currentDevice!.id);
         } else if (isAvailable) {
           idleCount++;
         } else {

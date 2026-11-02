@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:drink_water_app/core/models/account_balance.dart';
 import 'package:drink_water_app/core/models/device_model.dart';
 import 'package:drink_water_app/core/models/device_status.dart';
 import 'package:drink_water_app/core/services/drink_api_service.dart';
@@ -967,21 +968,19 @@ void main() {
       await dismissSnack(tester);
     });
 
-    testWidgets('a wallet-payment rejection falls back to alipay once', (
+    testWidgets('a wallet-payment rejection never switches payment method', (
       tester,
     ) async {
       final api = await pumpHomePage(
         tester,
         api: FakeHomeApiService(
-          // 第一次（钱包 91）被拒，第二次（支付宝 21）成功。
+          // 钱包（91）被拒：结算级联归服务端（积分→钱包→支付宝），
+          // 客户端不得改用支付宝免密重发。
           startResult: const DrinkResult(
             success: false,
             code: -100,
             message: '余额不足',
           ),
-          secondStartResult: const DrinkResult(success: true, code: 0),
-          // 回退成功后轮询立即看到设备空闲，收起接水态，不留周期 Timer。
-          deviceAvailable: true,
         ),
       );
       final controller = Get.find<HomeController>();
@@ -990,10 +989,33 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(api.startPtypes, [91, 21], reason: '钱包失败后应只回退一次支付宝');
-      expect(controller.isDrinking.value, isTrue, reason: '回退成功应进入接水态');
-      await tester.pump(const Duration(seconds: 6));
-      expect(controller.isDrinking.value, isFalse, reason: '空闲轮询应收起接水态');
+      expect(api.startCalls, 1, reason: '钱包被拒后不得改用支付宝再发请求');
+      expect(api.startPtypes, [91], reason: '只允许钱包支付类型');
+      expect(controller.isDrinking.value, isFalse, reason: '被拒后不进入接水态');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('an arrears rejection (-52) prompts a top-up, not alipay', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          startResult: const DrinkResult(
+            success: false,
+            code: -52,
+            message: '余额不足',
+          ),
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.startCalls, 1, reason: '欠费被拒也不改用支付宝');
+      expect(find.textContaining('充值'), findsOneWidget,
+          reason: '欠费提示应引导用户充值');
       await dismissSnack(tester);
     });
 
@@ -1101,6 +1123,356 @@ void main() {
       api.releaseStatus();
       await tester.pump();
       expect(api.startCalls, lessThanOrEqualTo(2));
+      // 释放后轮询看到的一直是可用状态，~5s 自动结算并启动结算上报；
+      // 上报窗口 ~15s 自行关闭，泵过它避免测试结束时 Timer 仍挂起。
+      await tester.pump(const Duration(seconds: 16));
+      await dismissSnack(tester);
+    });
+  });
+
+  group('balances and settlement report', () {
+    // 已结算饮水账单 fixture：utime 取远未来，保证晚于测试内任何会话起点。
+    final settledBill = {
+      'id': 'b9',
+      'type': 91,
+      'status': 3,
+      'cata': 6,
+      'payment': 0.35,
+      'utime': 4000000000000,
+      'dev': {'id': '101'},
+    };
+    final settledBillDetail = {
+      ...settledBill,
+      'promo': {'type': 4, 'discount': 0.65},
+    };
+
+    testWidgets('balances load with the device list and surface on the controller', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(tester);
+      final controller = Get.find<HomeController>();
+
+      expect(api.balanceCalls, greaterThanOrEqualTo(1));
+      expect(controller.walletBalance.value, 9.9);
+      expect(controller.scoreBalance.value, 100);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('failed balance lookup degrades to hidden without dialogs', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(balanceSequence: [null]),
+      );
+
+      final controller = Get.find<HomeController>();
+      expect(controller.walletBalance.value, isNull);
+      expect(controller.scoreBalance.value, isNull);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('manual settle reports consumption with the score breakdown', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: {'b9': settledBillDetail},
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(api.billListCalls, greaterThanOrEqualTo(1));
+      expect(api.billDetailCalls, greaterThanOrEqualTo(1));
+      expect(find.textContaining('本次消费'), findsOneWidget);
+      expect(find.textContaining('积分抵扣'), findsOneWidget);
+      expect(controller.walletBalance.value, 9.55, reason: '结算后余额应刷新');
+      expect(controller.scoreBalance.value, 60);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a bill appearing late is still reported within the window', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [],
+            [settledBill],
+          ],
+          billDetailBills: {'b9': settledBillDetail},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 2));
+      expect(find.textContaining('本次消费'), findsNothing);
+
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+      expect(api.billDetailCalls, greaterThanOrEqualTo(1));
+      expect(find.textContaining('积分抵扣'), findsOneWidget);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a bill that never appears finishes quietly but refreshes balances', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [],
+          ],
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 12));
+
+      expect(find.textContaining('本次消费'), findsNothing);
+      expect(controller.walletBalance.value, 9.55, reason: '窗口耗尽也要刷新余额');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a missing bill detail never reports a wrong amount', (
+      tester,
+    ) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: const {},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 12));
+
+      expect(api.billDetailCalls, greaterThanOrEqualTo(1));
+      expect(find.textContaining('本次消费'), findsNothing,
+          reason: '详情拿不到积分抵扣，宁可不上报错误金额');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a zero-cost bill reports no charge', (tester) async {
+      final freeBill = Map<String, dynamic>.from(settledBillDetail)
+        ..['payment'] = 0
+        ..remove('promo');
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: {'b9': freeBill},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.textContaining('未产生费用'), findsOneWidget);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a fully score-covered bill reports the deduction as the total', (
+      tester,
+    ) async {
+      final coveredBill = Map<String, dynamic>.from(settledBillDetail)
+        ..['payment'] = 0;
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: {'b9': coveredBill},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 2));
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.textContaining('积分抵扣'), findsOneWidget);
+      expect(find.textContaining('钱包支付'), findsNothing,
+          reason: '积分全额抵扣时没有钱包支付段');
+      await dismissSnack(tester);
+    });
+
+    testWidgets('idle-detected settlement also reports consumption', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          deviceAvailable: true,
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: {'b9': settledBillDetail},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 6));
+      // snackbar 默认 3 秒自动收起：上报落在第 5~7 秒，断言必须在收起前。
+      await tester.pump(const Duration(seconds: 2));
+
+      expect(find.textContaining('积分抵扣'), findsOneWidget);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a failed balance refresh keeps the previously shown values', (
+      tester,
+    ) async {
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // 初次加载 9.9/100；结算后的刷新失败（null）必须保留旧值。
+          balanceSequence: [
+            const AccountBalance(walletYuan: 9.9, score: 100),
+            null,
+          ],
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      await tester.pump(const Duration(seconds: 12));
+
+      expect(controller.walletBalance.value, 9.9,
+          reason: '刷新失败不能把已展示的余额清成占位符');
+      expect(controller.scoreBalance.value, 100);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('an adopted busy session is not reported as our own', (
+      tester,
+    ) async {
+      final available = const DeviceStatus(deviceStatus: 1, geneStatus: 99);
+      final busy = const DeviceStatus(deviceStatus: 1, geneStatus: 1);
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // 会话一：预检可用 + 5 次空闲轮询后自动结算；会话二：预检遇到
+          // 忙碌（接管他人会话，不发开始请求）+ 5 次空闲轮询后自动结算。
+          statusQueue: [
+            available, available, available, available, available, available,
+            busy, available, available, available, available, available,
+          ],
+          billListPages: [
+            [settledBill],
+          ],
+          billDetailBills: {'b9': settledBillDetail},
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump(const Duration(seconds: 2));
+      final reportsAfterOwnSession = api.billListCalls;
+      expect(reportsAfterOwnSession, greaterThanOrEqualTo(1));
+      await dismissSnack(tester);
+
+      final controller = Get.find<HomeController>();
+      controller.selectDevice(1);
+      await controller.startDrinking();
+      await tester.pump();
+      expect(controller.isDrinking.value, isTrue, reason: '接管占用中的设备');
+      expect(api.startCalls, 1, reason: '接管会话不发开始请求');
+
+      await tester.pump(const Duration(seconds: 6));
+      await tester.pump(const Duration(seconds: 2));
+      expect(api.billListCalls, reportsAfterOwnSession,
+          reason: '接管会话不归属本人，不得复用上一次的会话起点再上报');
+      await dismissSnack(tester);
+    });
+  });
+
+  group('balance section', () {
+    testWidgets('shows wallet and score balances when logged in', (tester) async {
+      await pumpHomePage(tester);
+
+      expect(find.byKey(balanceSectionKey), findsOneWidget);
+      expect(find.text('¥9.90'), findsOneWidget);
+      expect(find.text('100'), findsOneWidget);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('dark mode keeps the section present and readable', (
+      tester,
+    ) async {
+      await pumpHomePage(tester, brightness: Brightness.dark);
+
+      expect(find.byKey(balanceSectionKey), findsOneWidget);
+      expect(find.text('¥9.90'), findsOneWidget);
+      expect(find.text('100'), findsOneWidget);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('hides the section when logged out', (tester) async {
+      await pumpHomePage(tester, api: FakeHomeApiService(loggedIn: false));
+
+      expect(find.byKey(balanceSectionKey), findsNothing);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('shows placeholders while balances are unknown', (tester) async {
+      await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(balanceSequence: [null]),
+      );
+
+      expect(find.byKey(balanceSectionKey), findsOneWidget);
+      expect(find.text('--'), findsNWidgets(2));
       await dismissSnack(tester);
     });
   });

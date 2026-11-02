@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:drink_water_app/core/models/account_balance.dart';
 import 'package:drink_water_app/core/models/device_status.dart';
 import 'package:drink_water_app/core/services/drink_api_service.dart';
 
@@ -14,7 +15,6 @@ class FakeHomeApiService extends DrinkApiService {
       {'id': '102', 'name': '1栋102'},
     ],
     this.startResult = const DrinkResult(success: true, code: 0),
-    this.secondStartResult,
     this.stopResult = const DrinkResult(success: true, code: 0),
     this.deviceAvailable = false,
     this.toggleResult = true,
@@ -25,14 +25,18 @@ class FakeHomeApiService extends DrinkApiService {
     this.pollStatusFailure,
     this.hangStatus = false,
     this.resolveQrResponse = '',
+    this.balanceSequence = const [
+      AccountBalance(walletYuan: 9.9, score: 100),
+      AccountBalance(walletYuan: 9.55, score: 60),
+    ],
+    this.billListPages = const [],
+    this.billDetailBills = const {},
+    this.loggedIn = true,
+    this.statusQueue = const [],
   }) : super.test();
 
   final List<Map<String, dynamic>> devices;
   final DrinkResult startResult;
-
-  /// 第二次 startDrinking（钱包支付失败后的回退请求）返回的结果；
-  /// 为 null 时所有调用都返回 [startResult]。
-  final DrinkResult? secondStartResult;
   final DrinkResult stopResult;
 
   /// 轮询阶段（deviceStatus 预检之后）设备是否空闲可用。
@@ -54,6 +58,21 @@ class FakeHomeApiService extends DrinkApiService {
   /// resolveQrDevice 返回的设备 ID；空串表示服务端没能解析。
   final String resolveQrResponse;
 
+  /// accountBalance 按调用次序返回的序列；耗尽后重复最后一个。
+  final List<AccountBalance?> balanceSequence;
+
+  /// billList 依次返回的账单记录页；耗尽后重复最后一个，空表默认返回 []。
+  final List<List<Map<String, dynamic>>> billListPages;
+
+  /// billDetail 按 billId 返回的账单详情；缺失的 id 返回 null。
+  final Map<String, Map<String, dynamic>> billDetailBills;
+
+  /// isLoggedIn 的替身返回；默认视为已登录。
+  final bool loggedIn;
+
+  /// deviceStatus 依次返回的显式状态队列；耗尽后回落到默认逻辑。
+  final List<DeviceStatus> statusQueue;
+
   int deviceListCalls = 0;
   int startCalls = 0;
   int stopCalls = 0;
@@ -61,6 +80,9 @@ class FakeHomeApiService extends DrinkApiService {
   int availableCalls = 0;
   int toggleCalls = 0;
   int resolveCalls = 0;
+  int balanceCalls = 0;
+  int billListCalls = 0;
+  int billDetailCalls = 0;
   final List<int> startPtypes = [];
   String? lastToggleDeviceId;
   bool? lastToggleIsRemove;
@@ -90,15 +112,15 @@ class FakeHomeApiService extends DrinkApiService {
   }
 
   @override
+  Future<bool> isLoggedIn() async => loggedIn;
+
+  @override
   Future<DrinkResult> startDrinking({
     required String deviceId,
     int ptype = DrinkApiService.walletPaymentType,
   }) async {
     startCalls++;
     startPtypes.add(ptype);
-    if (startCalls == 2 && secondStartResult != null) {
-      return secondStartResult!;
-    }
     return startResult;
   }
 
@@ -111,6 +133,13 @@ class FakeHomeApiService extends DrinkApiService {
   @override
   Future<DeviceStatusResult> deviceStatus({required String deviceId}) async {
     statusCalls++;
+    if (statusQueue.isNotEmpty) {
+      final index = statusCalls - 1;
+      final status = statusQueue[index < statusQueue.length
+          ? index
+          : statusQueue.length - 1];
+      return DeviceStatusResult(success: true, code: 0, status: status);
+    }
     if (hangStatus) {
       final gate = _statusGate ??= Completer<DeviceStatusResult>();
       return gate.future;
@@ -148,6 +177,33 @@ class FakeHomeApiService extends DrinkApiService {
     resolveCalls++;
     lastQrId = qrId;
     return resolveQrResponse;
+  }
+
+  @override
+  Future<AccountBalance?> accountBalance() async {
+    if (!loggedIn) return null;
+    balanceCalls++;
+    if (balanceSequence.isEmpty) return null;
+    final index = balanceCalls - 1;
+    return balanceSequence[index < balanceSequence.length
+        ? index
+        : balanceSequence.length - 1];
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> billList() async {
+    billListCalls++;
+    if (billListPages.isEmpty) return const [];
+    final index = billListCalls - 1;
+    return billListPages[index < billListPages.length
+        ? index
+        : billListPages.length - 1];
+  }
+
+  @override
+  Future<Map<String, dynamic>?> billDetail({required String billId}) async {
+    billDetailCalls++;
+    return billDetailBills[billId];
   }
 }
 

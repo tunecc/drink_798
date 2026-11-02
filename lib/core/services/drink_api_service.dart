@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/account_balance.dart';
 import '../models/device_status.dart';
 
 /// 饮水操作的结果。
@@ -383,8 +384,8 @@ class DrinkApiService {
 
   /// 开始接水
   ///
-  /// [ptype] 缺省为钱包支付（91）；钱包余额不足等导致被拒时，调用方可
-  /// 回退支付宝免密支付（21）重发一次。
+  /// [ptype] 缺省为钱包支付（91），它是唯一的开始请求类型；被拒时
+  /// 调用方按错误码如实提示，不存在改用其他支付方式的重试。
   Future<DrinkResult> startDrinking({
     required String deviceId,
     int ptype = walletPaymentType,
@@ -524,4 +525,123 @@ class DrinkApiService {
       return '';
     }
   }
+
+  /// 查询账户余额：钱包（`/acc/wallet/owner`）与积分（`/acc/score/acc-score`）。
+  ///
+  /// 两个接口并行请求，形状对照 life-798 已核验实现（无签名、仅
+  /// Authorization）。未登录不发请求；某侧失败该侧为 null，全部失败
+  /// 返回 null。解析失败不抛错。
+  Future<AccountBalance?> accountBalance() async {
+    if (!await isLoggedIn()) return null;
+    final walletFuture = _fetchWalletYuan();
+    final scoreFuture = _fetchScore();
+    final walletYuan = await walletFuture;
+    final score = await scoreFuture;
+    final balance = AccountBalance(walletYuan: walletYuan, score: score);
+    if (balance.walletYuan == null && balance.score == null) return null;
+    return balance;
+  }
+
+  Future<double?> _fetchWalletYuan() async {
+    try {
+      Response response = await _dio.get(
+        "$_baseUrl/acc/wallet/owner",
+        options: await _authOptions(),
+      );
+      final data = _successData(response.data);
+      if (data == null) return null;
+      return _parseWalletYuan(data, endpointId: _token["eid"]?.toString());
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Future<int?> _fetchScore() async {
+    try {
+      Response response = await _dio.get(
+        "$_baseUrl/acc/score/acc-score",
+        options: await _authOptions(),
+      );
+      final data = _successData(response.data);
+      if (data == null) return null;
+      final score = data['validScore'];
+      // 服务端可能把整数积分发成 JSON double（4200.0），一并接受。
+      return score is num ? score.toInt() : int.tryParse('$score');
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// 钱包余额：优先取端点 ID 匹配账户 eid 的唯一条目，否则仅当
+  /// 全部条目唯一时取那一条；无法唯一判定时不猜测，返回 null。
+  ///
+  /// 服务端形状为 `data.aw`（主钱包）与 `data.eps[]`（分端点钱包），
+  /// 各条目带 `id`（端点）与 `balance`（元）。对照 life-798
+  /// `WalletResponseParser.dashboardBalance` 的已核验语义。
+  double? _parseWalletYuan(Map<dynamic, dynamic> data, {String? endpointId}) {
+    final entries = <Map<dynamic, dynamic>>[
+      if (data['aw'] is Map) data['aw'] as Map<dynamic, dynamic>,
+      if (data['eps'] is List)
+        ...(data['eps'] as List).whereType<Map<dynamic, dynamic>>(),
+    ];
+    double? balanceOf(Map<dynamic, dynamic> entry) {
+      final value = entry['balance'];
+      return value is num ? value.toDouble() : null;
+    }
+    if (endpointId != null && endpointId.isNotEmpty) {
+      final matched = entries
+          .where((entry) => entry['id']?.toString() == endpointId)
+          .toList();
+      if (matched.length == 1) return balanceOf(matched.single);
+    }
+    if (entries.length == 1) return balanceOf(entries.single);
+    return null;
+  }
+
+  /// 账单列表：最近一页结算记录（`/bill/lst-owner`）。
+  ///
+  /// 请求失败或形状异常返回空列表，由调用方按「暂未出账」处理。
+  Future<List<Map<String, dynamic>>> billList() async {
+    try {
+      Response response = await _dio.get(
+        "$_baseUrl/bill/lst-owner",
+        queryParameters: const {"page": 0, "size": 20},
+        options: await _authOptions(),
+      );
+      final data = _successData(response.data);
+      if (data == null) return const [];
+      final records = data['records'] ?? data['items'] ?? data['list'];
+      if (records is! List) return const [];
+      return records.whereType<Map>().map(_stringKeyMap).toList();
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  /// 账单详情（`/bill/view-full`），积分抵扣只在这里的 promo 里。
+  ///
+  /// 失败或形状异常返回 null。
+  Future<Map<String, dynamic>?> billDetail({required String billId}) async {
+    try {
+      Response response = await _dio.get(
+        "$_baseUrl/bill/view-full",
+        queryParameters: {"id": billId},
+        options: await _authOptions(),
+      );
+      final data = _successData(response.data);
+      final bill = data?['bill'];
+      return bill is Map ? _stringKeyMap(bill) : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  Map<String, dynamic>? _successData(dynamic body) {
+    if (body is! Map || body['code'] != 0) return null;
+    final data = body['data'];
+    return data is Map ? _stringKeyMap(data) : null;
+  }
+
+  Map<String, dynamic> _stringKeyMap(Map<dynamic, dynamic> value) =>
+      value.map((key, value) => MapEntry('$key', value));
 }
