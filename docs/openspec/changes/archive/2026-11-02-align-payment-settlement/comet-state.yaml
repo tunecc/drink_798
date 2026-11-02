@@ -1,0 +1,2697 @@
+# comet-execution: managed-run
+workflow: full
+language: en
+phase: archive
+context_compression: off
+build_mode: autonomous
+build_pause: null
+subagent_dispatch: null
+tdd_mode: tdd
+review_mode: standard
+isolation: current
+bound_branch: main
+verify_mode: null
+auto_transition: true
+base_ref: 7380c52c9475661507bd4e3ba5b39611e394f2e9
+design_doc: docs/openspec/changes/archive/2026-11-02-align-payment-settlement/design.md
+plan: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+verify_result: pass
+verify_failures: 0
+check_epoch: 6
+verification_report: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+branch_status: pending
+created_at: 2026-11-01
+verified_at: 2026-11-02
+archive_confirmation: confirmed
+archived: true
+direct_override: false
+handoff_context: docs/openspec/changes/archive/2026-11-02-align-payment-settlement/.comet/handoff/design-context.json
+handoff_hash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+classic_profile: null
+classic_migration: null
+run_checkpoint:
+  schema: comet.workflow-run-checkpoint.v2
+  hash: cd3e39c918935f5c8601dff3eb68abccf92064c9acf27504a1e418a24f16380b
+  run:
+    protocolVersion: 1
+    schemaVersion: 1
+    runId: align-payment-settlement
+    revision: 1
+    workflow:
+      id: comet-classic-full
+      version: "1"
+      hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    definitionHashes:
+      '["comet-classic-full","1"]': ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    initialStateHash: b997e4a21d9129551897dabe58afa6a040833b30264debb4b14d57c93379e26e
+    input:
+      change: align-payment-settlement
+      changeDir: docs/openspec/changes/align-payment-settlement
+      workspaceBaseline:
+        ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+    state:
+      archiveConfirmation: confirmed
+      archived: true
+      autoTransition: true
+      baseRef: 7380c52c9475661507bd4e3ba5b39611e394f2e9
+      boundBranch: main
+      branchStatus: pending
+      buildMode: autonomous
+      buildPause: null
+      checkEpoch: 6
+      classicMigration: null
+      classicProfile: null
+      contextCompression: off
+      createdAt: 2026-11-01
+      designDoc: docs/openspec/changes/archive/2026-11-02-align-payment-settlement/design.md
+      directOverride: false
+      handoffContext: docs/openspec/changes/archive/2026-11-02-align-payment-settlement/.comet/handoff/design-context.json
+      handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+      isolation: current
+      language: en
+      phase: archive
+      plan: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+      reviewMode: standard
+      subagentDispatch: null
+      tddMode: tdd
+      verificationReport: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+      verifiedAt: 2026-11-02
+      verifyFailures: 0
+      verifyMode: null
+      verifyResult: pass
+      workflow: full
+    status: running
+    sequence: 24
+    actions:
+      - attempt: 1
+        claim:
+          executorId: comet-classic-guard
+          token: portable-e133984a1298c37784b5d8d516e54c5d35251e0fc2bb7a23abdd20963acdc8c7
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:1
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 675c8c617f083c0396e45f4fada94d0f4b5c109af2f281580a9362cfda2ecd7c
+        outcome:
+          actionId: align-payment-settlement:1
+          attempt: 1
+          claimToken: portable-e133984a1298c37784b5d8d516e54c5d35251e0fc2bb7a23abdd20963acdc8c7
+          inputHash: 675c8c617f083c0396e45f4fada94d0f4b5c109af2f281580a9362cfda2ecd7c
+          outcomeId: 4ce8b2da-0783-47be-8c0a-2a71330602da
+          output:
+            event: open-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: c2c42af4e106f6170300b09fcbf27f0e78e0890cf50dba028675ae42ac28e3b2
+            outcomeId: 4ce8b2da-0783-47be-8c0a-2a71330602da
+        reconciliations: []
+        ref: comet-open
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.open
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-open-revalidate
+          token: portable-1581555fa2fcf344570fa70861d5585225a1f0332d612dc5a925959453ad5310
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:4
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 5980ae2201a7513ce4c1eca38930380908b929208a96f9102d1d997c610392ba
+        outcome:
+          actionId: align-payment-settlement:4
+          attempt: 1
+          claimToken: portable-1581555fa2fcf344570fa70861d5585225a1f0332d612dc5a925959453ad5310
+          inputHash: 5980ae2201a7513ce4c1eca38930380908b929208a96f9102d1d997c610392ba
+          outcomeId: align-payment-settlement:4:1:executor-result
+          output:
+            contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 7752ff9cb4a03f76c75ea1afab4333af534c475c9375d79be17e489f6392d206
+            outcomeId: align-payment-settlement:4:1:executor-result
+        reconciliations: []
+        ref: classic-open-revalidate
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.open.revalidate
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-890ecd48ff8a97a050a5be107a33fd7c5c8567253eb2b34610eb76587e15decc
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:5
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: a014d153271a4909edd9ed5bcd945e4e9e119776274a5ca3b9ce9d2849176f00
+        outcome:
+          actionId: align-payment-settlement:5
+          attempt: 1
+          claimToken: portable-890ecd48ff8a97a050a5be107a33fd7c5c8567253eb2b34610eb76587e15decc
+          inputHash: a014d153271a4909edd9ed5bcd945e4e9e119776274a5ca3b9ce9d2849176f00
+          outcomeId: 2767a90f-1193-4a22-a66d-4d6241f44e20
+          output:
+            handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+            handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+            proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+              the silent ptype=91→21 Alipay fallback entirely (no confirmation
+              dialog); D2 map -52/-82/-88/-87 to actionable Chinese prompts in
+              the existing pure prompt helper, -99 unchanged, unmapped codes
+              pass through; D3 two-step bounded poll after settle — list
+              /bill/lst-owner (type=91/status=3/cata=6, device+time filtered)
+              then detail /bill/view-full for the promo.type=4 score-discount
+              part, silent expiry instead of misreporting a fully score-covered
+              bill as zero; D4 balance endpoints /acc/wallet/owner +
+              /acc/score/acc-score with the existing token/headers, contingency
+              adds ApplicationType 1,1 to those two requests only; D5 nullable
+              balance state on the controller, home-page section only when
+              logged in, degrades silently. Testing: parser/controller/widget
+              layers incl. exactly-one-start-request assertion and scripted
+              bill-availability timing, flutter analyze green, real-device
+              integration check (tasks 5.2). Spec Patch: none. Approved by the
+              user at comet-design Step 1c (AskUserQuestion: 确认本设计)."
+            requirementsEvidence:
+              contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+              ref: docs/openspec/changes/align-payment-settlement
+            sourceEvidence:
+              contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+              ref: docs/openspec/changes/align-payment-settlement
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 286bd817e7fac03da3115bb5dbff2143bc8faff9aed7b36159151d4f01433a50
+            outcomeId: 2767a90f-1193-4a22-a66d-4d6241f44e20
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.design.handoff
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-5b2a91e74e1ca38d1baa2b43c7c18110f209a084cabeb6572ce3955f586fae95
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:7
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: b5371dfba87f9a20541fbb3fbfffbca5a6f0cfc3d2d237a52beef432648761e1
+        outcome:
+          actionId: align-payment-settlement:7
+          attempt: 1
+          claimToken: portable-5b2a91e74e1ca38d1baa2b43c7c18110f209a084cabeb6572ce3955f586fae95
+          inputHash: b5371dfba87f9a20541fbb3fbfffbca5a6f0cfc3d2d237a52beef432648761e1
+          outcomeId: 825a21ec-80ef-4984-a2aa-04eff93cc8d3
+          output:
+            designDoc: docs/openspec/changes/align-payment-settlement/design.md
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 71a23e28e601d3e77c8973be6ba01a25a8769fd946487a776aa42e9c061a8e38
+            outcomeId: 825a21ec-80ef-4984-a2aa-04eff93cc8d3
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.design.document
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-017bcccb8c0a6141dfe1c6d330a247e676cf047258d3101d3967f60a7f5ce3ec
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:9
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 9ad27993d5994149efc0ade7deef1c34efc5be0b1a6ca1dd0872d36d1938cfb8
+        outcome:
+          actionId: align-payment-settlement:9
+          attempt: 1
+          claimToken: portable-017bcccb8c0a6141dfe1c6d330a247e676cf047258d3101d3967f60a7f5ce3ec
+          inputHash: 9ad27993d5994149efc0ade7deef1c34efc5be0b1a6ca1dd0872d36d1938cfb8
+          outcomeId: c9a7ba07-12d4-413f-8b70-065d9ef1b7e0
+          output:
+            boundBranch: main
+            buildMode: autonomous
+            directOverride: false
+            isolation: current
+            reviewMode: standard
+            subagentDispatch: null
+            tddMode: tdd
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 9fe16b8b4de0ea8947604de17c4a2c8343577a00a2fd3adfbc0c35d457f81257
+            outcomeId: c9a7ba07-12d4-413f-8b70-065d9ef1b7e0
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.build.configure
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-a75b0439c096cae3efcdd44186e1c5b49634bb1b40905b4111d09cef03e8eed3
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:11
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 450edee7f9f7e1e60325b60d32c9533fa550fd11d81282bd0c9e30fb25c3ec10
+        outcome:
+          actionId: align-payment-settlement:11
+          attempt: 1
+          claimToken: portable-a75b0439c096cae3efcdd44186e1c5b49634bb1b40905b4111d09cef03e8eed3
+          inputHash: 450edee7f9f7e1e60325b60d32c9533fa550fd11d81282bd0c9e30fb25c3ec10
+          outcomeId: c2901848-0e00-4008-875f-9d1e2a43538e
+          output:
+            designEvidence:
+              contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+              ref: docs/openspec/changes/align-payment-settlement/design.md
+            plan: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+            planEvidence:
+              contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+              ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+            taskRevision: faf81ef53b8640f30edef6be47b095e83527ae58be95ab23b605d0b5699f8c15
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 2383d003d7e207116cb03ac78082dc5f30715c9e6da7adba103ec2d5f95a11cf
+            outcomeId: c2901848-0e00-4008-875f-9d1e2a43538e
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.build.plan
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          sessionId: classic-builder/align-payment-settlement:13/1
+          token: portable-a7915f1651c6a3f726e8684ed8f007fac16a2c5c9b819aae7114cc9b4490a7bf
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:13
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 1569f0695a11e0c25be862cf579277389ca5e22bfe9a809dd32e6763b536f636
+        outcome:
+          actionId: align-payment-settlement:13
+          attempt: 1
+          claimToken: portable-a7915f1651c6a3f726e8684ed8f007fac16a2c5c9b819aae7114cc9b4490a7bf
+          inputHash: 1569f0695a11e0c25be862cf579277389ca5e22bfe9a809dd32e6763b536f636
+          outcomeId: 291a69ae-f101-4a8c-8d6c-064f623490b8
+          output:
+            event: build-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: a6c3db93ea9edd171d5705482ef878fa2999efb0b44ff85896513b12ef0b2080
+            outcomeId: 291a69ae-f101-4a8c-8d6c-064f623490b8
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.build.execute
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-dc44ec38812a732e283d5f73fdd363af461bfb2773c8455fb04a7047492671e7
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:14
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 9f08873e4ecc11edff4c80434d706d7f6d60375ec7c1a29ac79a7435c32e7d10
+        outcome:
+          actionId: align-payment-settlement:14
+          attempt: 1
+          claimToken: portable-dc44ec38812a732e283d5f73fdd363af461bfb2773c8455fb04a7047492671e7
+          inputHash: 9f08873e4ecc11edff4c80434d706d7f6d60375ec7c1a29ac79a7435c32e7d10
+          outcomeId: 25e2ee0d-de51-4f00-ae68-0d8473586aed
+          output:
+            argv:
+              - flutter
+              - test
+            changedDuringExecution: []
+            checkEpoch: 2
+            contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+            cwd: .
+            environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+            exitCode: 0
+            inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+            inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+            manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+            manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/b29fde61-fe1e-457e-9ee8-3e43d5c50580.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+            reusable: false
+            reused: false
+            scope: build
+            tier: full
+            timeoutMs: 300000
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 710cc135e9d5a80e17042d23ae2303dbe9dc69fd0a9bde80d190b033dc221afe
+            outcomeId: 25e2ee0d-de51-4f00-ae68-0d8473586aed
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.build.check
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-guard
+          token: portable-4242bb3ee0b234954fc6b5c71ea42b957db12817eb8b503b94822f76f11f0f64
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:16
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: e3b701eedbd0bd9281f9bad46f94081a448f0693944e51cf75a9786347b48061
+        outcome:
+          actionId: align-payment-settlement:16
+          attempt: 1
+          claimToken: portable-4242bb3ee0b234954fc6b5c71ea42b957db12817eb8b503b94822f76f11f0f64
+          inputHash: e3b701eedbd0bd9281f9bad46f94081a448f0693944e51cf75a9786347b48061
+          outcomeId: 2525338d-a884-4bf9-bb7d-d9231ef4cbdc
+          output:
+            event: verification-ready
+            verificationReport: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: c24d22a407d08b355e3b8284c1697c4fa157c27eaacf0f324003b683bd86800a
+            outcomeId: 2525338d-a884-4bf9-bb7d-d9231ef4cbdc
+        reconciliations: []
+        ref: comet-verify
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.verify.run
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-67d8e5f199f9eeba9a044e9066549aef16576ea48600c5a1e53725f54c26469d
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:18
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 8c14892bc21a264a2c2d507fc5b968f6adfe91694826bbac112c459288d18d55
+        outcome:
+          actionId: align-payment-settlement:18
+          attempt: 1
+          claimToken: portable-67d8e5f199f9eeba9a044e9066549aef16576ea48600c5a1e53725f54c26469d
+          inputHash: 8c14892bc21a264a2c2d507fc5b968f6adfe91694826bbac112c459288d18d55
+          outcomeId: e54b470b-8e36-4dcd-9968-d9b8453b3173
+          output:
+            argv:
+              - flutter
+              - test
+            changedDuringExecution: []
+            checkEpoch: 3
+            contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+            cwd: .
+            deliveryInputs: {}
+            environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+            exitCode: 0
+            inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+            inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+            manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+            manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/9d4d5d42-420b-4cb2-9c2f-c58a770f378f.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+            reusable: true
+            reused: false
+            scope: verify
+            tier: full
+            timeoutMs: 300000
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 0926f56a5aad0b081eabffcdf134a1df442be79d573f8cf5a81cd34d24706976
+            outcomeId: e54b470b-8e36-4dcd-9968-d9b8453b3173
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.verify.check
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-dfc7d7174379d3acec4206a28389eadab462377ec565d17865929e6580713022
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:20
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: ce94a2436e3d1922cc9081ed5ec17d8353f0f0e83ed1b92738b67e47c9fa6b8a
+        outcome:
+          actionId: align-payment-settlement:20
+          attempt: 1
+          claimToken: portable-dfc7d7174379d3acec4206a28389eadab462377ec565d17865929e6580713022
+          inputHash: ce94a2436e3d1922cc9081ed5ec17d8353f0f0e83ed1b92738b67e47c9fa6b8a
+          outcomeId: f50cffa9-57f8-4f0e-aa0c-432dd6a3449e
+          output:
+            remote: origin
+            summary: "Archive align-payment-settlement: payment settlement aligned with the
+              server-side cascade (wallet ptype=91 only, no silent Alipay
+              fallback; mapped rejection prompts; settlement consumption report
+              with score-discount breakdown; home-page wallet/score balance
+              strip with post-settlement refresh). verify_result=pass: flutter
+              test 173/173, 16/16 spec scenarios covered, independent review
+              APPROVED (2 rounds), real-device check passed by the user on the
+              test APK. Delivery: push main to origin after the single archive
+              commit."
+            targetBranch: main
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 46813654547e555c5baa95330ae7deea49afe9940a1694d7037ca5952a12465b
+            outcomeId: f50cffa9-57f8-4f0e-aa0c-432dd6a3449e
+        reconciliations: []
+        ref: comet-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.archive.prepare
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-archive-preflight
+          token: portable-fb81683515335601dc9d3b4b4e655cf1c8cc719d91cefb9bfbabdfa592dde961
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:22
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 66164f68ef02b8867fbf9e7f04fb9df2910bdf48f4e243fe0d0750fc1a5abcaa
+        outcome:
+          actionId: align-payment-settlement:22
+          attempt: 1
+          claimToken: portable-fb81683515335601dc9d3b4b4e655cf1c8cc719d91cefb9bfbabdfa592dde961
+          inputHash: 66164f68ef02b8867fbf9e7f04fb9df2910bdf48f4e243fe0d0750fc1a5abcaa
+          outcomeId: 9b9a5738-7449-4c13-8bd6-42488a863026
+          output:
+            baseCommit: ae3892ea3111aa5f9aff29b1d94e83096143515a
+            deliveryAction: push
+            remote: origin
+            remoteIdentity: 4673629d327541c996b24cbbeb29b4ca4c887a47e462f18cd5ad41f7a6f629c3
+            targetBranch: main
+            verifiedBranch: main
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 9d98abc90fa322bb207b660aa91e657830ab6641ab7311fe0687239582afc20f
+            outcomeId: 9b9a5738-7449-4c13-8bd6-42488a863026
+        reconciliations: []
+        ref: classic-archive-preflight
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.archive.preflight
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-archive
+          token: portable-9fe0943e20c2353c20bb120bcd2d516c290c1bbb0b5dbe7db00e0a59e82ebb55
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-payment-settlement:23
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 38380d998d135d35f3248a6ad37068f137bd9bceba251e7f20b731fa6b68856c
+        outcome:
+          actionId: align-payment-settlement:23
+          artifacts:
+            - sha256: ed3146fb0964f5714bddb1e79dac4d59294b2c8b4bea56a2b69040a5229414ca
+              uri: docs/openspec/changes/archive/2026-11-02-align-payment-settlement/.comet/archive-manifest.json
+          attempt: 1
+          claimToken: portable-9fe0943e20c2353c20bb120bcd2d516c290c1bbb0b5dbe7db00e0a59e82ebb55
+          inputHash: 38380d998d135d35f3248a6ad37068f137bd9bceba251e7f20b731fa6b68856c
+          outcomeId: 5df7b869-6d18-4c15-a57f-2ec6b2988785
+          output:
+            archiveDirectory: docs/openspec/changes/archive/2026-11-02-align-payment-settlement
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: abe871cffcb668d0c2fa9f797e9d667f5884183bfad55892b1b6a1fef4560234
+            outcomeId: 5df7b869-6d18-4c15-a57f-2ec6b2988785
+        reconciliations: []
+        ref: classic-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: succeeded
+        stepId: full.archive.execute
+        type: call_tool
+      - attempt: 1
+        id: align-payment-settlement:24
+        input:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs: {}
+        inputHash: 51d9482be021141bc662132594622ffc507b9d636aa811008e113c8fe9861e5f
+        protocolVersion: 1
+        receipts: []
+        reconciliations: []
+        ref: comet-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-payment-settlement
+        status: pending
+        stepId: full.archive.deliver
+        type: invoke_skill
+    actionContexts:
+      align-payment-settlement:1:
+        results: {}
+        sequence: 1
+      align-payment-settlement:11:
+        results: {}
+        sequence: 11
+      align-payment-settlement:13:
+        results: {}
+        sequence: 13
+      align-payment-settlement:14:
+        results: {}
+        sequence: 14
+      align-payment-settlement:16:
+        results: {}
+        sequence: 16
+      align-payment-settlement:18:
+        results: {}
+        sequence: 18
+      align-payment-settlement:20:
+        results: {}
+        sequence: 20
+      align-payment-settlement:22:
+        results: {}
+        sequence: 22
+      align-payment-settlement:23:
+        results: {}
+        sequence: 23
+      align-payment-settlement:24:
+        results: {}
+        sequence: 24
+      align-payment-settlement:4:
+        results: {}
+        sequence: 4
+      align-payment-settlement:5:
+        results: {}
+        sequence: 5
+      align-payment-settlement:7:
+        results: {}
+        sequence: 7
+      align-payment-settlement:9:
+        results: {}
+        sequence: 9
+    waits:
+      - id: align-payment-settlement:3
+        stepId: full.open.confirm
+        sequence: 3
+        status: resolved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+              ref: docs/openspec/changes/align-payment-settlement
+        proposalHash: 05584b85a3c3cc5e67b2aaf1dfa377b8502e4e3e8cc4205251ecdfcf13ff3b92
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-open-fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+          choice: approved
+          proposalHash: 05584b85a3c3cc5e67b2aaf1dfa377b8502e4e3e8cc4205251ecdfcf13ff3b92
+      - id: align-payment-settlement:6
+        stepId: full.design.confirm
+        sequence: 6
+        status: resolved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+              handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+              proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+                the silent ptype=91→21 Alipay fallback entirely (no confirmation
+                dialog); D2 map -52/-82/-88/-87 to actionable Chinese prompts in
+                the existing pure prompt helper, -99 unchanged, unmapped codes
+                pass through; D3 two-step bounded poll after settle — list
+                /bill/lst-owner (type=91/status=3/cata=6, device+time filtered)
+                then detail /bill/view-full for the promo.type=4 score-discount
+                part, silent expiry instead of misreporting a fully
+                score-covered bill as zero; D4 balance endpoints
+                /acc/wallet/owner + /acc/score/acc-score with the existing
+                token/headers, contingency adds ApplicationType 1,1 to those two
+                requests only; D5 nullable balance state on the controller,
+                home-page section only when logged in, degrades silently.
+                Testing: parser/controller/widget layers incl.
+                exactly-one-start-request assertion and scripted
+                bill-availability timing, flutter analyze green, real-device
+                integration check (tasks 5.2). Spec Patch: none. Approved by the
+                user at comet-design Step 1c (AskUserQuestion: 确认本设计)."
+              requirementsEvidence:
+                contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+                ref: docs/openspec/changes/align-payment-settlement
+              sourceEvidence:
+                contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+                ref: docs/openspec/changes/align-payment-settlement
+        proposalHash: dc93dbb7dcb7bfb2ab01487f5d02621a09d174bcf1891113b7d73f2f26c22120
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-design-dc93dbb7dcb7bfb2ab01487f5d02621a09d174bcf1891113b7d73f2f26c22120-approved
+          choice: approved
+          proposalHash: dc93dbb7dcb7bfb2ab01487f5d02621a09d174bcf1891113b7d73f2f26c22120
+      - id: align-payment-settlement:10
+        stepId: full.build.confirm
+        sequence: 10
+        status: resolved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: autonomous
+              directOverride: false
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+        proposalHash: 881d2e08d063d5c8d65527fda336cb85e1885b17bd71079f95271647dd71462d
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-build-881d2e08d063d5c8d65527fda336cb85e1885b17bd71079f95271647dd71462d-approved
+          choice: approved
+          proposalHash: 881d2e08d063d5c8d65527fda336cb85e1885b17bd71079f95271647dd71462d
+      - id: align-payment-settlement:21
+        stepId: full.archive.confirm
+        sequence: 21
+        status: resolved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.archive.prepare:
+              remote: origin
+              summary: "Archive align-payment-settlement: payment settlement aligned with the
+                server-side cascade (wallet ptype=91 only, no silent Alipay
+                fallback; mapped rejection prompts; settlement consumption
+                report with score-discount breakdown; home-page wallet/score
+                balance strip with post-settlement refresh). verify_result=pass:
+                flutter test 173/173, 16/16 spec scenarios covered, independent
+                review APPROVED (2 rounds), real-device check passed by the user
+                on the test APK. Delivery: push main to origin after the single
+                archive commit."
+              targetBranch: main
+        proposalHash: e264bce3f4a8be6338fd7008718fa05d3220a11ee8bc50dc51b55beaea5b0997
+        choices:
+          - local
+          - push
+          - pr
+          - reverify
+          - later
+        results: {}
+        decision:
+          id: classic-archive-e264bce3f4a8be6338fd7008718fa05d3220a11ee8bc50dc51b55beaea5b0997-push
+          choice: push
+          proposalHash: e264bce3f4a8be6338fd7008718fa05d3220a11ee8bc50dc51b55beaea5b0997
+    evidenceWaits:
+      - id: align-payment-settlement:2
+        stepId: full.open.evidence
+        sequence: 2
+        kind: classic-open-artifacts
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-payment-settlement
+          contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+          submissionId: 7de45e9f-078d-40aa-9690-7cd6fa03f89c
+      - id: align-payment-settlement:8
+        stepId: full.design.evidence
+        sequence: 8
+        kind: classic-design-document
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-payment-settlement/design.md
+          contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+          submissionId: b4f9c442-5c94-4d35-848e-6456ccfcbacd
+      - id: align-payment-settlement:12
+        stepId: full.build.plan.evidence
+        sequence: 12
+        kind: classic-build-plan
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+          contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+          submissionId: 941823f7-ed34-4982-8e2b-a021614f4b4c
+      - id: align-payment-settlement:15
+        stepId: full.build.check.evidence
+        sequence: 15
+        kind: classic-build-check
+        status: resolved
+        results: {}
+        receipt:
+          ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+          contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+          submissionId: b5c451cf-4d84-4b4d-9af6-aa716cf286ed
+      - id: align-payment-settlement:17
+        stepId: full.verify.report.evidence
+        sequence: 17
+        kind: classic-verification-report
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+          contentHash: 45101ca5d279007f3ebea5eae57c721dd9ea4e49d453f4946066638be6f1a4ce
+          submissionId: 915d1593-a61a-43b9-a5c8-58b5a01c24e9
+      - id: align-payment-settlement:19
+        stepId: full.verify.check.evidence
+        sequence: 19
+        kind: classic-verify-check
+        status: resolved
+        results: {}
+        receipt:
+          ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+          contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+          submissionId: 6c7486dc-fbcc-4bc0-bce8-99363f7ff4c0
+    ready: []
+    joins: {}
+    outputs: {}
+    children: []
+    lineage: []
+  sourceRevision: 37
+  sourceHash: 3a304ff08f5d3da77d75ae26f6a9c2cf7c76c98405fb9fb76e71081dc83752f8
+  pool:
+    version: 3
+    values:
+      - event: open-complete
+      - choice: approved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+              ref: docs/openspec/changes/align-payment-settlement
+      - contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+        ref: docs/openspec/changes/align-payment-settlement
+      - contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+      - choice: approved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+              handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+              proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+                the silent ptype=91→21 Alipay fallback entirely (no confirmation
+                dialog); D2 map -52/-82/-88/-87 to actionable Chinese prompts in
+                the existing pure prompt helper, -99 unchanged, unmapped codes
+                pass through; D3 two-step bounded poll after settle — list
+                /bill/lst-owner (type=91/status=3/cata=6, device+time filtered)
+                then detail /bill/view-full for the promo.type=4 score-discount
+                part, silent expiry instead of misreporting a fully
+                score-covered bill as zero; D4 balance endpoints
+                /acc/wallet/owner + /acc/score/acc-score with the existing
+                token/headers, contingency adds ApplicationType 1,1 to those two
+                requests only; D5 nullable balance state on the controller,
+                home-page section only when logged in, degrades silently.
+                Testing: parser/controller/widget layers incl.
+                exactly-one-start-request assertion and scripted
+                bill-availability timing, flutter analyze green, real-device
+                integration check (tasks 5.2). Spec Patch: none. Approved by the
+                user at comet-design Step 1c (AskUserQuestion: 确认本设计)."
+              requirementsEvidence:
+                contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+                ref: docs/openspec/changes/align-payment-settlement
+              sourceEvidence:
+                contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+                ref: docs/openspec/changes/align-payment-settlement
+      - handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+        handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+        proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+          the silent ptype=91→21 Alipay fallback entirely (no confirmation
+          dialog); D2 map -52/-82/-88/-87 to actionable Chinese prompts in the
+          existing pure prompt helper, -99 unchanged, unmapped codes pass
+          through; D3 two-step bounded poll after settle — list /bill/lst-owner
+          (type=91/status=3/cata=6, device+time filtered) then detail
+          /bill/view-full for the promo.type=4 score-discount part, silent
+          expiry instead of misreporting a fully score-covered bill as zero; D4
+          balance endpoints /acc/wallet/owner + /acc/score/acc-score with the
+          existing token/headers, contingency adds ApplicationType 1,1 to those
+          two requests only; D5 nullable balance state on the controller,
+          home-page section only when logged in, degrades silently. Testing:
+          parser/controller/widget layers incl. exactly-one-start-request
+          assertion and scripted bill-availability timing, flutter analyze
+          green, real-device integration check (tasks 5.2). Spec Patch: none.
+          Approved by the user at comet-design Step 1c (AskUserQuestion:
+          确认本设计)."
+        requirementsEvidence:
+          contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+          ref: docs/openspec/changes/align-payment-settlement
+        sourceEvidence:
+          contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+          ref: docs/openspec/changes/align-payment-settlement
+      - designDoc: docs/openspec/changes/align-payment-settlement/design.md
+      - contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+        ref: docs/openspec/changes/align-payment-settlement/design.md
+      - boundBranch: main
+        buildMode: autonomous
+        directOverride: false
+        isolation: current
+        reviewMode: standard
+        subagentDispatch: null
+        tddMode: tdd
+      - choice: approved
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: autonomous
+              directOverride: false
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+      - designEvidence:
+          contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+          ref: docs/openspec/changes/align-payment-settlement/design.md
+        plan: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+        planEvidence:
+          contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+          ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+        taskRevision: faf81ef53b8640f30edef6be47b095e83527ae58be95ab23b605d0b5699f8c15
+      - contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+        ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+      - event: build-complete
+      - argv:
+          - flutter
+          - test
+        changedDuringExecution: []
+        checkEpoch: 2
+        contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+        cwd: .
+        environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+        exitCode: 0
+        inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+        inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+        manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+        manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/b29fde61-fe1e-457e-9ee8-3e43d5c50580.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+        reusable: false
+        reused: false
+        scope: build
+        tier: full
+        timeoutMs: 300000
+      - contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+        ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+      - contentHash: 45101ca5d279007f3ebea5eae57c721dd9ea4e49d453f4946066638be6f1a4ce
+        ref: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+      - event: verification-ready
+        verificationReport: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+      - argv:
+          - flutter
+          - test
+        changedDuringExecution: []
+        checkEpoch: 3
+        contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+        cwd: .
+        deliveryInputs: {}
+        environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+        exitCode: 0
+        inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+        inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+        manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+        manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/9d4d5d42-420b-4cb2-9c2f-c58a770f378f.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+        reusable: true
+        reused: false
+        scope: verify
+        tier: full
+        timeoutMs: 300000
+      - contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+        ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+      - choice: push
+        proposal:
+          input:
+            change: align-payment-settlement
+            changeDir: docs/openspec/changes/align-payment-settlement
+            workspaceBaseline:
+              ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+          outputs:
+            full.archive.prepare:
+              remote: origin
+              summary: "Archive align-payment-settlement: payment settlement aligned with the
+                server-side cascade (wallet ptype=91 only, no silent Alipay
+                fallback; mapped rejection prompts; settlement consumption
+                report with score-discount breakdown; home-page wallet/score
+                balance strip with post-settlement refresh). verify_result=pass:
+                flutter test 173/173, 16/16 spec scenarios covered, independent
+                review APPROVED (2 rounds), real-device check passed by the user
+                on the test APK. Delivery: push main to origin after the single
+                archive commit."
+              targetBranch: main
+      - remote: origin
+        summary: "Archive align-payment-settlement: payment settlement aligned with the
+          server-side cascade (wallet ptype=91 only, no silent Alipay fallback;
+          mapped rejection prompts; settlement consumption report with
+          score-discount breakdown; home-page wallet/score balance strip with
+          post-settlement refresh). verify_result=pass: flutter test 173/173,
+          16/16 spec scenarios covered, independent review APPROVED (2 rounds),
+          real-device check passed by the user on the test APK. Delivery: push
+          main to origin after the single archive commit."
+        targetBranch: main
+      - baseCommit: ae3892ea3111aa5f9aff29b1d94e83096143515a
+        deliveryAction: push
+        remote: origin
+        remoteIdentity: 4673629d327541c996b24cbbeb29b4ca4c887a47e462f18cd5ad41f7a6f629c3
+        targetBranch: main
+        verifiedBranch: main
+      - archiveDirectory: docs/openspec/changes/archive/2026-11-02-align-payment-settlement
+      - sequence: 9
+        value:
+          boundBranch: main
+          buildMode: autonomous
+          directOverride: false
+          isolation: current
+          reviewMode: standard
+          subagentDispatch: null
+          tddMode: tdd
+      - sequence: 10
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-payment-settlement
+              changeDir: docs/openspec/changes/align-payment-settlement
+              workspaceBaseline:
+                ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+            outputs:
+              full.build.configure:
+                boundBranch: main
+                buildMode: autonomous
+                directOverride: false
+                isolation: current
+                reviewMode: standard
+                subagentDispatch: null
+                tddMode: tdd
+      - sequence: 6
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-payment-settlement
+              changeDir: docs/openspec/changes/align-payment-settlement
+              workspaceBaseline:
+                ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+            outputs:
+              full.design.handoff:
+                handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+                handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+                proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+                  the silent ptype=91→21 Alipay fallback entirely (no
+                  confirmation dialog); D2 map -52/-82/-88/-87 to actionable
+                  Chinese prompts in the existing pure prompt helper, -99
+                  unchanged, unmapped codes pass through; D3 two-step bounded
+                  poll after settle — list /bill/lst-owner
+                  (type=91/status=3/cata=6, device+time filtered) then detail
+                  /bill/view-full for the promo.type=4 score-discount part,
+                  silent expiry instead of misreporting a fully score-covered
+                  bill as zero; D4 balance endpoints /acc/wallet/owner +
+                  /acc/score/acc-score with the existing token/headers,
+                  contingency adds ApplicationType 1,1 to those two requests
+                  only; D5 nullable balance state on the controller, home-page
+                  section only when logged in, degrades silently. Testing:
+                  parser/controller/widget layers incl.
+                  exactly-one-start-request assertion and scripted
+                  bill-availability timing, flutter analyze green, real-device
+                  integration check (tasks 5.2). Spec Patch: none. Approved by
+                  the user at comet-design Step 1c (AskUserQuestion: 确认本设计)."
+                requirementsEvidence:
+                  contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+                  ref: docs/openspec/changes/align-payment-settlement
+                sourceEvidence:
+                  contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+                  ref: docs/openspec/changes/align-payment-settlement
+      - sequence: 7
+        value:
+          designDoc: docs/openspec/changes/align-payment-settlement/design.md
+      - sequence: 8
+        value:
+          contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+          ref: docs/openspec/changes/align-payment-settlement/design.md
+      - sequence: 5
+        value:
+          handoffContext: docs/openspec/changes/align-payment-settlement/.comet/handoff/design-context.json
+          handoffHash: 972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86
+          proposal: "Technical design confirmed via brainstorming 2026-11-02: D1 remove
+            the silent ptype=91→21 Alipay fallback entirely (no confirmation
+            dialog); D2 map -52/-82/-88/-87 to actionable Chinese prompts in the
+            existing pure prompt helper, -99 unchanged, unmapped codes pass
+            through; D3 two-step bounded poll after settle — list
+            /bill/lst-owner (type=91/status=3/cata=6, device+time filtered) then
+            detail /bill/view-full for the promo.type=4 score-discount part,
+            silent expiry instead of misreporting a fully score-covered bill as
+            zero; D4 balance endpoints /acc/wallet/owner + /acc/score/acc-score
+            with the existing token/headers, contingency adds ApplicationType
+            1,1 to those two requests only; D5 nullable balance state on the
+            controller, home-page section only when logged in, degrades
+            silently. Testing: parser/controller/widget layers incl.
+            exactly-one-start-request assertion and scripted bill-availability
+            timing, flutter analyze green, real-device integration check (tasks
+            5.2). Spec Patch: none. Approved by the user at comet-design Step 1c
+            (AskUserQuestion: 确认本设计)."
+          requirementsEvidence:
+            contentHash: 0c29ec19f420629170705bb0e1438c0a363ee32b3a4669ebbba71613f9637df7
+            ref: docs/openspec/changes/align-payment-settlement
+          sourceEvidence:
+            contentHash: e268a70ba800678a916df416b91c2f7fbab64a9c40ddf2a773fbe8ad34aa71a9
+            ref: docs/openspec/changes/align-payment-settlement
+      - sequence: 1
+        value:
+          event: open-complete
+      - sequence: 3
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-payment-settlement
+              changeDir: docs/openspec/changes/align-payment-settlement
+              workspaceBaseline:
+                ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+            outputs:
+              full.open:
+                event: open-complete
+              full.open.evidence:
+                contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+                ref: docs/openspec/changes/align-payment-settlement
+      - sequence: 2
+        value:
+          contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+          ref: docs/openspec/changes/align-payment-settlement
+      - sequence: 4
+        value:
+          contentHash: fa39fcdc0c9c0866064071222473724d152980a990750de718bb4af76fc559ea
+      - sequence: 11
+        value:
+          designEvidence:
+            contentHash: 26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7
+            ref: docs/openspec/changes/align-payment-settlement/design.md
+          plan: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+          planEvidence:
+            contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+            ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+          taskRevision: faf81ef53b8640f30edef6be47b095e83527ae58be95ab23b605d0b5699f8c15
+      - sequence: 12
+        value:
+          contentHash: 027e5635c7ae03fc4a2be0f158a2b9f86bc08f620651bb16ff545fb03b6abeaf
+          ref: docs/superpowers/plans/2026-11-02-align-payment-settlement.md
+      - sequence: 13
+        value:
+          event: build-complete
+      - sequence: 14
+        value:
+          argv:
+            - flutter
+            - test
+          changedDuringExecution: []
+          checkEpoch: 2
+          contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+          cwd: .
+          environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+          exitCode: 0
+          inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+          inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+          manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+          manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/b29fde61-fe1e-457e-9ee8-3e43d5c50580.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+          reusable: false
+          reused: false
+          scope: build
+          tier: full
+          timeoutMs: 300000
+      - sequence: 15
+        value:
+          contentHash: 4d42b688d9a2e8ac46d5f0bca1f090bc53fa3a1f251b85d21ee9ff90ce27ef71
+          ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/1da09eda-1f24-4583-acfc-5718f1feddbd.log
+      - sequence: 17
+        value:
+          contentHash: 45101ca5d279007f3ebea5eae57c721dd9ea4e49d453f4946066638be6f1a4ce
+          ref: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+      - sequence: 16
+        value:
+          event: verification-ready
+          verificationReport: docs/superpowers/reports/2026-11-02-align-payment-settlement-verify.md
+      - sequence: 18
+        value:
+          argv:
+            - flutter
+            - test
+          changedDuringExecution: []
+          checkEpoch: 3
+          contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+          cwd: .
+          deliveryInputs: {}
+          environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+          exitCode: 0
+          inputAfter: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+          inputBefore: e95672fbd4998f7ec28555d7cb4c34a57293d124c2d8aa10b9fcf54b4ba5126f
+          manifestHash: c7705572081b48d78ea831227f036975e8b8de5ea8f947c0a628072208177124
+          manifestRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/9d4d5d42-420b-4cb2-9c2f-c58a770f378f.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+          reusable: true
+          reused: false
+          scope: verify
+          tier: full
+          timeoutMs: 300000
+      - sequence: 19
+        value:
+          contentHash: e05aa286d650cb4bc76fc40e0fdce51aad0a0bd908c31d5a58e801387ca1e39e
+          ref: .comet/runtime/classic-sdk-checks/1e32c61088e1b90ad9fb5d73c0d6fe822da4440ee1cf0a4e4d1d03ada1d7f190/6cd589b2-9dee-451c-84c0-dab44dbf588f.log
+      - sequence: 21
+        value:
+          choice: push
+          proposal:
+            input:
+              change: align-payment-settlement
+              changeDir: docs/openspec/changes/align-payment-settlement
+              workspaceBaseline:
+                ref: 4ae9b981-1387-4137-815b-a5d19918cff7
+            outputs:
+              full.archive.prepare:
+                remote: origin
+                summary: "Archive align-payment-settlement: payment settlement aligned with the
+                  server-side cascade (wallet ptype=91 only, no silent Alipay
+                  fallback; mapped rejection prompts; settlement consumption
+                  report with score-discount breakdown; home-page wallet/score
+                  balance strip with post-settlement refresh).
+                  verify_result=pass: flutter test 173/173, 16/16 spec scenarios
+                  covered, independent review APPROVED (2 rounds), real-device
+                  check passed by the user on the test APK. Delivery: push main
+                  to origin after the single archive commit."
+                targetBranch: main
+      - sequence: 20
+        value:
+          remote: origin
+          summary: "Archive align-payment-settlement: payment settlement aligned with the
+            server-side cascade (wallet ptype=91 only, no silent Alipay
+            fallback; mapped rejection prompts; settlement consumption report
+            with score-discount breakdown; home-page wallet/score balance strip
+            with post-settlement refresh). verify_result=pass: flutter test
+            173/173, 16/16 spec scenarios covered, independent review APPROVED
+            (2 rounds), real-device check passed by the user on the test APK.
+            Delivery: push main to origin after the single archive commit."
+          targetBranch: main
+      - sequence: 22
+        value:
+          baseCommit: ae3892ea3111aa5f9aff29b1d94e83096143515a
+          deliveryAction: push
+          remote: origin
+          remoteIdentity: 4673629d327541c996b24cbbeb29b4ca4c887a47e462f18cd5ad41f7a6f629c3
+          targetBranch: main
+          verifiedBranch: main
+      - sequence: 23
+        value:
+          archiveDirectory: docs/openspec/changes/archive/2026-11-02-align-payment-settlement
+    nodes:
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 1
+        height: 2
+      - key: full.open.revalidate
+        value: 3
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: 3
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 5
+        left: 6
+        right: 7
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 8
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 7
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 6
+        left: 10
+        right: 11
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 12
+        right: 7
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 13
+        right: 4
+        height: 4
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 16
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 11
+        right: 7
+        height: 2
+      - key: full.design.document
+        value: 6
+        left: 17
+        right: 18
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 19
+        right: 4
+        height: 4
+      - key: full.build.plan
+        value: 10
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 11
+        left: 21
+        right: 22
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 23
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 4
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 24
+        right: 25
+        height: 4
+      - key: full.build.execute
+        value: 12
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 27
+        height: 2
+      - key: full.build.plan.evidence
+        value: 11
+        left: null
+        right: 22
+        height: 2
+      - key: full.build.plan
+        value: 10
+        left: 28
+        right: 29
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 30
+        right: 25
+        height: 4
+      - key: full.build.check
+        value: 13
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 14
+        left: 32
+        right: 33
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 34
+        right: 27
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 35
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 25
+        height: 5
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 15
+        left: null
+        right: 39
+        height: 2
+      - key: full.open.revalidate
+        value: 3
+        left: 38
+        right: 40
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 41
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 42
+        height: 5
+      - key: full.open.revalidate
+        value: 3
+        left: 38
+        right: null
+        height: 2
+      - key: full.verify.check.evidence
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 15
+        left: 45
+        right: 39
+        height: 2
+      - key: full.verify.check
+        value: 17
+        left: 44
+        right: 46
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 47
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 48
+        height: 5
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 13
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 20
+        left: 50
+        right: 51
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 33
+        right: 27
+        height: 2
+      - key: full.build.check.evidence
+        value: 14
+        left: 52
+        right: 53
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 54
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 55
+        right: 48
+        height: 5
+      - key: full.archive.preflight
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: 57
+        height: 2
+      - key: full.archive.prepare
+        value: 20
+        left: 58
+        right: 51
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 53
+        right: 29
+        height: 3
+      - key: full.build.check.evidence
+        value: 14
+        left: 59
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 61
+        right: 48
+        height: 5
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.preflight
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.execute
+        value: 22
+        left: 63
+        right: 64
+        height: 2
+      - key: full.archive.prepare
+        value: 20
+        left: 65
+        right: 51
+        height: 3
+      - key: full.build.check.evidence
+        value: 14
+        left: 66
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 67
+        right: 48
+        height: 5
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 70
+        height: 2
+      - key: full.design.evidence
+        value: 27
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: 72
+        right: 73
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: 75
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 76
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 71
+        right: 77
+        height: 4
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: 79
+        right: 80
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 81
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 82
+        right: 77
+        height: 4
+      - key: full.build.execute
+        value: 35
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 84
+        height: 2
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: 80
+        height: 2
+      - key: full.build.plan
+        value: 33
+        left: 85
+        right: 86
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 87
+        right: 77
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: 89
+        right: 90
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 91
+        right: 84
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 92
+        right: 86
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 77
+        height: 5
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: null
+        right: 96
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: 95
+        right: 97
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 98
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 99
+        height: 5
+      - key: full.open.revalidate
+        value: 32
+        left: 95
+        right: null
+        height: 2
+      - key: full.verify.check.evidence
+        value: 41
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: 102
+        right: 96
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 101
+        right: 103
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 104
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 105
+        height: 5
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 43
+        left: 107
+        right: 108
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 90
+        right: 84
+        height: 2
+      - key: full.build.check.evidence
+        value: 37
+        left: 109
+        right: 110
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 111
+        right: 86
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 112
+        right: 105
+        height: 5
+      - key: full.archive.preflight
+        value: 44
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: 114
+        height: 2
+      - key: full.archive.prepare
+        value: 43
+        left: 115
+        right: 108
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 110
+        right: 86
+        height: 3
+      - key: full.build.check.evidence
+        value: 37
+        left: 116
+        right: 117
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 118
+        right: 105
+        height: 5
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.preflight
+        value: 44
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.execute
+        value: 45
+        left: 120
+        right: 121
+        height: 2
+      - key: full.archive.prepare
+        value: 43
+        left: 122
+        right: 108
+        height: 3
+      - key: full.build.check.evidence
+        value: 37
+        left: 123
+        right: 117
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 124
+        right: 105
+        height: 5
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 30
+        left: 126
+        right: 127
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: 129
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 126
+        right: 130
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: 132
+        right: 133
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 134
+        right: 130
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: 136
+        right: 137
+        height: 2
+      - key: full.design.handoff
+        value: 28
+        left: 138
+        right: 133
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 139
+        right: 130
+        height: 4
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: 141
+        height: 2
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 144
+        right: 145
+        height: 2
+      - key: full.open
+        value: 29
+        left: 143
+        right: 146
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: 149
+        right: 150
+        height: 2
+      - key: full.design.confirm
+        value: 25
+        left: 148
+        right: 151
+        height: 3
+      - key: full.open
+        value: 29
+        left: 152
+        right: 146
+        height: 4
+      - key: full.archive.prepare
+        value: 43
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 36
+        left: 154
+        right: 155
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: 158
+        height: 2
+      - key: full.build.execute
+        value: 35
+        left: 157
+        right: 159
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: 156
+        right: 160
+        height: 4
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 144
+        right: 162
+        height: 2
+      - key: full.verify.check.evidence
+        value: 41
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: 164
+        right: 165
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 163
+        right: 166
+        height: 3
+      - key: full.open
+        value: 29
+        left: 151
+        right: 167
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 161
+        right: 168
+        height: 5
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: 171
+        right: 172
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 174
+        right: 175
+        height: 2
+      - key: full.open
+        value: 29
+        left: 173
+        right: 176
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 178
+        right: 179
+        height: 2
+      - key: full.design.document
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: 181
+        right: 182
+        height: 2
+      - key: full.design.confirm
+        value: 25
+        left: 180
+        right: 183
+        height: 3
+      - key: full.open
+        value: 29
+        left: 184
+        right: 176
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: 186
+        right: null
+        height: 2
+      - key: full.build.execute
+        value: 35
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: 188
+        right: 189
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 187
+        right: 190
+        height: 3
+      - key: full.open
+        value: 29
+        left: 183
+        right: 176
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: 191
+        right: 192
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: 194
+        right: 195
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 196
+        right: 190
+        height: 3
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: 198
+        height: 2
+      - key: full.open.evidence
+        value: 31
+        left: 174
+        right: 199
+        height: 3
+      - key: full.open
+        value: 29
+        left: 183
+        right: 200
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 197
+        right: 201
+        height: 5
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 174
+        right: 203
+        height: 2
+      - key: full.verify.report.evidence
+        value: 38
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: 205
+        right: null
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 204
+        right: 206
+        height: 3
+      - key: full.open
+        value: 29
+        left: 183
+        right: 207
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 197
+        right: 208
+        height: 5
+    maps:
+      - null
+      - 2
+      - 5
+      - 9
+      - 14
+      - 20
+      - 26
+      - 31
+      - 37
+      - 43
+      - 49
+      - 56
+      - 62
+      - 68
+      - 78
+      - 83
+      - 88
+      - 94
+      - 100
+      - 106
+      - 113
+      - 119
+      - 125
+      - 128
+      - 131
+      - 135
+      - 140
+      - 142
+      - 147
+      - 153
+      - 169
+      - 170
+      - 177
+      - 185
+      - 193
+      - 202
+      - 209
+    bindings:
+      - path:
+          - actions
+          - "0"
+          - input
+          - outputs
+        map: 0
+      - path:
+          - actions
+          - "1"
+          - input
+          - outputs
+        map: 1
+      - path:
+          - actions
+          - "2"
+          - input
+          - outputs
+        map: 2
+      - path:
+          - actions
+          - "3"
+          - input
+          - outputs
+        map: 3
+      - path:
+          - actions
+          - "4"
+          - input
+          - outputs
+        map: 4
+      - path:
+          - actions
+          - "5"
+          - input
+          - outputs
+        map: 5
+      - path:
+          - actions
+          - "6"
+          - input
+          - outputs
+        map: 6
+      - path:
+          - actions
+          - "7"
+          - input
+          - outputs
+        map: 7
+      - path:
+          - actions
+          - "8"
+          - input
+          - outputs
+        map: 8
+      - path:
+          - actions
+          - "9"
+          - input
+          - outputs
+        map: 9
+      - path:
+          - actions
+          - "10"
+          - input
+          - outputs
+        map: 10
+      - path:
+          - actions
+          - "11"
+          - input
+          - outputs
+        map: 11
+      - path:
+          - actions
+          - "12"
+          - input
+          - outputs
+        map: 12
+      - path:
+          - actions
+          - "13"
+          - input
+          - outputs
+        map: 13
+      - path:
+          - actionContexts
+          - align-payment-settlement:1
+          - results
+        map: 0
+      - path:
+          - actionContexts
+          - align-payment-settlement:11
+          - results
+        map: 14
+      - path:
+          - actionContexts
+          - align-payment-settlement:13
+          - results
+        map: 15
+      - path:
+          - actionContexts
+          - align-payment-settlement:14
+          - results
+        map: 16
+      - path:
+          - actionContexts
+          - align-payment-settlement:16
+          - results
+        map: 17
+      - path:
+          - actionContexts
+          - align-payment-settlement:18
+          - results
+        map: 18
+      - path:
+          - actionContexts
+          - align-payment-settlement:20
+          - results
+        map: 19
+      - path:
+          - actionContexts
+          - align-payment-settlement:22
+          - results
+        map: 20
+      - path:
+          - actionContexts
+          - align-payment-settlement:23
+          - results
+        map: 21
+      - path:
+          - actionContexts
+          - align-payment-settlement:24
+          - results
+        map: 22
+      - path:
+          - actionContexts
+          - align-payment-settlement:4
+          - results
+        map: 23
+      - path:
+          - actionContexts
+          - align-payment-settlement:5
+          - results
+        map: 24
+      - path:
+          - actionContexts
+          - align-payment-settlement:7
+          - results
+        map: 25
+      - path:
+          - actionContexts
+          - align-payment-settlement:9
+          - results
+        map: 26
+      - path:
+          - outputs
+        map: 22
+      - path:
+          - waits
+          - "0"
+          - results
+        map: 27
+      - path:
+          - waits
+          - "1"
+          - results
+        map: 28
+      - path:
+          - waits
+          - "2"
+          - results
+        map: 29
+      - path:
+          - waits
+          - "3"
+          - results
+        map: 30
+      - path:
+          - evidenceWaits
+          - "0"
+          - results
+        map: 31
+      - path:
+          - evidenceWaits
+          - "1"
+          - results
+        map: 32
+      - path:
+          - evidenceWaits
+          - "2"
+          - results
+        map: 33
+      - path:
+          - evidenceWaits
+          - "3"
+          - results
+        map: 34
+      - path:
+          - evidenceWaits
+          - "4"
+          - results
+        map: 35
+      - path:
+          - evidenceWaits
+          - "5"
+          - results
+        map: 36
+  storageHash: 6322d34d4ea52c4f611b81d24caa004c30c191eb2a8028a699e15aeab4e12a24

@@ -1,0 +1,17 @@
+{
+  "change": "align-payment-settlement",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "task_hash_policy": "task-content-v1",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "972b52bb441e76947a395b84fe607c2c32635534dc058185d5e53234069eff86",
+  "files": [
+    { "path": "docs/openspec/changes/align-payment-settlement/proposal.md", "sha256": "1c604df8bc7dd412524348bb2727d5ccf874055e379661626a0bd670e95be1ed" },
+    { "path": "docs/openspec/changes/align-payment-settlement/design.md", "sha256": "26d2815017ecb96f7081e759434fd1bdb710459dff0d3e7fd02fd84aa39c52a7" },
+    { "path": "docs/openspec/changes/align-payment-settlement/tasks.md", "sha256": "faf81ef53b8640f30edef6be47b095e83527ae58be95ab23b605d0b5699f8c15" },
+    { "path": "docs/openspec/changes/align-payment-settlement/.openspec.yaml", "sha256": "71e91d8f42848565b00ec7bb4da95cf19e2182f4adc440c230b10a0f3345023b" },
+    { "path": "docs/openspec/changes/align-payment-settlement/specs/account-balance/spec.md", "sha256": "0b44a425420aec7751a5ba6746b5221ad1e86528db87cde891e451222a1ede98" },
+    { "path": "docs/openspec/changes/align-payment-settlement/specs/payment-settlement/spec.md", "sha256": "1ee06efb18f1c2aa53a5a4579ba9dbe115d4d993eba36ebd2ba2a073d2018940" }
+  ]
+}

@@ -2,6 +2,7 @@
 change: align-payment-settlement
 design-doc: docs/openspec/changes/align-payment-settlement/design.md
 base-ref: 7380c52c9475661507bd4e3ba5b39611e394f2e9
+archived-with: 2026-11-02-align-payment-settlement
 ---
 
 <!-- comet-task-authority: docs/openspec/changes/align-payment-settlement/tasks.md -->

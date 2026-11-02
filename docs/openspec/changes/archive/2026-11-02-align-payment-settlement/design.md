@@ -2,6 +2,8 @@
 comet_change: align-payment-settlement
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-11-02-align-payment-settlement
+status: final
 ---
 
 # Design: align-payment-settlement
