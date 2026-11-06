@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:drink_water_app/core/services/drink_api_service.dart';
+import 'package:drink_water_app/core/services/drink_api_signer.dart';
 
 /// 捕获请求参数与 URL 的测试 adapter。
 class _CapturingAdapter implements HttpClientAdapter {
@@ -151,7 +152,7 @@ void main() {
     });
 
     test('sendSmsCode 不带 sign', () async {
-      // 该接口不校验签名，见 login 测试内的说明。
+      // 验证码下发接口不附加签名（官方实测形状）；登录接口才需要签名。
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.sendSmsCode(
@@ -163,18 +164,25 @@ void main() {
       expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
     });
 
-    test('login 不带 sign', () async {
-      // acc/login 不校验签名。实测同一种 authCode：不带 sign、带空 sign、
-      // 带错误 sign 服务端均返回「短信验证码错误」；带上按官方算法算出的
-      // sign 反而返回「验签失败」。逆向之前本项目不带签名即可登录。
+    test('login 使用官方签名与 iOS 身份', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
-      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
+      final options = adapter.captured!;
+      expect(options.uri.path, '/api/v1/acc/login');
+      expect(
+        options.uri.queryParameters['sign'],
+        DrinkApiSigner.loginSign({'authCode': '123456', 'un': '22644212509'}),
+      );
+      expect(options.headers['User-Agent'],
+          'iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9');
+      expect(options.headers['VersionCode'], '3.1.9');
+      expect(options.headers.containsKey('ApplicationType'), isFalse);
+      expect((options.data as Map).keys.toSet(), {'authCode', 'un'});
     });
 
-    test('login 与 sendSmsCode 都不带 sign', () async {
+    test('login 带签名而 sendSmsCode 不带签名', () async {
       final api = DrinkApiService();
       await api.isLoggedIn();
 
@@ -184,7 +192,19 @@ void main() {
       expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
 
       await api.login(phone: '22644212509', smsCode: '123456');
-      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isTrue);
+    });
+
+    test('非登录请求保持 Android 3.1.8 身份', () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.accountBalance();
+
+      final options = adapter.captured!;
+      expect(options.headers['VersionCode'], '3.1.8');
+      expect(options.headers['User-Agent'], 'Android_ilife798_3.1.8');
+      expect(options.headers['User-Agent'], isNot(contains('iOS_ilife798')));
+      expect(options.uri.queryParameters.containsKey('sign'), isFalse);
     });
 
     test('login 参数集不含 cid', () async {
@@ -427,8 +447,8 @@ void main() {
       expect(result.message, '系统错误');
     });
 
-    test('login 不受本地残留 token 影响', () async {
-      // 登录请求不带 sign，残留 token 无从影响它。
+    test('login 不使用本地残留 token', () async {
+      // 登录以签名与手机号/验证码为准：请求带 sign，且不带 Authorization。
       SharedPreferences.setMockInitialValues({
         'drink_water_app_token':
             '{"uid":"87654321abcdefgh","eid":"e1","token":"abcdefgh12345678"}',
@@ -439,7 +459,8 @@ void main() {
       await api.isLoggedIn();
       await api.login(phone: '22644212509', smsCode: '123456');
 
-      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
+      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isTrue);
+      expect(adapter.captured?.headers.containsKey('Authorization'), isFalse);
     });
   });
 }

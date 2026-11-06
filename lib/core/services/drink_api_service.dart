@@ -4,6 +4,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'drink_api_signer.dart';
+
 import '../models/account_balance.dart';
 import '../models/device_status.dart';
 
@@ -81,7 +83,7 @@ class DrinkApiService {
   // 请求头与官方客户端对齐：只发 VersionCode 与 User-Agent，
   // Authorization 由 _authOptions() 按请求注入。
   // 历史上还发送 ApplicationType、Accept、Accept-Encoding、Connection，
-  // 逆向确认官方客户端不使用这些头，服务端也不校验，故移除。
+  // 逆向确认官方客户端不使用这些头，故移除。
   final Dio _dio = Dio(
     BaseOptions(
       baseUrl: _baseUrl,
@@ -110,6 +112,11 @@ class DrinkApiService {
 
   static const String _baseUrl = "https://i.ilife798.com/api/v1";
   static const String _clientVersion = "3.1.8";
+
+  /// 登录请求使用的官方 iOS 客户端身份与 API 版本。
+  static const String _loginUserAgent =
+      "iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9";
+  static const String _loginVersionCode = "3.1.9";
   static const String _tokenKey = "drink_water_app_token";
   static const String _loginKey = "drink_water_app_is_login";
 
@@ -180,7 +187,7 @@ class DrinkApiService {
       "authCode": captcha,
       "un": phone,
     };
-    // 与 acc/login 一致：该接口不校验签名，见 login() 内的说明。
+    // 验证码下发接口不附加签名（官方实测形状）；只有 acc/login 需要签名。
     const url = "$_baseUrl/acc/login/code";
 
     try {
@@ -216,23 +223,24 @@ class DrinkApiService {
     required String phone,
     required String smsCode,
   }) async {
-    // 参数集与官方一致：openCode、un、authCode。
-    // 曾多传 cid，官方不发送该参数；它参与签名计算导致服务端返回
-    // 「验签失败」(code -1)，登录永远无法成功。
-    Map<String, dynamic> data = {
-      "openCode": "",
+    // 参数集与官方一致：只发 un、authCode；这两个参数同时参与登录签名。
+    // 曾多传 cid/openCode，它们会改变签名覆盖的参数集，服务端返回「验签失败」。
+    final Map<String, dynamic> data = {
       "authCode": smsCode,
       "un": phone,
     };
 
-    // acc/login 不校验签名。实测同一种 authCode：不带 sign、带空 sign、
-    // 带错误 sign，服务端均返回「短信验证码错误」；而带上按官方算法算出
-    // 的 sign 反而返回「验签失败」。逆向之前本项目不带签名即可登录。
-    // 设备接口（dev/start 等）仍需要签名，见各方法内的 longSign 调用。
-    const url = "$_baseUrl/acc/login";
+    // 服务端对 acc/login 强制验签：签名缺失或错误返回「请升级最新版应用」。
+    // 登录请求单独使用官方 iOS 身份；其余请求仍用全局 Android 3.1.8 身份。
+    final sign = DrinkApiSigner.loginSign(data);
+    final url = "$_baseUrl/acc/login?sign=$sign";
+    final options = Options(headers: {
+      "User-Agent": _loginUserAgent,
+      "VersionCode": _loginVersionCode,
+    });
 
     try {
-      final response = await _dio.post(url, data: data);
+      final response = await _dio.post(url, data: data, options: options);
       final result = response.data;
 
       if (result is! Map) {

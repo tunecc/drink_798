@@ -1,0 +1,1907 @@
+# comet-execution: managed-run
+change_id: d0497475-5ae3-4bff-8414-c945757bd2d7
+workflow: full
+language: en
+phase: verify
+context_compression: off
+build_mode: executing-plans
+build_pause: null
+subagent_dispatch: null
+tdd_mode: tdd
+review_mode: standard
+isolation: current
+verify_mode: null
+auto_transition: true
+base_ref: 1258918045f582dc81d07489ffabab2154fbf7ca
+design_doc: docs/openspec/changes/align-login-signing/design.md
+plan: docs/superpowers/plans/2026-11-05-align-login-signing.md
+verify_result: pending
+verify_failures: 0
+verification_report: null
+branch_status: pending
+created_at: 2026-11-05
+verified_at: null
+archive_confirmation: null
+archived: false
+bound_branch: main
+direct_override: false
+handoff_context: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+handoff_hash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+classic_profile: null
+classic_migration: null
+run_checkpoint:
+  schema: comet.workflow-run-checkpoint.v2
+  hash: c4e0515fdf2546f930fb1163404fc390137f9a9622ccb5d1dc6a7a4a9415fa50
+  run:
+    protocolVersion: 1
+    schemaVersion: 1
+    runId: align-login-signing
+    revision: 1
+    workflow:
+      id: comet-classic-full
+      version: "1"
+      hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    definitionHashes:
+      '["comet-classic-full","1"]': ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    initialStateHash: 83cf76b5513ab9d2dfedea29122eb6f058e298f259e32e6a7a98bc4f9c3cb62a
+    input:
+      change: align-login-signing
+      changeDir: docs/openspec/changes/align-login-signing
+      workspaceBaseline:
+        ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+    state:
+      archiveConfirmation: null
+      archived: false
+      autoTransition: true
+      baseRef: 1258918045f582dc81d07489ffabab2154fbf7ca
+      boundBranch: main
+      branchStatus: pending
+      buildMode: executing-plans
+      buildPause: null
+      checkEpoch: 3
+      classicMigration: null
+      classicProfile: null
+      contextCompression: off
+      createdAt: 2026-11-05
+      designDoc: docs/openspec/changes/align-login-signing/design.md
+      directOverride: false
+      handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+      handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+      isolation: current
+      language: en
+      phase: verify
+      plan: docs/superpowers/plans/2026-11-05-align-login-signing.md
+      reviewMode: standard
+      subagentDispatch: null
+      tddMode: tdd
+      verificationReport: null
+      verifiedAt: null
+      verifyFailures: 0
+      verifyMode: null
+      verifyResult: pending
+      workflow: full
+    status: running
+    sequence: 18
+    actions:
+      - attempt: 1
+        claim:
+          executorId: native-host
+          sessionId: claude-code-drink798-login-align
+          token: portable-ae5d7821f7b71a55df8560d587d097b48c7b7529c632b9153373b983797e4be9
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:1
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 93ffd7c515d2d5732de2b49f90973b4ffced3d951f49c3a1fec34314dae56e35
+        outcome:
+          actionId: align-login-signing:1
+          attempt: 1
+          claimToken: portable-ae5d7821f7b71a55df8560d587d097b48c7b7529c632b9153373b983797e4be9
+          inputHash: 93ffd7c515d2d5732de2b49f90973b4ffced3d951f49c3a1fec34314dae56e35
+          outcomeId: 4753c43f-426b-46f8-b69a-8bf181538666
+          output:
+            event: open-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: da5bf5e1df9126253d2189e4a8b1891bf9ce0e9e195113ba0ebac17f47ef1c22
+            outcomeId: 4753c43f-426b-46f8-b69a-8bf181538666
+        reconciliations: []
+        ref: comet-open
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.open
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-open-revalidate
+          token: portable-c74d02a9ef9178182ae2ae2499a0f3631b49e3c32bef17f90e87f2aa6da3b1dd
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:4
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: a2d0409d50e97da2e8da05e4a2528eea5283e9bc8be0cf302b5acc05edc04a0d
+        outcome:
+          actionId: align-login-signing:4
+          attempt: 1
+          claimToken: portable-c74d02a9ef9178182ae2ae2499a0f3631b49e3c32bef17f90e87f2aa6da3b1dd
+          inputHash: a2d0409d50e97da2e8da05e4a2528eea5283e9bc8be0cf302b5acc05edc04a0d
+          outcomeId: align-login-signing:4:1:executor-result
+          output:
+            contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: ee5236d57e707d18292b76deb4edff8895f68ea1e76343433930167fef73d768
+            outcomeId: align-login-signing:4:1:executor-result
+        reconciliations: []
+        ref: classic-open-revalidate
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.open.revalidate
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-030e680cde149faae0bfaa09f6a98aa9c06ff2249a031d75addec539bb1e328a
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:5
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 8d4d11be2b46082c964ea7aa14ae37a4c56ea9e6a1383875853502f8c292cbac
+        outcome:
+          actionId: align-login-signing:5
+          attempt: 1
+          claimToken: portable-030e680cde149faae0bfaa09f6a98aa9c06ff2249a031d75addec539bb1e328a
+          inputHash: 8d4d11be2b46082c964ea7aa14ae37a4c56ea9e6a1383875853502f8c292cbac
+          outcomeId: cc024c83-b838-4092-9d2e-2f78d26583b5
+          output:
+            handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+            handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+            proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+              iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9,
+              VersionCode 3.1.9, no ApplicationType); (2)
+              DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(params)\
+              +LOGIN_SALT)) with LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v; (3)
+              login body only {authCode, un}; (4) remove unused shortSign and
+              its spec requirement; (5) longSign, device endpoints and global
+              Android 3.1.8 headers unchanged; (6) score balance and settlement
+              reads verified, not modified. Tests: signature vector
+              93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+              assertions, live read check."
+            requirementsEvidence:
+              contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+              ref: docs/openspec/changes/align-login-signing
+            sourceEvidence:
+              contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+              ref: docs/openspec/changes/align-login-signing
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 65f6e35c3fa4faf573b14b80a441a7736bda2e5fc9a4a41b43118f4affc1bc52
+            outcomeId: cc024c83-b838-4092-9d2e-2f78d26583b5
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.design.handoff
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-4a8b8baafc8a60ae69040e28a718a4745c7ae8709e703d676b7356d6d5363875
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:7
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 2a56b9bdd70331114e3c59de72f41f8f70e9a861e3ee0c30e454334c42673b94
+        outcome:
+          actionId: align-login-signing:7
+          attempt: 1
+          claimToken: portable-4a8b8baafc8a60ae69040e28a718a4745c7ae8709e703d676b7356d6d5363875
+          inputHash: 2a56b9bdd70331114e3c59de72f41f8f70e9a861e3ee0c30e454334c42673b94
+          outcomeId: 98f9d684-eb1b-4c5c-a635-526a2a75f452
+          output:
+            designDoc: docs/openspec/changes/align-login-signing/design.md
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: e2171c26dd500026c3a40514c115f9997eb64a35556b77cfdcd969eaf839b3a8
+            outcomeId: 98f9d684-eb1b-4c5c-a635-526a2a75f452
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.design.document
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-ccce5a3561d6667d0dc9a426607f94628281f8b0df253b86ad73bb1c99c33201
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:9
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 96109a6613e7294e81fa556f688c67636d4022119250a09677ca138cc8b50930
+        outcome:
+          actionId: align-login-signing:9
+          attempt: 1
+          claimToken: portable-ccce5a3561d6667d0dc9a426607f94628281f8b0df253b86ad73bb1c99c33201
+          inputHash: 96109a6613e7294e81fa556f688c67636d4022119250a09677ca138cc8b50930
+          outcomeId: 1035438e-7823-4f78-98c5-e13a137403d1
+          output:
+            boundBranch: main
+            buildMode: executing-plans
+            directOverride: false
+            isolation: current
+            reviewMode: standard
+            subagentDispatch: null
+            tddMode: tdd
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: da4772c5b9ecfb1491ca74aa5177e1499fb7edbabf099c40de498da492f29942
+            outcomeId: 1035438e-7823-4f78-98c5-e13a137403d1
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.build.configure
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-8378131cab88f225fae1db220c8799354a3088cf54373923bc83cafbdf8cecf2
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:11
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 9a2cf7e8cdf2a00103d5702f42c293305d586f88ef9998bc88e84b09629c849b
+        outcome:
+          actionId: align-login-signing:11
+          attempt: 1
+          claimToken: portable-8378131cab88f225fae1db220c8799354a3088cf54373923bc83cafbdf8cecf2
+          inputHash: 9a2cf7e8cdf2a00103d5702f42c293305d586f88ef9998bc88e84b09629c849b
+          outcomeId: 83237b3b-1ed5-407a-bc3c-d0cd9fcea03c
+          output:
+            designEvidence:
+              contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+              ref: docs/openspec/changes/align-login-signing/design.md
+            plan: docs/superpowers/plans/2026-11-05-align-login-signing.md
+            planEvidence:
+              contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+              ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+            taskRevision: 1435a7dd6c980fc1db261ef0768ef8bfaed7b7c81b5355f646fb13ffc6724e72
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: c9497170c9855c858498605fdaf822e24a25d512ba1fab9d01e4b590049a133b
+            outcomeId: 83237b3b-1ed5-407a-bc3c-d0cd9fcea03c
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.build.plan
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          sessionId: classic-builder/align-login-signing:13/1
+          token: portable-e2b46e50adbc619ffbc5b910f69edc27b4334c3f17fcb1b41a02f612b6b5711a
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:13
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 067af458d6c078fc3be6d2848ea557b938f9555d45675f6cccae848bab6bff76
+        outcome:
+          actionId: align-login-signing:13
+          attempt: 1
+          claimToken: portable-e2b46e50adbc619ffbc5b910f69edc27b4334c3f17fcb1b41a02f612b6b5711a
+          inputHash: 067af458d6c078fc3be6d2848ea557b938f9555d45675f6cccae848bab6bff76
+          outcomeId: 71f4d1ad-188b-41e9-b90b-36068757e9a3
+          output:
+            event: build-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: a543c0129ace2efe42dbfa65cfa3307d6b304f96b22894f16171ea617410c8ff
+            outcomeId: 71f4d1ad-188b-41e9-b90b-36068757e9a3
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.build.execute
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-c0522796da7a55a17768c2f800c414e1ab3cbd63694ba0b30163de6bd3d4ce52
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:14
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: 2ae237341283e8ca8f95b46c4a21c398ae9a098cf3a25ad7020f6765141a6b4b
+        outcome:
+          actionId: align-login-signing:14
+          attempt: 1
+          claimToken: portable-c0522796da7a55a17768c2f800c414e1ab3cbd63694ba0b30163de6bd3d4ce52
+          inputHash: 2ae237341283e8ca8f95b46c4a21c398ae9a098cf3a25ad7020f6765141a6b4b
+          outcomeId: ed8c41b3-4101-494e-8dbd-118cf1872988
+          output:
+            argv:
+              - flutter
+              - test
+              - --json
+            changedDuringExecution: []
+            checkEpoch: 2
+            contentHash: 961d3821a00622c3fd75ee37df021f3f3366d95206980a38bcf3dee100ff2166
+            cwd: .
+            environment: 875e29cea4f0da15e959768b6fb91fb7dc963ab8d7ccdd03d1036d992c92be51
+            exitCode: 64
+            inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+            inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+            manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+            manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/5b7bd3ff-4e55-4023-89f3-b5c82c2d97c0.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/fa185455-d43e-4cf3-a69b-61ca99b6c212.log
+            reusable: false
+            reused: false
+            scope: build
+            tier: full
+            timeoutMs: 300000
+          status: failed
+        protocolVersion: 1
+        receipts:
+          - hash: d27dbd5a90745678cb4e668cbacb15ec8563bd7cfab1b35a0e4101a85e6f2e92
+            outcomeId: ed8c41b3-4101-494e-8dbd-118cf1872988
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: failed
+        stepId: full.build.check
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          sessionId: classic-builder/align-login-signing:15/1
+          token: portable-a09920885ad8c277dd33e88d3a7aa5e4983423ae5ab8d9b9c93a30182828497f
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:15
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: db260a4570c77f424cc35b15a634ee37edb32a184e5248d4beefad8ee0a3c08b
+        outcome:
+          actionId: align-login-signing:15
+          attempt: 1
+          claimToken: portable-a09920885ad8c277dd33e88d3a7aa5e4983423ae5ab8d9b9c93a30182828497f
+          inputHash: db260a4570c77f424cc35b15a634ee37edb32a184e5248d4beefad8ee0a3c08b
+          outcomeId: 1b8cb766-24e7-4981-bf52-53e227f3e379
+          output:
+            event: build-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 3e88171614d4803f75a02caf9f8d0ccb01a1395bb473372ee19c5b871188d528
+            outcomeId: 1b8cb766-24e7-4981-bf52-53e227f3e379
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.build.execute
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-eee51c50c207df9a10f556c40a384da4130865d0ec9d22444019fef95c951fe4
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-login-signing:16
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: db260a4570c77f424cc35b15a634ee37edb32a184e5248d4beefad8ee0a3c08b
+        outcome:
+          actionId: align-login-signing:16
+          attempt: 1
+          claimToken: portable-eee51c50c207df9a10f556c40a384da4130865d0ec9d22444019fef95c951fe4
+          inputHash: db260a4570c77f424cc35b15a634ee37edb32a184e5248d4beefad8ee0a3c08b
+          outcomeId: 9fe9cee4-cc6c-404d-b297-f8adb946876e
+          output:
+            argv:
+              - flutter
+              - test
+            changedDuringExecution: []
+            checkEpoch: 2
+            contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+            cwd: .
+            environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+            exitCode: 0
+            inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+            inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+            manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+            manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2268ee7e-7ba1-4a4b-bb0f-036f453f11d5.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+            reusable: false
+            reused: false
+            scope: build
+            tier: full
+            timeoutMs: 300000
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: a85dc9f43cf8717e09557adc99bd027226f03aadd959736e4b5261ea1293a794
+            outcomeId: 9fe9cee4-cc6c-404d-b297-f8adb946876e
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: succeeded
+        stepId: full.build.check
+        type: call_tool
+      - attempt: 1
+        id: align-login-signing:18
+        input:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs: {}
+        inputHash: c5790e80f474d40f5913c7b956e1a0371b8279097aec88f2c2520b98025a9a5c
+        protocolVersion: 1
+        receipts: []
+        reconciliations: []
+        ref: comet-verify
+        requiredCapabilities: []
+        retry: manual
+        runId: align-login-signing
+        status: pending
+        stepId: full.verify.run
+        type: invoke_skill
+    actionContexts:
+      align-login-signing:1:
+        results: {}
+        sequence: 1
+      align-login-signing:11:
+        results: {}
+        sequence: 11
+      align-login-signing:13:
+        results: {}
+        sequence: 13
+      align-login-signing:14:
+        results: {}
+        sequence: 14
+      align-login-signing:15:
+        results: {}
+        sequence: 15
+      align-login-signing:16:
+        results: {}
+        sequence: 16
+      align-login-signing:18:
+        results: {}
+        sequence: 18
+      align-login-signing:4:
+        results: {}
+        sequence: 4
+      align-login-signing:5:
+        results: {}
+        sequence: 5
+      align-login-signing:7:
+        results: {}
+        sequence: 7
+      align-login-signing:9:
+        results: {}
+        sequence: 9
+    waits:
+      - id: align-login-signing:3
+        stepId: full.open.confirm
+        sequence: 3
+        status: resolved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+              ref: docs/openspec/changes/align-login-signing
+        proposalHash: 99775ab197f4ca0c07dc25308697df715e0fde4075edb31a49ff052c0059be14
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: 4bb4a487-2b10-4836-b59d-1268c14be67d
+          choice: approved
+          proposalHash: 99775ab197f4ca0c07dc25308697df715e0fde4075edb31a49ff052c0059be14
+      - id: align-login-signing:6
+        stepId: full.design.confirm
+        sequence: 6
+        status: resolved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+              handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+              proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+                iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00)
+                iOS_ilife798_3.1.9, VersionCode 3.1.9, no ApplicationType); (2)
+                DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(param\
+                s)+LOGIN_SALT)) with LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v;
+                (3) login body only {authCode, un}; (4) remove unused shortSign
+                and its spec requirement; (5) longSign, device endpoints and
+                global Android 3.1.8 headers unchanged; (6) score balance and
+                settlement reads verified, not modified. Tests: signature vector
+                93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+                assertions, live read check."
+              requirementsEvidence:
+                contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+                ref: docs/openspec/changes/align-login-signing
+              sourceEvidence:
+                contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+                ref: docs/openspec/changes/align-login-signing
+        proposalHash: 933cd588ef98d9b0872bf96adcd799c562cc0e86d003c0dcc018d63e169b5d55
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-design-933cd588ef98d9b0872bf96adcd799c562cc0e86d003c0dcc018d63e169b5d55-approved
+          choice: approved
+          proposalHash: 933cd588ef98d9b0872bf96adcd799c562cc0e86d003c0dcc018d63e169b5d55
+      - id: align-login-signing:10
+        stepId: full.build.confirm
+        sequence: 10
+        status: resolved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: executing-plans
+              directOverride: false
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+        proposalHash: 0e0101d1ae5b1b29da8f3b7dd12dc03c6ea16b00f7497e7c9121aa29fcaa5da0
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: 0fab6d51-cd6a-40d6-b413-58d9945ced0a
+          choice: approved
+          proposalHash: 0e0101d1ae5b1b29da8f3b7dd12dc03c6ea16b00f7497e7c9121aa29fcaa5da0
+    evidenceWaits:
+      - id: align-login-signing:2
+        stepId: full.open.evidence
+        sequence: 2
+        kind: classic-open-artifacts
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-login-signing
+          contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+          submissionId: 121af97d-c2ce-4d8f-ae95-218bf4de005c
+      - id: align-login-signing:8
+        stepId: full.design.evidence
+        sequence: 8
+        kind: classic-design-document
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-login-signing/design.md
+          contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+          submissionId: 175a5dc3-993c-4894-b363-ae0545090019
+      - id: align-login-signing:12
+        stepId: full.build.plan.evidence
+        sequence: 12
+        kind: classic-build-plan
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+          contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+          submissionId: 96b26679-3d04-4c2d-8546-7b8178aa1188
+      - id: align-login-signing:17
+        stepId: full.build.check.evidence
+        sequence: 17
+        kind: classic-build-check
+        status: resolved
+        results: {}
+        receipt:
+          ref: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+          contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+          submissionId: f9f611ca-86b5-4862-ae8f-18bdd10ec53c
+    ready: []
+    joins: {}
+    outputs: {}
+    children: []
+    lineage: []
+  sourceRevision: 29
+  sourceHash: 35d38c59985943556da59ece8c68b9f57bf0d9b6b05cc42c9622708d87e92a88
+  pool:
+    version: 3
+    values:
+      - event: open-complete
+      - choice: approved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+              ref: docs/openspec/changes/align-login-signing
+      - contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+        ref: docs/openspec/changes/align-login-signing
+      - contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+      - choice: approved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+              handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+              proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+                iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00)
+                iOS_ilife798_3.1.9, VersionCode 3.1.9, no ApplicationType); (2)
+                DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(param\
+                s)+LOGIN_SALT)) with LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v;
+                (3) login body only {authCode, un}; (4) remove unused shortSign
+                and its spec requirement; (5) longSign, device endpoints and
+                global Android 3.1.8 headers unchanged; (6) score balance and
+                settlement reads verified, not modified. Tests: signature vector
+                93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+                assertions, live read check."
+              requirementsEvidence:
+                contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+                ref: docs/openspec/changes/align-login-signing
+              sourceEvidence:
+                contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+                ref: docs/openspec/changes/align-login-signing
+      - handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+        handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+        proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+          iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9,
+          VersionCode 3.1.9, no ApplicationType); (2)
+          DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(params)+LOG\
+          IN_SALT)) with LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v; (3) login
+          body only {authCode, un}; (4) remove unused shortSign and its spec
+          requirement; (5) longSign, device endpoints and global Android 3.1.8
+          headers unchanged; (6) score balance and settlement reads verified,
+          not modified. Tests: signature vector
+          93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+          assertions, live read check."
+        requirementsEvidence:
+          contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+          ref: docs/openspec/changes/align-login-signing
+        sourceEvidence:
+          contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+          ref: docs/openspec/changes/align-login-signing
+      - designDoc: docs/openspec/changes/align-login-signing/design.md
+      - contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+        ref: docs/openspec/changes/align-login-signing/design.md
+      - boundBranch: main
+        buildMode: executing-plans
+        directOverride: false
+        isolation: current
+        reviewMode: standard
+        subagentDispatch: null
+        tddMode: tdd
+      - choice: approved
+        proposal:
+          input:
+            change: align-login-signing
+            changeDir: docs/openspec/changes/align-login-signing
+            workspaceBaseline:
+              ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: executing-plans
+              directOverride: false
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+      - designEvidence:
+          contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+          ref: docs/openspec/changes/align-login-signing/design.md
+        plan: docs/superpowers/plans/2026-11-05-align-login-signing.md
+        planEvidence:
+          contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+          ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+        taskRevision: 1435a7dd6c980fc1db261ef0768ef8bfaed7b7c81b5355f646fb13ffc6724e72
+      - contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+        ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+      - event: build-complete
+      - argv:
+          - flutter
+          - test
+          - --json
+        changedDuringExecution: []
+        checkEpoch: 2
+        contentHash: 961d3821a00622c3fd75ee37df021f3f3366d95206980a38bcf3dee100ff2166
+        cwd: .
+        environment: 875e29cea4f0da15e959768b6fb91fb7dc963ab8d7ccdd03d1036d992c92be51
+        exitCode: 64
+        inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+        inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+        manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+        manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/5b7bd3ff-4e55-4023-89f3-b5c82c2d97c0.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/fa185455-d43e-4cf3-a69b-61ca99b6c212.log
+        reusable: false
+        reused: false
+        scope: build
+        tier: full
+        timeoutMs: 300000
+      - argv:
+          - flutter
+          - test
+        changedDuringExecution: []
+        checkEpoch: 2
+        contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+        cwd: .
+        environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+        exitCode: 0
+        inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+        inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+        manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+        manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2268ee7e-7ba1-4a4b-bb0f-036f453f11d5.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+        reusable: false
+        reused: false
+        scope: build
+        tier: full
+        timeoutMs: 300000
+      - contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+        ref: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+      - sequence: 9
+        value:
+          boundBranch: main
+          buildMode: executing-plans
+          directOverride: false
+          isolation: current
+          reviewMode: standard
+          subagentDispatch: null
+          tddMode: tdd
+      - sequence: 10
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-login-signing
+              changeDir: docs/openspec/changes/align-login-signing
+              workspaceBaseline:
+                ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+            outputs:
+              full.build.configure:
+                boundBranch: main
+                buildMode: executing-plans
+                directOverride: false
+                isolation: current
+                reviewMode: standard
+                subagentDispatch: null
+                tddMode: tdd
+      - sequence: 6
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-login-signing
+              changeDir: docs/openspec/changes/align-login-signing
+              workspaceBaseline:
+                ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+            outputs:
+              full.design.handoff:
+                handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+                handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+                proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+                  iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00)
+                  iOS_ilife798_3.1.9, VersionCode 3.1.9, no ApplicationType);
+                  (2)
+                  DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(par\
+                  ams)+LOGIN_SALT)) with
+                  LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v; (3) login body
+                  only {authCode, un}; (4) remove unused shortSign and its spec
+                  requirement; (5) longSign, device endpoints and global Android
+                  3.1.8 headers unchanged; (6) score balance and settlement
+                  reads verified, not modified. Tests: signature vector
+                  93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+                  assertions, live read check."
+                requirementsEvidence:
+                  contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+                  ref: docs/openspec/changes/align-login-signing
+                sourceEvidence:
+                  contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+                  ref: docs/openspec/changes/align-login-signing
+      - sequence: 7
+        value:
+          designDoc: docs/openspec/changes/align-login-signing/design.md
+      - sequence: 8
+        value:
+          contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+          ref: docs/openspec/changes/align-login-signing/design.md
+      - sequence: 5
+        value:
+          handoffContext: docs/openspec/changes/align-login-signing/.comet/handoff/design-context.json
+          handoffHash: 3883f150a29bcfbc330ad2a43a3b8ff081c95ad53f4cecdd49790497518bdb80
+          proposal: "Login signing: (1) per-request iOS identity for acc/login only (UA
+            iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9,
+            VersionCode 3.1.9, no ApplicationType); (2)
+            DrinkApiSigner.loginSign(params)=MD5(objcEncode(serialize(params)+L\
+            OGIN_SALT)) with LOGIN_SALT=aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v; (3)
+            login body only {authCode, un}; (4) remove unused shortSign and its
+            spec requirement; (5) longSign, device endpoints and global Android
+            3.1.8 headers unchanged; (6) score balance and settlement reads
+            verified, not modified. Tests: signature vector
+            93f9b2ec2c30df3ef4c8b9caeea3013b, mock-adapter request-shape
+            assertions, live read check."
+          requirementsEvidence:
+            contentHash: 7ec617659b63d4fe8d757c5959b225ee50ce2f5ff31c019c801e974aa99e5861
+            ref: docs/openspec/changes/align-login-signing
+          sourceEvidence:
+            contentHash: b73227632c0e76af63eb25fa7ffe88f935d0dfd2bf7e4cc1861e578da0632339
+            ref: docs/openspec/changes/align-login-signing
+      - sequence: 1
+        value:
+          event: open-complete
+      - sequence: 3
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-login-signing
+              changeDir: docs/openspec/changes/align-login-signing
+              workspaceBaseline:
+                ref: 2ba49b74-ec4e-4b41-8d84-0af8367f3aac
+            outputs:
+              full.open:
+                event: open-complete
+              full.open.evidence:
+                contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+                ref: docs/openspec/changes/align-login-signing
+      - sequence: 2
+        value:
+          contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+          ref: docs/openspec/changes/align-login-signing
+      - sequence: 4
+        value:
+          contentHash: 12a41e61069723926f71245f355c3e61c2048dac025072caf9b3575a54fc2af3
+      - sequence: 11
+        value:
+          designEvidence:
+            contentHash: 16e6f094670af496e35c6b02fe5fc9cea7ee0534522c538947128a97bdb0acb0
+            ref: docs/openspec/changes/align-login-signing/design.md
+          plan: docs/superpowers/plans/2026-11-05-align-login-signing.md
+          planEvidence:
+            contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+            ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+          taskRevision: 1435a7dd6c980fc1db261ef0768ef8bfaed7b7c81b5355f646fb13ffc6724e72
+      - sequence: 12
+        value:
+          contentHash: e21d6ad73f7adc0195bae01a7ab49ae64b1d097ccf1c7de3c8783f977339e226
+          ref: docs/superpowers/plans/2026-11-05-align-login-signing.md
+      - sequence: 13
+        value:
+          event: build-complete
+      - sequence: 14
+        value:
+          argv:
+            - flutter
+            - test
+            - --json
+          changedDuringExecution: []
+          checkEpoch: 2
+          contentHash: 961d3821a00622c3fd75ee37df021f3f3366d95206980a38bcf3dee100ff2166
+          cwd: .
+          environment: 875e29cea4f0da15e959768b6fb91fb7dc963ab8d7ccdd03d1036d992c92be51
+          exitCode: 64
+          inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+          inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+          manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+          manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/5b7bd3ff-4e55-4023-89f3-b5c82c2d97c0.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/fa185455-d43e-4cf3-a69b-61ca99b6c212.log
+          reusable: false
+          reused: false
+          scope: build
+          tier: full
+          timeoutMs: 300000
+      - sequence: 15
+        value:
+          event: build-complete
+      - sequence: 16
+        value:
+          argv:
+            - flutter
+            - test
+          changedDuringExecution: []
+          checkEpoch: 2
+          contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+          cwd: .
+          environment: 1905cb28804589264673b8e131afce64dacd320a98dea637d8a0a531e873944a
+          exitCode: 0
+          inputAfter: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+          inputBefore: 8924189897d9dcd59d4bd63263ca8061d76c7955c46528d3fde3b2e4001ce02e
+          manifestHash: 3d262f625e80f337fbf88a9887787cb1669a10dee7bc2acc8294f20eb5dc1a99
+          manifestRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2268ee7e-7ba1-4a4b-bb0f-036f453f11d5.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+          reusable: false
+          reused: false
+          scope: build
+          tier: full
+          timeoutMs: 300000
+      - sequence: 17
+        value:
+          contentHash: cd172e7bdd180f87fc7055be0c6d25f81ecc4646ca4b9a228d04e459320c81d0
+          ref: .comet/runtime/classic-sdk-checks/816fbcc82484047c47c072160d294311f29b4a058e5bd00ea171ad80bb7dbf22/2f5c5473-2c8e-4fe3-b068-c80999d98732.log
+    nodes:
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 1
+        height: 2
+      - key: full.open.revalidate
+        value: 3
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: 3
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 5
+        left: 6
+        right: 7
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 8
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 7
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 6
+        left: 10
+        right: 11
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 12
+        right: 7
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 13
+        right: 4
+        height: 4
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 16
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 11
+        right: 7
+        height: 2
+      - key: full.design.document
+        value: 6
+        left: 17
+        right: 18
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 19
+        right: 4
+        height: 4
+      - key: full.build.plan
+        value: 10
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 11
+        left: 21
+        right: 22
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 23
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 4
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 24
+        right: 25
+        height: 4
+      - key: full.build.execute
+        value: 12
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 27
+        height: 2
+      - key: full.build.plan.evidence
+        value: 11
+        left: null
+        right: 22
+        height: 2
+      - key: full.build.plan
+        value: 10
+        left: 28
+        right: 29
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 30
+        right: 25
+        height: 4
+      - key: full.build.check
+        value: 13
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 8
+        left: 32
+        right: null
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 33
+        right: 27
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 34
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 35
+        right: 25
+        height: 5
+      - key: full.build.check
+        value: 14
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 15
+        left: 37
+        right: 38
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 39
+        right: 27
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 40
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 41
+        right: 25
+        height: 5
+      - key: full.build.configure
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 17
+        left: 43
+        right: 44
+        height: 2
+      - key: full.design.evidence
+        value: 20
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 22
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 21
+        left: 46
+        right: 47
+        height: 2
+      - key: full.open.revalidate
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 24
+        left: null
+        right: 49
+        height: 2
+      - key: full.open.confirm
+        value: 23
+        left: 48
+        right: 50
+        height: 3
+      - key: full.design.document
+        value: 19
+        left: 45
+        right: 51
+        height: 4
+      - key: full.build.plan
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 27
+        left: 53
+        right: 54
+        height: 2
+      - key: full.build.confirm
+        value: 17
+        left: 43
+        right: 55
+        height: 3
+      - key: full.design.document
+        value: 19
+        left: 56
+        right: 51
+        height: 4
+      - key: full.build.execute
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 17
+        left: 43
+        right: 58
+        height: 2
+      - key: full.build.plan.evidence
+        value: 27
+        left: null
+        right: 54
+        height: 2
+      - key: full.build.plan
+        value: 26
+        left: 59
+        right: 60
+        height: 3
+      - key: full.design.document
+        value: 19
+        left: 61
+        right: 51
+        height: 4
+      - key: full.build.check
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 16
+        left: 63
+        right: null
+        height: 2
+      - key: full.build.confirm
+        value: 17
+        left: 64
+        right: 58
+        height: 3
+      - key: full.build.plan
+        value: 26
+        left: 65
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 19
+        left: 66
+        right: 51
+        height: 5
+      - key: full.build.execute
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 17
+        left: 64
+        right: 68
+        height: 3
+      - key: full.build.plan
+        value: 26
+        left: 69
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 19
+        left: 70
+        right: 51
+        height: 5
+      - key: full.build.check
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 32
+        left: 72
+        right: 73
+        height: 2
+      - key: full.build.confirm
+        value: 17
+        left: 74
+        right: 68
+        height: 3
+      - key: full.build.plan
+        value: 26
+        left: 75
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 19
+        left: 76
+        right: 51
+        height: 5
+      - key: full.open
+        value: 22
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 24
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 23
+        left: 78
+        right: 79
+        height: 2
+      - key: full.open.revalidate
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 24
+        left: null
+        right: 81
+        height: 2
+      - key: full.open.confirm
+        value: 23
+        left: 78
+        right: 82
+        height: 3
+      - key: full.design.confirm
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 22
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 21
+        left: 84
+        right: 85
+        height: 2
+      - key: full.open.confirm
+        value: 23
+        left: 86
+        right: 82
+        height: 3
+      - key: full.design.confirm
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 20
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 19
+        left: 88
+        right: 89
+        height: 2
+      - key: full.design.handoff
+        value: 21
+        left: 90
+        right: 85
+        height: 3
+      - key: full.open.confirm
+        value: 23
+        left: 91
+        right: 82
+        height: 4
+      - key: full.open.evidence
+        value: 24
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 22
+        left: null
+        right: 93
+        height: 2
+      - key: full.design.handoff
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 24
+        left: 96
+        right: 97
+        height: 2
+      - key: full.open
+        value: 22
+        left: 95
+        right: 98
+        height: 3
+      - key: full.build.configure
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 20
+        left: 101
+        right: 102
+        height: 2
+      - key: full.design.confirm
+        value: 18
+        left: 100
+        right: 103
+        height: 3
+      - key: full.open
+        value: 22
+        left: 104
+        right: 98
+        height: 4
+      - key: full.open
+        value: 22
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 19
+        left: 107
+        right: 108
+        height: 2
+      - key: full.open.confirm
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 24
+        left: 110
+        right: 111
+        height: 2
+      - key: full.open
+        value: 22
+        left: 109
+        right: 112
+        height: 3
+      - key: full.build.configure
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 17
+        left: 114
+        right: 115
+        height: 2
+      - key: full.design.document
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 20
+        left: 117
+        right: 118
+        height: 2
+      - key: full.design.confirm
+        value: 18
+        left: 116
+        right: 119
+        height: 3
+      - key: full.open
+        value: 22
+        left: 120
+        right: 112
+        height: 4
+      - key: full.build.check
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 16
+        left: 122
+        right: null
+        height: 2
+      - key: full.build.execute
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 27
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 26
+        left: 124
+        right: 125
+        height: 2
+      - key: full.build.confirm
+        value: 17
+        left: 123
+        right: 126
+        height: 3
+      - key: full.open
+        value: 22
+        left: 119
+        right: 112
+        height: 3
+      - key: full.design.confirm
+        value: 18
+        left: 127
+        right: 128
+        height: 4
+    maps:
+      - null
+      - 2
+      - 5
+      - 9
+      - 14
+      - 20
+      - 26
+      - 31
+      - 36
+      - 42
+      - 52
+      - 57
+      - 62
+      - 67
+      - 71
+      - 77
+      - 80
+      - 83
+      - 87
+      - 92
+      - 94
+      - 99
+      - 105
+      - 106
+      - 113
+      - 121
+      - 129
+    bindings:
+      - path:
+          - actions
+          - "0"
+          - input
+          - outputs
+        map: 0
+      - path:
+          - actions
+          - "1"
+          - input
+          - outputs
+        map: 1
+      - path:
+          - actions
+          - "2"
+          - input
+          - outputs
+        map: 2
+      - path:
+          - actions
+          - "3"
+          - input
+          - outputs
+        map: 3
+      - path:
+          - actions
+          - "4"
+          - input
+          - outputs
+        map: 4
+      - path:
+          - actions
+          - "5"
+          - input
+          - outputs
+        map: 5
+      - path:
+          - actions
+          - "6"
+          - input
+          - outputs
+        map: 6
+      - path:
+          - actions
+          - "7"
+          - input
+          - outputs
+        map: 7
+      - path:
+          - actions
+          - "8"
+          - input
+          - outputs
+        map: 8
+      - path:
+          - actions
+          - "9"
+          - input
+          - outputs
+        map: 8
+      - path:
+          - actions
+          - "10"
+          - input
+          - outputs
+        map: 9
+      - path:
+          - actionContexts
+          - align-login-signing:1
+          - results
+        map: 0
+      - path:
+          - actionContexts
+          - align-login-signing:11
+          - results
+        map: 10
+      - path:
+          - actionContexts
+          - align-login-signing:13
+          - results
+        map: 11
+      - path:
+          - actionContexts
+          - align-login-signing:14
+          - results
+        map: 12
+      - path:
+          - actionContexts
+          - align-login-signing:15
+          - results
+        map: 13
+      - path:
+          - actionContexts
+          - align-login-signing:16
+          - results
+        map: 14
+      - path:
+          - actionContexts
+          - align-login-signing:18
+          - results
+        map: 15
+      - path:
+          - actionContexts
+          - align-login-signing:4
+          - results
+        map: 16
+      - path:
+          - actionContexts
+          - align-login-signing:5
+          - results
+        map: 17
+      - path:
+          - actionContexts
+          - align-login-signing:7
+          - results
+        map: 18
+      - path:
+          - actionContexts
+          - align-login-signing:9
+          - results
+        map: 19
+      - path:
+          - outputs
+        map: 15
+      - path:
+          - waits
+          - "0"
+          - results
+        map: 20
+      - path:
+          - waits
+          - "1"
+          - results
+        map: 21
+      - path:
+          - waits
+          - "2"
+          - results
+        map: 22
+      - path:
+          - evidenceWaits
+          - "0"
+          - results
+        map: 23
+      - path:
+          - evidenceWaits
+          - "1"
+          - results
+        map: 24
+      - path:
+          - evidenceWaits
+          - "2"
+          - results
+        map: 25
+      - path:
+          - evidenceWaits
+          - "3"
+          - results
+        map: 26
+  storageHash: 6ea13091ac5dabfe3acef19efd7ae6faf4b692ca63bf8e9cda1def09b355f8dd
+check_epoch: 3

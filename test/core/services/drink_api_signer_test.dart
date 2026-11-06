@@ -88,28 +88,18 @@ void main() {
     });
   });
 
-  group('DrinkApiSigner.shortSign', () {
-    test('相同参数两次计算结果一致', () {
-      final params = {'un': '22644212509', 'authCode': '123456'};
-
-      expect(DrinkApiSigner.shortSign(params), DrinkApiSigner.shortSign(params));
-    });
-
-    test('拼接串不含时间戳与身份信息', () {
-      // 短签名只依赖参数与密钥片段；换 token/uid 不影响结果
-      final params = {'un': '22644212509', 'authCode': '123456'};
-
-      final first = DrinkApiSigner.shortSign(params);
-      final second = DrinkApiSigner.shortSign(params);
-
-      expect(first, second);
-      expect(first, matches(RegExp(r'^[0-9a-f]{32}$')));
-    });
-
-    test('不同参数产生不同签名', () {
+  group('DrinkApiSigner.loginSign', () {
+    test('固定参数得到官方向量', () {
       expect(
-        DrinkApiSigner.shortSign({'un': '22644212509', 'authCode': '111111'}),
-        isNot(DrinkApiSigner.shortSign({'un': '22644212509', 'authCode': '222222'})),
+        DrinkApiSigner.loginSign({'authCode': '123456', 'un': '13800138000'}),
+        '93f9b2ec2c30df3ef4c8b9caeea3013b',
+      );
+    });
+
+    test('验证码变化导致签名变化', () {
+      expect(
+        DrinkApiSigner.loginSign({'authCode': '111111', 'un': '13800138000'}),
+        isNot(DrinkApiSigner.loginSign({'authCode': '222222', 'un': '13800138000'})),
       );
     });
   });
@@ -216,21 +206,11 @@ void main() {
       // 期望值由服务端验签通过反推确认。字符片段必须插在盐值之间：
       // k1[1] k2[25]↑ k3[0] | dF6hJ9kL2nP | k4[18] | rT8wY1 | k2[21] | G | k3[23] | iM7oQ | k1[15] | v
       // 聚成一圈再拼盐值会得到不同结果，服务端返回「验签失败」。
-      final sign = DrinkApiSigner.shortSign({'un': '22644212509', 'authCode': '123456'});
-
-      expect(sign, isNot('d75a96c18f30e951079f27df9c672c65'),
-          reason: '旧顺序（片段聚合）的签名值，服务端不接受');
-      expect(sign, matches(RegExp(r'^[0-9a-f]{32}$')));
-    });
-
-    test('长签名的密钥片段顺序与短签名一致', () {
-      final params = startParams();
-
-      final long = DrinkApiSigner.longSign(params,
+      final sign = DrinkApiSigner.longSign(startParams(),
           token: 'abcdefgh12345678', uid: '87654321abcdefgh', nowMillis: millis);
 
-      // 同一组密钥片段，长签名与短签名应产生同结构的拼接
-      expect(long, matches(RegExp(r'^[0-9a-f]{32}$')));
+      // 固定向量：片段顺序一旦改变，该值随之改变
+      expect(sign, '5b9ad263b95de242c6cf5769aa0e760e');
     });
 
     test('签名先于 sign 入参计算，追加 sign 不改变已有签名', () {

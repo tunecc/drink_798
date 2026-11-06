@@ -94,17 +94,6 @@ class DrinkApiSigner {
   static const String _salt4 = 'iM7oQ';
   static const String _salt5 = 'v';
 
-  /// 短签名，用于短信验证码等接口。
-  ///
-  /// 拼接顺序见 [_keyFragments]：序列化参数后接密钥片段与盐值，字符片段
-  /// 分散插在盐值之间。结果经 [objcEncode] 后取 MD5。
-  ///
-  /// 短签名不含时间戳与身份信息，相同参数必然得到相同结果。
-  static String shortSign(Map<String, dynamic> params) {
-    final query = serialize(params);
-    return md5Hex(objcEncode(_keyFragments(query)));
-  }
-
   /// 取摘要字符串中第 [index] 个字符（0-based）。
   ///
   /// 摘要固定 32 位，下标越界返回空串——与官方在密钥异常时的降级行为一致。
@@ -113,9 +102,20 @@ class DrinkApiSigner {
     return source[index];
   }
 
+  /// 登录签名固定串：官方登录请求追加的协议常量。
+  static const String LOGIN_SALT = 'aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v';
+
+  /// 登录签名，用于 `acc/login`。
+  ///
+  /// 序列化参数后追加 [LOGIN_SALT]，按官方编码规则编码再取 MD5。
+  /// 对 `authCode`/`un` 这类数字参数，编码步骤不改变输入，但保留以对齐官方流程。
+  static String loginSign(Map<String, dynamic> params) {
+    return md5Hex(objcEncode('${serialize(params)}$LOGIN_SALT'));
+  }
+
   /// 长签名，用于设备操作类接口。
   ///
-  /// 在 [shortSign] 的拼接顺序基础上，于序列化参数之后插入三段：
+  /// 在 [_keyFragments] 拼出的密钥片段与盐值之前，于序列化参数之后插入三段：
   /// 时间档位值、token 的后 8 个字符、uid 的后 8 个字符。
   ///
   /// 时间档位值为 `30 * ((nowMillis + lat - lng) / 30000)`，整数除法，
@@ -135,7 +135,7 @@ class DrinkApiSigner {
     return md5Hex(objcEncode(raw));
   }
 
-  /// 密钥字符片段与固定盐值的拼接，两个签名共用。
+  /// 密钥字符片段与固定盐值的拼接，长签名使用。
   ///
   /// 顺序必须严格对应官方格式串
   /// `%@%@%@%@dF6hJ9kL2nP%@rT8wY1%@G%@iM7oQ%@v`：
