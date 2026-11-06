@@ -43,69 +43,6 @@
 
 ## MODIFIED Requirements
 
-### Requirement: 签名附加到请求
-
-系统 SHALL 把登录签名以 `sign` 为键追加到 `acc/login` 的查询参数中。追加后 SHALL 保持原有参数不变，仅新增 `sign` 一项。其他接口 SHALL NOT 附加签名。
-
-#### Scenario: 登录请求携带签名
-
-- **WHEN** 用户提交手机号与短信验证码登录
-- **THEN** 登录请求 URL 的查询参数中包含 `sign` 项
-
-#### Scenario: 设备请求不附加签名
-
-- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
-- **THEN** 请求 URL 的查询参数中不包含 `sign` 项
-
-#### Scenario: 短信验证码请求不附加签名
-
-- **WHEN** 用户请求下发短信验证码
-- **THEN** 该请求 URL 的查询参数中不包含 `sign` 项
-
-#### Scenario: 设备状态查询不附加签名
-
-- **WHEN** 系统查询设备在线状态
-- **THEN** 请求不包含 `sign` 参数
-
-### Requirement: 接口签名类型映射
-
-系统 SHALL 只为 `acc/login` 附加登录签名；`acc/login/code`、`dev/start`、`dev/end`、`dev/favo` 与 `ui/app/dev/status` 均不附加签名。
-
-#### Scenario: 登录接口使用登录签名
-
-- **WHEN** 系统构造 `acc/login` 请求
-- **THEN** 使用登录签名计算 `sign` 值
-
-#### Scenario: 设备操作接口不附加签名
-
-- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
-- **THEN** 请求不包含 `sign` 参数
-
-#### Scenario: 短信验证码接口不附加签名
-
-- **WHEN** 系统构造 `acc/login/code` 请求
-- **THEN** 请求不包含 `sign` 参数
-
-#### Scenario: 设备状态查询不附加签名
-
-- **WHEN** 系统查询设备在线状态
-- **THEN** 请求不包含 `sign` 参数
-
-### Requirement: token 登录路径的限制
-
-系统 SHALL 在通过「使用已有 Token 登录」路径登录时，允许用户完成登录并查看设备列表。设备操作请求不附加签名，与该登录路径是否获取 uid 无关。
-
-#### Scenario: token 登录可查看设备列表
-
-- **WHEN** 用户通过粘贴已有 token 完成登录
-- **THEN** 用户可以正常看到设备列表
-
-#### Scenario: token 登录后设备操作不附加签名
-
-- **WHEN** 用户通过 token 登录后发起设备操作
-- **THEN** 该请求不包含 `sign` 参数，行为与其他登录路径一致
-- **AND** 系统不因此崩溃或给出误导性提示
-
 ### Requirement: 长签名计算
 
 系统 SHALL 保留长签名能力（当前没有接口使用）。长签名 SHALL 在序列化参数之后依次插入时间档位值、token 后 8 个字符、uid 后 8 个字符，再拼接固定密钥片段：`k1[1]`、`k2[25]` 转大写、`k3[0]`、`dF6hJ9kL2nP`、`k4[18]`、`rT8wY1`、`k2[21]`、`G`、`k3[23]`、`iM7oQ`、`k1[15]`、`v`（`k1`–`k4` 为四个固定密钥各自的 MD5 摘要），最后按既有编码规则编码并取 MD5。
@@ -139,7 +76,90 @@
 - **WHEN** uid 为空字符串
 - **THEN** 拼接串中 uid 片段为空串，签名仍能正常计算
 
+## ADDED Requirements
+
+### Requirement: 签名附加规则
+
+系统 SHALL 只把登录签名以 `sign` 为键追加到 `acc/login` 的查询参数中，追加后保持原有参数不变。其他接口 SHALL NOT 附加签名。
+
+#### Scenario: 登录请求携带签名
+
+- **WHEN** 用户提交手机号与短信验证码登录
+- **THEN** 登录请求 URL 的查询参数中包含 `sign` 项
+
+#### Scenario: 设备请求不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求 URL 的查询参数中不包含 `sign` 项
+
+#### Scenario: 短信验证码请求不附加签名
+
+- **WHEN** 用户请求下发短信验证码
+- **THEN** 该请求 URL 的查询参数中不包含 `sign` 项
+
+#### Scenario: 设备状态查询不附加签名
+
+- **WHEN** 系统查询设备在线状态
+- **THEN** 请求不包含 `sign` 参数
+
+### Requirement: 接口签名映射
+
+系统 SHALL 只为 `acc/login` 使用登录签名；`acc/login/code`、`dev/start`、`dev/end`、`dev/favo` 与 `ui/app/dev/status` 均不附加签名。
+
+#### Scenario: 登录接口使用登录签名
+
+- **WHEN** 系统构造 `acc/login` 请求
+- **THEN** 使用登录签名计算 `sign` 值
+
+#### Scenario: 设备操作接口不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求不包含 `sign` 参数
+
+#### Scenario: 短信验证码接口不附加签名
+
+- **WHEN** 系统构造 `acc/login/code` 请求
+- **THEN** 请求不包含 `sign` 参数
+
+#### Scenario: 设备状态查询不附加签名
+
+- **WHEN** 系统查询设备在线状态
+- **THEN** 请求不包含 `sign` 参数
+
+### Requirement: token 登录与设备请求
+
+系统 SHALL 在通过「使用已有 Token 登录」路径登录时，允许用户完成登录并查看设备列表。设备操作请求不附加签名，与该登录路径是否获取 uid 无关。
+
+#### Scenario: token 登录可查看设备列表
+
+- **WHEN** 用户通过粘贴已有 token 完成登录
+- **THEN** 用户可以正常看到设备列表
+
+#### Scenario: token 登录后设备操作不附加签名
+
+- **WHEN** 用户通过 token 登录后发起设备操作
+- **THEN** 该请求不包含 `sign` 参数，行为与其他登录路径一致
+- **AND** 系统不因此崩溃或给出误导性提示
+
 ## REMOVED Requirements
+
+### Requirement: 签名附加到请求
+
+**Reason**: 服务端与当前客户端只在 `acc/login` 附加签名，原要求描述的设备接口签名行为不存在。
+
+**Migration**: 改按新增的「签名附加规则」要求。
+
+### Requirement: 接口签名类型映射
+
+**Reason**: 签名类型映射已变化，只有 `acc/login` 使用登录签名。
+
+**Migration**: 改按新增的「接口签名映射」要求。
+
+### Requirement: token 登录路径的限制
+
+**Reason**: 设备操作不再附加签名，原限制（长签名 uid 片段置空）不再成立。
+
+**Migration**: 改按新增的「token 登录与设备请求」要求。
 
 ### Requirement: 短签名计算
 

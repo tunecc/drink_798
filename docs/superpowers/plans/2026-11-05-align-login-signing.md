@@ -2,6 +2,7 @@
 change: align-login-signing
 design-doc: docs/openspec/changes/align-login-signing/design.md
 base-ref: 1258918045f582dc81d07489ffabab2154fbf7ca
+archived-with: 2026-11-06-align-login-signing
 ---
 
 # Login Signing Alignment Implementation Plan

@@ -55,25 +55,9 @@
 - **THEN** 分别得到 `k1 = MD5("eZ")`、`k2 = MD5("kzyZ")`、`k3 = MD5("null")`、`k4 = MD5("hn")`
 - **AND** 每次签名复用同一组摘要，不重复计算
 
-### Requirement: 短签名计算
-
-系统 SHALL 提供短签名，用于登录类接口。短签名 SHALL 按以下顺序拼接后计算 MD5：先对拼接结果做 URL 百分号编码，再取 MD5 摘要。拼接顺序为：序列化参数、`k1` 的第 2 个字符、`k2` 的第 26 个字符转大写、`k3` 的第 1 个字符、`k4` 的第 19 个字符、`k2` 的第 22 个字符、`k3` 的第 24 个字符、`k1` 的第 16 个字符、固定串 `dF6hJ9kL2nP`、固定串 `rT8wY1`、固定串 `G`、固定串 `iM7oQ`、固定串 `v`。
-
-字符位置均为 1-based。
-
-#### Scenario: 短签名结果可复现
-
-- **WHEN** 使用相同参数连续两次计算短签名
-- **THEN** 两次得到的签名值完全相同
-
-#### Scenario: 短签名不含时间与身份信息
-
-- **WHEN** 对相同参数计算短签名
-- **THEN** 拼接串中不包含当前时间戳，也不包含 token 或 uid
-
 ### Requirement: 长签名计算
 
-系统 SHALL 提供长签名，用于设备操作类接口。长签名 SHALL 在短签名的拼接顺序基础上，于序列化参数之后、密钥字符片段之前，插入三段内容：时间档位值、token 的后 8 个字符、uid 的后 8 个字符。
+系统 SHALL 保留长签名能力（当前没有接口使用）。长签名 SHALL 在序列化参数之后依次插入时间档位值、token 后 8 个字符、uid 后 8 个字符，再拼接固定密钥片段：`k1[1]`、`k2[25]` 转大写、`k3[0]`、`dF6hJ9kL2nP`、`k4[18]`、`rT8wY1`、`k2[21]`、`G`、`k3[23]`、`iM7oQ`、`k1[15]`、`v`（`k1`–`k4` 为四个固定密钥各自的 MD5 摘要），最后按既有编码规则编码并取 MD5。
 
 时间档位值 SHALL 按 `30 * ((当前毫秒时间戳 + lat - lng) / 30000)` 计算，除法取整。`lat` 与 `lng` 为位置修正值，未提供时 SHALL 取 0。
 
@@ -132,55 +116,6 @@
 - **WHEN** 系统构造 `dev/start` 请求
 - **THEN** `upgrade` 为布尔真，`rcp` 为布尔假
 
-### Requirement: 签名附加到请求
-
-系统 SHALL 把签名值以 `sign` 为键追加到请求的查询参数中。追加后 SHALL 保持原有参数不变，仅新增 `sign` 一项。
-
-#### Scenario: 开始接水请求携带签名
-
-- **WHEN** 用户对设备发起开始接水请求
-- **THEN** 请求 URL 的查询参数中除六个业务参数外，还包含 `sign` 项
-- **AND** 六个业务参数的值在追加签名后未被修改
-
-#### Scenario: 结算请求携带签名
-
-- **WHEN** 用户对设备发起结算请求
-- **THEN** 请求 URL 的查询参数中包含 `sign` 项
-
-#### Scenario: 收藏设备请求携带签名
-
-- **WHEN** 用户收藏或取消收藏设备
-- **THEN** 请求 URL 的查询参数中包含 `sign` 项
-
-#### Scenario: 登录请求携带签名
-
-- **WHEN** 用户提交手机号与短信验证码登录
-- **THEN** 登录请求 URL 的查询参数中包含 `sign` 项
-
-#### Scenario: 短信验证码请求携带签名
-
-- **WHEN** 用户请求下发短信验证码
-- **THEN** 该请求 URL 的查询参数中包含 `sign` 项
-
-### Requirement: 接口签名类型映射
-
-系统 SHALL 为每个接口指定正确的签名类型：`dev/start`、`dev/end`、`dev/favo` 使用长签名；`acc/login`、`acc/login/code` 使用短签名；`ui/app/dev/status` 不附加签名。
-
-#### Scenario: 设备操作接口使用长签名
-
-- **WHEN** 系统构造 `dev/start` 或 `dev/end` 请求
-- **THEN** 使用长签名计算 `sign` 值
-
-#### Scenario: 登录接口使用短签名
-
-- **WHEN** 系统构造 `acc/login` 或 `acc/login/code` 请求
-- **THEN** 使用短签名计算 `sign` 值
-
-#### Scenario: 设备状态查询不附加签名
-
-- **WHEN** 系统查询设备在线状态
-- **THEN** 请求不包含 `sign` 参数
-
 ### Requirement: 请求头对齐
 
 系统 SHALL 只发送官方客户端使用的请求头：`Authorization`、`VersionCode`、`User-Agent`。系统 SHALL 不再发送 `ApplicationType`、`Accept`、`Accept-Encoding`、`Connection`。
@@ -214,19 +149,104 @@
 - **WHEN** 服务端返回其他非零业务错误码
 - **THEN** 系统呈现服务端返回的错误信息，而非统一提示设备无响应
 
-### Requirement: token 登录路径的限制
+### Requirement: 登录请求签名
 
-系统 SHALL 在通过"使用已有 Token 登录"路径登录时，允许用户完成登录并查看设备列表。系统 SHALL NOT 保证该路径下设备操作请求的签名与服务端预期一致。
+系统 SHALL 为 `acc/login` 计算登录签名：只取 `authCode` 与 `un` 两个参数，按既有序列化规则得到 `authCode=<短信验证码>&un=<手机号>`，追加固定串 `aB3dF6hJ9kL2nP5rT8wY1eG4iM7oQ0v`，再按既有编码规则编码后取 MD5，输出小写十六进制。
 
-此限制源于该登录路径不获取 uid，导致长签名中的 uid 片段置空。
+#### Scenario: 固定参数得到固定签名
+
+- **WHEN** 短信验证码为 `123456`、手机号为 `13800138000`
+- **THEN** 登录签名等于 `93f9b2ec2c30df3ef4c8b9caeea3013b`
+
+#### Scenario: 签名只覆盖两个参数
+
+- **WHEN** 系统计算登录签名
+- **THEN** 参与签名的参数只有 `authCode` 与 `un`，不包含时间、token、uid 或请求头
+
+#### Scenario: 验证码变化导致签名变化
+
+- **WHEN** 同一手机号先后使用两个不同的短信验证码
+- **THEN** 两次登录签名不同
+
+### Requirement: 登录请求身份
+
+系统 SHALL 以官方 iOS 客户端的身份发送 `acc/login`：`User-Agent` 为 `iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9`，`VersionCode` 为 `3.1.9`，且 SHALL NOT 发送 `ApplicationType`。登录请求体 SHALL 只包含 `authCode` 与 `un`。
+
+#### Scenario: 登录请求头使用 iOS 身份
+
+- **WHEN** 用户提交手机号与短信验证码登录
+- **THEN** 请求包含 iOS `User-Agent` 与 `VersionCode: 3.1.9`
+- **AND** 请求不包含 `ApplicationType`
+
+#### Scenario: 登录请求体只包含两个参数
+
+- **WHEN** 用户提交登录
+- **THEN** 请求体只包含 `authCode` 与 `un`，不包含 `openCode` 或 `cid`
+
+#### Scenario: 其他请求保持原身份
+
+- **WHEN** 已登录用户发起设备或账单请求
+- **THEN** 请求仍使用 `Android_ilife798_3.1.8` 身份，不使用登录所用的 iOS 身份
+
+### Requirement: 签名附加规则
+
+系统 SHALL 只把登录签名以 `sign` 为键追加到 `acc/login` 的查询参数中，追加后保持原有参数不变。其他接口 SHALL NOT 附加签名。
+
+#### Scenario: 登录请求携带签名
+
+- **WHEN** 用户提交手机号与短信验证码登录
+- **THEN** 登录请求 URL 的查询参数中包含 `sign` 项
+
+#### Scenario: 设备请求不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求 URL 的查询参数中不包含 `sign` 项
+
+#### Scenario: 短信验证码请求不附加签名
+
+- **WHEN** 用户请求下发短信验证码
+- **THEN** 该请求 URL 的查询参数中不包含 `sign` 项
+
+#### Scenario: 设备状态查询不附加签名
+
+- **WHEN** 系统查询设备在线状态
+- **THEN** 请求不包含 `sign` 参数
+
+### Requirement: 接口签名映射
+
+系统 SHALL 只为 `acc/login` 使用登录签名；`acc/login/code`、`dev/start`、`dev/end`、`dev/favo` 与 `ui/app/dev/status` 均不附加签名。
+
+#### Scenario: 登录接口使用登录签名
+
+- **WHEN** 系统构造 `acc/login` 请求
+- **THEN** 使用登录签名计算 `sign` 值
+
+#### Scenario: 设备操作接口不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求不包含 `sign` 参数
+
+#### Scenario: 短信验证码接口不附加签名
+
+- **WHEN** 系统构造 `acc/login/code` 请求
+- **THEN** 请求不包含 `sign` 参数
+
+#### Scenario: 设备状态查询不附加签名
+
+- **WHEN** 系统查询设备在线状态
+- **THEN** 请求不包含 `sign` 参数
+
+### Requirement: token 登录与设备请求
+
+系统 SHALL 在通过「使用已有 Token 登录」路径登录时，允许用户完成登录并查看设备列表。设备操作请求不附加签名，与该登录路径是否获取 uid 无关。
 
 #### Scenario: token 登录可查看设备列表
 
 - **WHEN** 用户通过粘贴已有 token 完成登录
 - **THEN** 用户可以正常看到设备列表
 
-#### Scenario: token 登录下设备操作签名不完整
+#### Scenario: token 登录后设备操作不附加签名
 
-- **WHEN** 用户通过 token 登录后尝试开始接水
-- **THEN** 系统仍然发送请求，但长签名中的 uid 片段为空串
+- **WHEN** 用户通过 token 登录后发起设备操作
+- **THEN** 该请求不包含 `sign` 参数，行为与其他登录路径一致
 - **AND** 系统不因此崩溃或给出误导性提示

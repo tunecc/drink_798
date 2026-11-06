@@ -1,0 +1,16 @@
+{
+  "change": "align-login-signing",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "task_hash_policy": "task-content-v1",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "42906e5c1ce00ad91f61069098c567e3a265e56ad98fd7a0d721a5776c58417e",
+  "files": [
+    { "path": "docs/openspec/changes/align-login-signing/proposal.md", "sha256": "4a052cfb10b2e07c118c85308de5983cd447799e2ad43ff01b42bf7f135b3dd0" },
+    { "path": "docs/openspec/changes/align-login-signing/design.md", "sha256": "f6a5573118c37ae02460e8134eed2068693cacb664e3bafb97c65238e3740bf3" },
+    { "path": "docs/openspec/changes/align-login-signing/tasks.md", "sha256": "9b3ba96aa3525aa75610284d6089053a2ba6fc0138c31c224572ffdb7c888f9d" },
+    { "path": "docs/openspec/changes/align-login-signing/.openspec.yaml", "sha256": "9b4b840064a33a6866a0ebc375b496fbdc2387a324f6c8fb4f21b270218c0d37" },
+    { "path": "docs/openspec/changes/align-login-signing/specs/drink-api-signing/spec.md", "sha256": "85723051cf786e1fa210920a5cc254820bdef80d43ceb3d2c2285a7547dbd740" }
+  ]
+}

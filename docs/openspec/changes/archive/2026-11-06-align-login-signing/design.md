@@ -2,6 +2,8 @@
 comet_change: align-login-signing
 role: technical-design
 canonical_spec: openspec
+archived-with: 2026-11-06-align-login-signing
+status: final
 ---
 
 # Design
