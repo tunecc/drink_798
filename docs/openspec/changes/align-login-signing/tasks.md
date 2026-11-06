@@ -22,3 +22,10 @@
 ## Workflow follow-up
 
 - Archive the change and commit only this change's files after the OpenSpec and Comet checks pass.
+
+## 5. Review fixes (final integrated review)
+
+- [x] 5.1 Correct the delta spec so device endpoints (`dev/start`, `dev/end`, `dev/favo`) and `ui/app/dev/status` carry no `sign`, leaving only `acc/login` signed; update the affected scenarios. Verify: the delta has no claim that device requests carry a signature and its scenarios match the request tests. <!-- comet-task:c80fd6fb-449c-4ae2-abba-1894980bbb93 -->
+- [x] 5.2 Make the `长签名计算` requirement self-contained by removing its reference to the deleted short signature, as a MODIFIED requirement in the delta. Verify: the delta describes the fragment/salt order without naming shortSign. <!-- comet-task:dccdd861-3e36-4632-9596-a4edd8d36679 -->
+- [x] 5.3 Align `design.md` and `proposal.md` statements about `longSign` usage with the code (device requests are unsigned). Verify: no document claims device endpoints use longSign. <!-- comet-task:b5999dbd-f1f9-4e6c-bd7b-18eef793bae2 -->
+- [x] 5.4 Remove the dead `prefix` parameter from `_keyFragments`, document both signing paths in the class comment, and add a login network-error test (DioException → `code == null`, message starts with 网络错误). Verify: `flutter test` passes with the new test. <!-- comet-task:d561b9be-033c-4ce4-848f-616c189b1643 -->

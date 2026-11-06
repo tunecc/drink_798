@@ -7,9 +7,10 @@ import 'package:crypto/crypto.dart';
 /// 算法从官方 App 3.1.8 逆向还原。官方对业务请求追加 `?sign=<MD5>` 查询参数，
 /// 服务端据此校验请求合法性。
 ///
-/// 签名流程分两步：
+/// 两条签名路径共用同一套序列化与编码规则：
 /// 1. 把参数序列化为 `k=v` 以 `&` 连接的字符串（[serialize]）
-/// 2. 按固定顺序拼接密钥片段后，经 [objcEncode] 编码再取 MD5
+/// 2. 登录签名（[loginSign]）：追加官方登录固定串后，经 [objcEncode] 编码再取 MD5
+///    长签名（[longSign]）：追加时间档位、身份片段与密钥片段后，经 [objcEncode] 编码再取 MD5
 ///
 /// 注意：MD5 的输入是**编码后**的字符串，且编码规则必须匹配 ObjC 的
 /// `URLQueryAllowedCharacterSet`（放行 `=`、`&` 等字符），不能使用 Dart 的
@@ -146,8 +147,8 @@ class DrinkApiSigner {
   ///
   /// 字符片段分散插在盐值之间，不能聚成一圈再拼盐值——那样会得到不同
   /// 的 MD5 输入，服务端返回「验签失败」。下标均为 1-based。
-  static String _keyFragments([String prefix = '']) {
-    final buffer = StringBuffer(prefix)
+  static String _keyFragments() {
+    final buffer = StringBuffer()
       ..write(_charAt(key1, 1))
       ..write(_charAt(key2, 25).toUpperCase())
       ..write(_charAt(key3, 0))

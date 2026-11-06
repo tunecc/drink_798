@@ -45,47 +45,41 @@
 
 ### Requirement: 签名附加到请求
 
-系统 SHALL 把签名值以 `sign` 为键追加到请求的查询参数中。追加后 SHALL 保持原有参数不变，仅新增 `sign` 一项。`acc/login/code` SHALL NOT 附加签名。
-
-#### Scenario: 开始接水请求携带签名
-
-- **WHEN** 用户对设备发起开始接水请求
-- **THEN** 请求 URL 的查询参数中除六个业务参数外，还包含 `sign` 项
-- **AND** 六个业务参数的值在追加签名后未被修改
-
-#### Scenario: 结算请求携带签名
-
-- **WHEN** 用户对设备发起结算请求
-- **THEN** 请求 URL 的查询参数中包含 `sign` 项
-
-#### Scenario: 收藏设备请求携带签名
-
-- **WHEN** 用户收藏或取消收藏设备
-- **THEN** 请求 URL 的查询参数中包含 `sign` 项
+系统 SHALL 把登录签名以 `sign` 为键追加到 `acc/login` 的查询参数中。追加后 SHALL 保持原有参数不变，仅新增 `sign` 一项。其他接口 SHALL NOT 附加签名。
 
 #### Scenario: 登录请求携带签名
 
 - **WHEN** 用户提交手机号与短信验证码登录
 - **THEN** 登录请求 URL 的查询参数中包含 `sign` 项
 
+#### Scenario: 设备请求不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求 URL 的查询参数中不包含 `sign` 项
+
 #### Scenario: 短信验证码请求不附加签名
 
 - **WHEN** 用户请求下发短信验证码
 - **THEN** 该请求 URL 的查询参数中不包含 `sign` 项
 
+#### Scenario: 设备状态查询不附加签名
+
+- **WHEN** 系统查询设备在线状态
+- **THEN** 请求不包含 `sign` 参数
+
 ### Requirement: 接口签名类型映射
 
-系统 SHALL 为每个接口指定正确的签名类型：`dev/start`、`dev/end`、`dev/favo` 使用长签名；`acc/login` 使用登录签名；`acc/login/code` 与 `ui/app/dev/status` 不附加签名。
-
-#### Scenario: 设备操作接口使用长签名
-
-- **WHEN** 系统构造 `dev/start` 或 `dev/end` 请求
-- **THEN** 使用长签名计算 `sign` 值
+系统 SHALL 只为 `acc/login` 附加登录签名；`acc/login/code`、`dev/start`、`dev/end`、`dev/favo` 与 `ui/app/dev/status` 均不附加签名。
 
 #### Scenario: 登录接口使用登录签名
 
 - **WHEN** 系统构造 `acc/login` 请求
 - **THEN** 使用登录签名计算 `sign` 值
+
+#### Scenario: 设备操作接口不附加签名
+
+- **WHEN** 系统构造 `dev/start`、`dev/end` 或 `dev/favo` 请求
+- **THEN** 请求不包含 `sign` 参数
 
 #### Scenario: 短信验证码接口不附加签名
 
@@ -97,10 +91,43 @@
 - **WHEN** 系统查询设备在线状态
 - **THEN** 请求不包含 `sign` 参数
 
+### Requirement: 长签名计算
+
+系统 SHALL 保留长签名能力（当前没有接口使用）。长签名 SHALL 在序列化参数之后依次插入时间档位值、token 后 8 个字符、uid 后 8 个字符，再拼接固定密钥片段：`k1[1]`、`k2[25]` 转大写、`k3[0]`、`dF6hJ9kL2nP`、`k4[18]`、`rT8wY1`、`k2[21]`、`G`、`k3[23]`、`iM7oQ`、`k1[15]`、`v`（`k1`–`k4` 为四个固定密钥各自的 MD5 摘要），最后按既有编码规则编码并取 MD5。
+
+时间档位值 SHALL 按 `30 * ((当前毫秒时间戳 + lat - lng) / 30000)` 计算，除法取整。`lat` 与 `lng` 为位置修正值，未提供时 SHALL 取 0。
+
+当 token 长度小于 8 时，token 片段 SHALL 置为空串。当 uid 长度小于 8 时，uid 片段 SHALL 置为空串。
+
+#### Scenario: 长签名包含时间档位
+
+- **WHEN** 在时刻 T 计算长签名
+- **THEN** 拼接串中包含 `30 * ((T + lat - lng) / 30000)` 的整数值
+
+#### Scenario: 同一时间档位内签名一致
+
+- **WHEN** 在 30 秒时间窗口内的两个不同时刻，用相同参数、token、uid 计算长签名
+- **THEN** 两次签名值相同
+
+#### Scenario: 跨时间档位签名不同
+
+- **WHEN** 在相隔超过 30 秒的两个时刻，用相同参数、token、uid 计算长签名
+- **THEN** 两次签名值不同
+
+#### Scenario: token 不足 8 位时置空
+
+- **WHEN** token 长度为 5 个字符
+- **THEN** 拼接串中 token 片段为空串，签名仍能正常计算
+
+#### Scenario: uid 不足 8 位时置空
+
+- **WHEN** uid 为空字符串
+- **THEN** 拼接串中 uid 片段为空串，签名仍能正常计算
+
 ## REMOVED Requirements
 
 ### Requirement: 短签名计算
 
 **Reason**: 登录改用独立的登录签名，短签名不再被任何接口使用，保留该要求会描述不存在的行为。
 
-**Migration**: 登录签名改按「登录请求签名」要求计算；设备接口仍按「长签名计算」要求计算。
+**Migration**: 登录签名改按「登录请求签名」要求计算；长签名保留为自包含要求，当前没有接口调用。

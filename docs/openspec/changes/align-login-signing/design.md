@@ -11,7 +11,7 @@ canonical_spec: openspec
 See proposal.md — Why. Current constraints that shape the approach:
 
 - `DrinkApiService` builds one Dio instance with global headers `VersionCode: 3.1.8` and `User-Agent: Android_ilife798_3.1.8`; login posts to `/acc/login` with no signature.
-- `DrinkApiSigner.longSign` is used by device endpoints (`dev/start`, `dev/end`, `dev/favo`) and must keep its current key-derived fragments and salt. `shortSign` exists but no production code calls it.
+- Device requests (`dev/start`, `dev/end`, `dev/favo`) are sent **unsigned**: the sign was removed in commit `09a1c08` after the server stopped verifying it, and the request tests assert its absence. `DrinkApiSigner.longSign` therefore has no production caller; it stays in the codebase with unchanged fragments and salt. `shortSign` is unused and removed by this change.
 - Verified against the live server with a real SMS code (sibling client life-798, same gateway): an unsigned or wrongly signed login returns 「请升级最新版应用」/「验签失败」; an iOS-client identity plus the fixed login constant succeeds and returns a usable token; that token is accepted by read endpoints under the regular Android identity.
 
 ## Goals / Non-Goals
@@ -55,6 +55,10 @@ After D2 no endpoint uses `shortSign`. Keeping it would leave a requirement that
 ### D4 — Login body contains only `authCode` and `un`
 
 The server validates the signature over the received parameters; `openCode` and `cid` change that set and are not sent by the verified client. The login body therefore drops `openCode`.
+
+### D6 — The spec states only verified request shapes
+
+After the final integrated review, the delta spec is corrected to the verified reality: only `acc/login` carries `sign`; `acc/login/code`, `dev/start`, `dev/end`, `dev/favo` and `ui/app/dev/status` do not. The `长签名计算` requirement is restated self-contained because its former wording referenced the short signature this change removes. The design and proposal drop the earlier claim that device endpoints use `longSign`.
 
 ### D5 — Score chain is verified, not modified
 

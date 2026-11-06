@@ -30,6 +30,25 @@ class _CapturingAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
+/// 直接抛出网络异常的测试 adapter。
+class _ThrowingAdapter implements HttpClientAdapter {
+  @override
+  Future<ResponseBody> fetch(
+    RequestOptions options,
+    Stream<List<int>>? requestStream,
+    Future<void>? cancelFuture,
+  ) async {
+    throw DioException(
+      requestOptions: options,
+      type: DioExceptionType.connectionError,
+      message: 'boom',
+    );
+  }
+
+  @override
+  void close({bool force = false}) {}
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -356,6 +375,18 @@ void main() {
       expect(result.success, isFalse);
       expect(result.code, -1);
       expect(result.message, '短信验证码错误');
+    });
+
+    test('网络异常时返回网络错误且 code 为 null', () async {
+      DrinkApiService().setHttpClientAdapter(_ThrowingAdapter());
+
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.login(phone: '22644212509', smsCode: '123456');
+
+      expect(result.success, isFalse);
+      expect(result.code, isNull);
+      expect(result.message, startsWith('网络错误'));
     });
 
     test('登录被接受但缺少账号信息时不说成验证码错误', () async {

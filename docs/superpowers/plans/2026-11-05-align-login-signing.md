@@ -248,3 +248,40 @@ Expected: PASS (entire suite).
 ## Workflow follow-up
 
 - Record the build check, run `comet guard align-login-signing build --apply`, then continue to Verify.
+
+## Review-fix tasks (final integrated review)
+
+### Task 8: Delta spec corrections (tasks 5.1 and 5.2)
+
+<!-- comet-task-ref:c80fd6fb-449c-4ae2-abba-1894980bbb93 -->
+<!-- comet-task-ref:dccdd861-3e36-4632-9596-a4edd8d36679 -->
+
+**Files:**
+- Modify: `docs/openspec/changes/align-login-signing/specs/drink-api-signing/spec.md`
+
+- **Step 1:** In `签名附加到请求`, keep `acc/login` signed; state that `acc/login/code`, `dev/start`, `dev/end`, `dev/favo` and `ui/app/dev/status` carry no `sign`; replace the three device-signature scenarios with device endpoints not carrying `sign`.
+- **Step 2:** In `接口签名类型映射`, map only `acc/login` to the login signature; every other listed endpoint is unsigned.
+- **Step 3:** Add a MODIFIED `长签名计算` requirement that describes the key-fragment/salt order inline, without referring to the removed short signature.
+- **Step 4:** Verify: the delta contains no claim that device requests carry a signature and no `shortSign` reference.
+
+### Task 9: Align design and proposal statements (task 5.3)
+
+<!-- comet-task-ref:b5999dbd-f1f9-4e6c-bd7b-18eef793bae2 -->
+
+**Files:**
+- Modify: `docs/openspec/changes/align-login-signing/design.md`, `proposal.md`
+
+- **Step 1:** Replace the claim that device endpoints use `longSign` with the fact that device requests are currently unsigned and `longSign` has no production caller (kept, unchanged, out of scope).
+- **Step 2:** Verify with `grep -n "longSign"` across the change directory: no statement says it is in use.
+
+### Task 10: Signer cleanup and network-error test (task 5.4)
+
+<!-- comet-task-ref:d561b9be-033c-4ce4-848f-616c189b1643 -->
+
+**Files:**
+- Modify: `lib/core/services/drink_api_signer.dart`, `test/core/services/drink_api_service_request_test.dart`
+
+- **Step 1:** Change `_keyFragments([String prefix = ''])` to `_keyFragments()` and drop the prefix argument from the buffer initialization.
+- **Step 2:** Extend the class doc to describe both signing paths (`loginSign`, `longSign`).
+- **Step 3:** Add a test where the adapter throws `DioException`, asserting `code == null` and the message starts with `网络错误`.
+- **Step 4:** Verify: `flutter test` passes.
