@@ -29,3 +29,8 @@
 - [x] 5.2 Make the `长签名计算` requirement self-contained by removing its reference to the deleted short signature, as a MODIFIED requirement in the delta. Verify: the delta describes the fragment/salt order without naming shortSign. <!-- comet-task:dccdd861-3e36-4632-9596-a4edd8d36679 -->
 - [x] 5.3 Align `design.md` and `proposal.md` statements about `longSign` usage with the code (device requests are unsigned). Verify: no document claims device endpoints use longSign. <!-- comet-task:b5999dbd-f1f9-4e6c-bd7b-18eef793bae2 -->
 - [x] 5.4 Remove the dead `prefix` parameter from `_keyFragments`, document both signing paths in the class comment, and add a login network-error test (DioException → `code == null`, message starts with 网络错误). Verify: `flutter test` passes with the new test. <!-- comet-task:d561b9be-033c-4ce4-848f-616c189b1643 -->
+
+## 6. Documentation consistency follow-up
+
+- [x] 6.1 Remove the remaining statements in `design.md`, `proposal.md` and the `longSign` doc comment that imply device endpoints use long signatures. Verify: no document or comment claims device endpoints send a signature. <!-- comet-task:443f3907-a16b-4531-abef-7ce3fb3cbcd1 -->
+- [x] 6.2 Add a MODIFIED `token 登录路径的限制` requirement to the delta so the archived capability spec no longer claims device operations carry a long signature tied to uid. Verify: the delta contains the requirement and its scenarios describe unsigned device requests. <!-- comet-task:ad67f900-a27e-4550-8608-009ac5d1f269 -->

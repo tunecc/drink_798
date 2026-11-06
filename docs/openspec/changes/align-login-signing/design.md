@@ -19,12 +19,12 @@ See proposal.md — Why. Current constraints that shape the approach:
 **Goals:**
 
 - Restore phone/SMS login against the current server behavior with the smallest possible request-shape change.
-- Keep every non-login request (device control, score balance, settlement bills) on its current identity and signature.
+- Keep every non-login request (device control, score balance, settlement bills) on its current identity and request shape; device requests stay unsigned.
 - Make the capability spec describe only verified behavior.
 
 **Non-Goals:**
 
-- Changing long-signature generation or the device-endpoint salt.
+- Changing `longSign`'s generation or its salt (it currently has no production caller).
 - Adding Alipay (1,5) login or score-task features.
 - Any UI change.
 
@@ -45,7 +45,7 @@ Alternatives considered:
 
 Alternatives considered:
 
-- Re-derive the four key strings so the existing fragment builder yields the login constant. Rejected: `longSign` shares that builder, so the device-endpoint salt would change silently.
+- Re-derive the four key strings so the existing fragment builder yields the login constant. Rejected: `longSign` shares that builder, so its output (currently unused) would change silently.
 - Reuse `shortSign`. Rejected: it appends a different, unverified constant; the server rejects it with 「验签失败」.
 
 ### D3 — Remove `shortSign` and its capability requirement

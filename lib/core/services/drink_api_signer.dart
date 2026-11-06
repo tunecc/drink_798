@@ -114,7 +114,7 @@ class DrinkApiSigner {
     return md5Hex(objcEncode('${serialize(params)}$LOGIN_SALT'));
   }
 
-  /// 长签名，用于设备操作类接口。
+  /// 长签名。当前没有生产调用（设备请求不附加签名），保留以保持与官方算法的可比性。
   ///
   /// 在 [_keyFragments] 拼出的密钥片段与盐值之前，于序列化参数之后插入三段：
   /// 时间档位值、token 的后 8 个字符、uid 的后 8 个字符。

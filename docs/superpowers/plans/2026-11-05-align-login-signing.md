@@ -285,3 +285,15 @@ Expected: PASS (entire suite).
 - **Step 2:** Extend the class doc to describe both signing paths (`loginSign`, `longSign`).
 - **Step 3:** Add a test where the adapter throws `DioException`, asserting `code == null` and the message starts with `网络错误`.
 - **Step 4:** Verify: `flutter test` passes.
+
+### Task 11: Documentation consistency follow-up (tasks 6.1 and 6.2)
+
+<!-- comet-task-ref:443f3907-a16b-4531-abef-7ce3fb3cbcd1 -->
+<!-- comet-task-ref:ad67f900-a27e-4550-8608-009ac5d1f269 -->
+
+**Files:**
+- Modify: `design.md`, `proposal.md`, `lib/core/services/drink_api_signer.dart` (comment only), `specs/drink-api-signing/spec.md`
+
+- **Step 1:** Remove every remaining statement implying device endpoints use `longSign` from the change documents and the `longSign` doc comment.
+- **Step 2:** Add a MODIFIED `token 登录路径的限制` requirement to the delta stating that device operation requests carry no signature regardless of the token-login path.
+- **Step 3:** Verify: `grep -rn "设备操作.*长签名\|device endpoints.*signature"` across the change directory returns nothing except the corrected statements; `flutter test` still passes (no code behavior changed).
