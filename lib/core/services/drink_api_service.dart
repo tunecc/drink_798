@@ -425,6 +425,29 @@ class DrinkApiService {
     }
   }
 
+  /// 同步账户级积分抵扣开关。
+  ///
+  /// 服务端结算级联（积分 → 钱包 → 支付宝）只有在账户开关 useScore
+  /// 开启时才扣积分；官方 App 在设备支付页提供「开启自动抵扣」开关，
+  /// 参考客户端 ilife798 在每次启动设备前以 `POST acc/upt
+  /// {"useScore":1}` 同步。与所有非登录请求一致：不签名、不带
+  /// ApplicationType（官方 iOS 客户端不发送该头）。
+  Future<DrinkResult> setUseScore({int value = 1}) async {
+    String url = "$_baseUrl/acc/upt";
+    Options options = await _authOptions();
+
+    try {
+      Response response = await _dio.post(
+        url,
+        data: {"useScore": value},
+        options: options,
+      );
+      return _toResult(response.data);
+    } catch (e) {
+      return const DrinkResult(success: false);
+    }
+  }
+
   /// 结束接水
   ///
   /// `rcp=false` 与官方客户端一致（上游实测形状）。

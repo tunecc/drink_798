@@ -126,9 +126,66 @@ void main() {
       expect(headers!.containsKey('VersionCode'), isTrue);
       expect(headers.containsKey('User-Agent'), isTrue);
       expect(headers.containsKey('Authorization'), isTrue);
-      expect(headers.containsKey('ApplicationType'), isFalse);
-      expect(headers.containsKey('Accept-Encoding'), isFalse);
-      expect(headers.containsKey('Connection'), isFalse);
+    expect(headers.containsKey('ApplicationType'), isFalse);
+    expect(headers.containsKey('Accept-Encoding'), isFalse);
+    expect(headers.containsKey('Connection'), isFalse);
+  });
+  });
+
+  group('DrinkApiService.setUseScore 请求形状', () {
+    late _CapturingAdapter adapter;
+
+    setUp(() {
+      adapter = _CapturingAdapter();
+      SharedPreferences.setMockInitialValues({
+        'drink_water_app_token':
+            '{"uid":"87654321abcdefgh","eid":"e1","token":"abcdefgh12345678"}',
+        'drink_water_app_is_login': true,
+      });
+      DrinkApiService().setHttpClientAdapter(adapter);
+    });
+
+    test('POST acc/upt 且 body 恰为 {"useScore":1}', () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.setUseScore();
+
+      expect(adapter.captured?.method, 'POST');
+      expect(adapter.captured?.uri.path, '/api/v1/acc/upt');
+      expect(adapter.captured?.data, {'useScore': 1});
+    });
+
+    test('携带 Authorization 与 application/json,不带 ApplicationType 与 sign',
+        () async {
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      await api.setUseScore();
+
+      final headers = adapter.captured?.headers;
+      expect(headers?['Authorization'], 'abcdefgh12345678');
+      expect(adapter.captured?.contentType, contains('application/json'));
+      expect(headers?.containsKey('ApplicationType'), isFalse);
+      expect((adapter.captured?.data as Map).containsKey('sign'), isFalse);
+    });
+
+    test('服务端非零 code 返回失败结果', () async {
+      adapter.responseBody = '{"code":-98,"msg":"操作频繁"}';
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.setUseScore();
+
+      expect(result.success, isFalse);
+      expect(result.code, -98);
+      expect(result.message, '操作频繁');
+    });
+
+    test('网络异常返回失败结果', () async {
+      DrinkApiService().setHttpClientAdapter(_ThrowingAdapter());
+      final api = DrinkApiService();
+      await api.isLoggedIn();
+      final result = await api.setUseScore();
+
+      expect(result.success, isFalse);
     });
   });
 
