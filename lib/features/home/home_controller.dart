@@ -404,6 +404,23 @@ class HomeController extends GetxController {
         }
       }
 
+      // 服务端结算级联（积分 → 钱包 → 支付宝）只有在账户级积分抵扣开关
+      // useScore 开启时才扣积分；官方 App 在设备支付页提供「开启自动抵扣」，
+      // 参考客户端在每次启动设备前同步该开关。这里同样先同步再启动；
+      // 同步失败则中止本次启动——绝不在开关未开时静默扣款。不自动重试。
+      final switchSync = await _apiService.setUseScore();
+      if (!switchSync.success) {
+        // 专用提示，与启动被拒的码位提示分开：明确本次没有开始接水，
+        // 服务端原因非空时附在括号里。
+        final reason = switchSync.message;
+        _err(
+          reason == null || reason.isEmpty
+              ? '积分抵扣开关同步失败，本次未开始接水'
+              : '积分抵扣开关同步失败（$reason），本次未开始接水',
+        );
+        return;
+      }
+
       // ptype=91（钱包支付）是唯一的开始请求类型：结算级联（积分 → 钱包
       // → 支付宝）由服务端执行，被拒时按错误码如实提示，不存在回退。
       final startedAt = DateTime.now();

@@ -995,6 +995,78 @@ void main() {
       await dismissSnack(tester);
     });
 
+    testWidgets('a wallet start syncs the score switch first', (tester) async {
+      final api = await pumpHomePage(tester);
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+
+      expect(api.setUseScoreCalls, 1);
+      expect(
+        api.callLog,
+        ['setUseScore', 'startDrinking'],
+        reason: '同步必须先于启动请求完成',
+      );
+
+      // 收尾：结算结束会话，收起状态轮询 Timer，不留挂起任务。
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      expect(api.stopCalls, 1);
+      await dismissSnack(tester);
+    });
+
+    testWidgets('a failed sync aborts the start without it', (tester) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // -98 仅为代表：任何非零 code（含频控）都走同一条中止路径。
+          setUseScoreResult: const DrinkResult(
+            success: false,
+            code: -98,
+            message: '操作频繁',
+          ),
+        ),
+      );
+      final controller = Get.find<HomeController>();
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.setUseScoreCalls, 1);
+      expect(api.startCalls, 0, reason: '同步失败不得发送启动请求');
+      expect(controller.isDrinking.value, isFalse);
+      expect(
+        find.textContaining('积分抵扣开关同步失败'),
+        findsOneWidget,
+        reason: '同步失败要有可分辨的专用提示',
+      );
+      await dismissSnack(tester);
+    });
+
+    testWidgets('adopting a busy device sends no sync', (tester) async {
+      final api = await pumpHomePage(
+        tester,
+        api: FakeHomeApiService(
+          // 预检发现 gene.status 非 99 → 设备正在被使用，走接管分支。
+          precheckStatus: const DeviceStatus(deviceStatus: 1, geneStatus: 1),
+          deviceAvailable: true,
+        ),
+      );
+
+      await tester.tap(find.byKey(primaryActionKey));
+      await tester.pump();
+      await tester.pump();
+
+      expect(
+        api.setUseScoreCalls,
+        0,
+        reason: '接管路径不发起启动，也不同步开关',
+      );
+      expect(api.startCalls, 0);
+      await tester.pump(const Duration(seconds: 6));
+      await dismissSnack(tester);
+    });
+
     testWidgets('an arrears rejection (-52) prompts a top-up, not alipay', (
       tester,
     ) async {

@@ -33,6 +33,7 @@ class FakeHomeApiService extends DrinkApiService {
     this.billDetailBills = const {},
     this.loggedIn = true,
     this.statusQueue = const [],
+    this.setUseScoreResult = const DrinkResult(success: true, code: 0),
   }) : super.test();
 
   final List<Map<String, dynamic>> devices;
@@ -73,6 +74,9 @@ class FakeHomeApiService extends DrinkApiService {
   /// deviceStatus 依次返回的显式状态队列；耗尽后回落到默认逻辑。
   final List<DeviceStatus> statusQueue;
 
+  /// setUseScore 的替身返回；默认成功，供同步失败用例覆写。
+  final DrinkResult setUseScoreResult;
+
   int deviceListCalls = 0;
   int startCalls = 0;
   int stopCalls = 0;
@@ -83,7 +87,11 @@ class FakeHomeApiService extends DrinkApiService {
   int balanceCalls = 0;
   int billListCalls = 0;
   int billDetailCalls = 0;
+  int setUseScoreCalls = 0;
   final List<int> startPtypes = [];
+
+  /// 按发生次序记录的请求名，用于断言「同步先于启动」。
+  final List<String> callLog = [];
   String? lastToggleDeviceId;
   bool? lastToggleIsRemove;
   String? lastQrId;
@@ -115,18 +123,27 @@ class FakeHomeApiService extends DrinkApiService {
   Future<bool> isLoggedIn() async => loggedIn;
 
   @override
+  Future<DrinkResult> setUseScore({int value = 1}) async {
+    setUseScoreCalls++;
+    callLog.add('setUseScore');
+    return setUseScoreResult;
+  }
+
+  @override
   Future<DrinkResult> startDrinking({
     required String deviceId,
     int ptype = DrinkApiService.walletPaymentType,
   }) async {
     startCalls++;
     startPtypes.add(ptype);
+    callLog.add('startDrinking');
     return startResult;
   }
 
   @override
   Future<DrinkResult> stopDrinking({required String deviceId}) async {
     stopCalls++;
+    callLog.add('stopDrinking');
     return stopResult;
   }
 
