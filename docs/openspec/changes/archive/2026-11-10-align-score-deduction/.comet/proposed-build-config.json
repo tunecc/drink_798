@@ -1,0 +1,7 @@
+{
+  "build_mode": "direct",
+  "tdd_mode": "tdd",
+  "review_mode": "standard",
+  "subagent_dispatch": null,
+  "direct_override": true
+}
