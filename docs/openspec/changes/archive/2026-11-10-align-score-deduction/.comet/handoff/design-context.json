@@ -1,0 +1,16 @@
+{
+  "change": "align-score-deduction",
+  "phase": "design",
+  "mode": "compact",
+  "canonical_spec": "openspec",
+  "task_hash_policy": "task-content-v1",
+  "generated_by": "comet-handoff.sh",
+  "context_hash": "5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b",
+  "files": [
+    { "path": "docs/openspec/changes/align-score-deduction/proposal.md", "sha256": "afc3ee127220fd837c80beae15db4e0175b614083a0c4fedf565ae4341e9f2d8" },
+    { "path": "docs/openspec/changes/align-score-deduction/design.md", "sha256": "5750891f78651677509b85a175635a51de796614b2fff2dbf390a213aa1749b3" },
+    { "path": "docs/openspec/changes/align-score-deduction/tasks.md", "sha256": "1e9e30a9439214fbd4fd0aba8d2923a9fafabc7738d8f9a5561bb921dd612b56" },
+    { "path": "docs/openspec/changes/align-score-deduction/.openspec.yaml", "sha256": "cb72bd9217510d5461ddb5384ca197195a83da2d8dfbd237178f7ed662291c68" },
+    { "path": "docs/openspec/changes/align-score-deduction/specs/payment-settlement/spec.md", "sha256": "560ce87205e7c4ddb97963d9351b110cafe19496fd4d4e77d05bd0399df18501" }
+  ]
+}
