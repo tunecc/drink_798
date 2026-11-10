@@ -1,0 +1,2787 @@
+# comet-execution: managed-run
+change_id: ac18647f-d6eb-41ce-819b-6709819977c4
+workflow: full
+language: en
+phase: archive
+context_compression: off
+build_mode: direct
+build_pause: null
+subagent_dispatch: null
+tdd_mode: tdd
+review_mode: standard
+isolation: current
+verify_mode: null
+auto_transition: true
+base_ref: e61f6f4fff769a194de3902c7a647f0aa6690cdf
+design_doc: docs/openspec/changes/archive/2026-11-10-align-score-deduction/design.md
+plan: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+verify_result: pass
+verify_failures: 0
+verification_report: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+branch_status: pending
+created_at: 2026-11-07
+verified_at: 2026-11-10
+archive_confirmation: confirmed
+archived: true
+bound_branch: main
+direct_override: true
+handoff_context: docs/openspec/changes/archive/2026-11-10-align-score-deduction/.comet/handoff/design-context.json
+handoff_hash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+classic_profile: null
+classic_migration: null
+run_checkpoint:
+  schema: comet.workflow-run-checkpoint.v2
+  hash: 9f45c39461acb3ada0cf8bf7a7ab56b10723f069a7e08784c6db12d911cd01bf
+  run:
+    protocolVersion: 1
+    schemaVersion: 1
+    runId: align-score-deduction
+    revision: 1
+    workflow:
+      id: comet-classic-full
+      version: "1"
+      hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    definitionHashes:
+      '["comet-classic-full","1"]': ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+    initialStateHash: 6bce1b64de387567631956b6d1744817bece46d5d4dd4379d0e19f97610a44e1
+    input:
+      change: align-score-deduction
+      changeDir: docs/openspec/changes/align-score-deduction
+      workspaceBaseline:
+        ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+    state:
+      archiveConfirmation: confirmed
+      archived: true
+      autoTransition: true
+      baseRef: e61f6f4fff769a194de3902c7a647f0aa6690cdf
+      boundBranch: main
+      branchStatus: pending
+      buildMode: direct
+      buildPause: null
+      checkEpoch: 6
+      classicMigration: null
+      classicProfile: null
+      contextCompression: off
+      createdAt: 2026-11-07
+      designDoc: docs/openspec/changes/archive/2026-11-10-align-score-deduction/design.md
+      directOverride: true
+      handoffContext: docs/openspec/changes/archive/2026-11-10-align-score-deduction/.comet/handoff/design-context.json
+      handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+      isolation: current
+      language: en
+      phase: archive
+      plan: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+      reviewMode: standard
+      subagentDispatch: null
+      tddMode: tdd
+      verificationReport: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+      verifiedAt: 2026-11-10
+      verifyFailures: 0
+      verifyMode: null
+      verifyResult: pass
+      workflow: full
+    status: running
+    sequence: 26
+    actions:
+      - attempt: 1
+        claim:
+          executorId: comet-classic-guard
+          token: portable-c97258f324805b0a95a173b8d056abc4cce031c9f32bdf8c7bfdd85248672559
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:1
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 050390bdc159e7717b75dd62e5750edce6d422a5090c2869500bc99d67104710
+        outcome:
+          actionId: align-score-deduction:1
+          attempt: 1
+          claimToken: portable-c97258f324805b0a95a173b8d056abc4cce031c9f32bdf8c7bfdd85248672559
+          inputHash: 050390bdc159e7717b75dd62e5750edce6d422a5090c2869500bc99d67104710
+          outcomeId: 9cc7bd7b-35ba-492f-b6d1-870999f30295
+          output:
+            event: open-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 060a0b518c1b5efdfa5e5b268a0bfce9a7155f64a674268cc26cb3d0d3cf908f
+            outcomeId: 9cc7bd7b-35ba-492f-b6d1-870999f30295
+        reconciliations: []
+        ref: comet-open
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.open
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-open-revalidate
+          token: portable-e82404225abd0715d0265b074c1209971630f3f087d20bcd000cf55e26f144a6
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:4
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: c5ac42f54d0ed15797d714a58cdfb903e927f47504ed40f80c1803e1a7faf44b
+        outcome:
+          actionId: align-score-deduction:4
+          attempt: 1
+          claimToken: portable-e82404225abd0715d0265b074c1209971630f3f087d20bcd000cf55e26f144a6
+          inputHash: c5ac42f54d0ed15797d714a58cdfb903e927f47504ed40f80c1803e1a7faf44b
+          outcomeId: align-score-deduction:4:1:executor-result
+          output:
+            contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 3a15c9d854f7d1b8010c5e1612c7be123442bea5d919411cc0d6a92125115796
+            outcomeId: align-score-deduction:4:1:executor-result
+        reconciliations: []
+        ref: classic-open-revalidate
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.open.revalidate
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-35ba3dfbedd8f86710fdb05904d7357007397a67cf815c6ffc8068c6b00e7118
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:5
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 4628b54b042b97fcfec1c8feff2255c569487638a6287d0da326381033205683
+        outcome:
+          actionId: align-score-deduction:5
+          attempt: 1
+          claimToken: portable-35ba3dfbedd8f86710fdb05904d7357007397a67cf815c6ffc8068c6b00e7118
+          inputHash: 4628b54b042b97fcfec1c8feff2255c569487638a6287d0da326381033205683
+          outcomeId: d02d4add-2758-4595-bdcc-e9b050a98669
+          output:
+            handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+            handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+            proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+              DrinkApiService.setUseScore:POST acc/upt JSON body
+              {"useScore":1},Content-Type application/json,仅 Authorization 头,无
+              sign 无 ApplicationType(镜像 ilife798 参考,官方 iOS 无 ApplicationType
+              字符串)。同步成功才发送 dev/start;任何同步失败(网络错误或服务端非零
+              code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+              频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+              bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+              并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec
+              Patch: 无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+              sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm flutter
+              test 回归 + 真机验证抵扣链路。'
+            requirementsEvidence:
+              contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+              ref: docs/openspec/changes/align-score-deduction
+            sourceEvidence:
+              contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+              ref: docs/openspec/changes/align-score-deduction
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 50a7a3185ae748cee19aefba495dfbd6e2ba87204e4e803198ca12cde11ccf59
+            outcomeId: d02d4add-2758-4595-bdcc-e9b050a98669
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.design.handoff
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-60670c9cc6cbda9c8bc8588bd323ed72b8584caf4b99c3f945818430f4d3866a
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:7
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 789535910afe04c3ccdb99faa9c767be65c47c0b6ed47a907b195ef2899f5d8e
+        outcome:
+          actionId: align-score-deduction:7
+          attempt: 1
+          claimToken: portable-60670c9cc6cbda9c8bc8588bd323ed72b8584caf4b99c3f945818430f4d3866a
+          inputHash: 789535910afe04c3ccdb99faa9c767be65c47c0b6ed47a907b195ef2899f5d8e
+          outcomeId: e27c8dd0-81a9-40ec-b7bd-e98132327e90
+          output:
+            designDoc: docs/openspec/changes/align-score-deduction/design.md
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 5d6816d797b107a94598e86b3236821f833a3195b5ecd934d4b50bb847338657
+            outcomeId: e27c8dd0-81a9-40ec-b7bd-e98132327e90
+        reconciliations: []
+        ref: comet-design
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.design.document
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-ef56fb212a5fb581fb87efc22d4c867b2c43422bc14039ef643f0c3637afee52
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:9
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 3907014180c0a60333b7b7341c5987d7cc320406689288a46e51381ca0d13575
+        outcome:
+          actionId: align-score-deduction:9
+          attempt: 1
+          claimToken: portable-ef56fb212a5fb581fb87efc22d4c867b2c43422bc14039ef643f0c3637afee52
+          inputHash: 3907014180c0a60333b7b7341c5987d7cc320406689288a46e51381ca0d13575
+          outcomeId: a700eb95-e4c4-484a-b936-2d6d5e362d3d
+          output:
+            boundBranch: main
+            buildMode: direct
+            directOverride: true
+            isolation: current
+            reviewMode: standard
+            subagentDispatch: null
+            tddMode: tdd
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: b213d774fbdda2223e88572abefb3b3b8f3a6bd959a05ec94f231cc1cb990716
+            outcomeId: a700eb95-e4c4-484a-b936-2d6d5e362d3d
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.build.configure
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-8fe8e48ce9cbca966d722838b9aad1be8f5976670e6d870552b66d57e0c94fce
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:11
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 5ab11f487e98f384d5faf1467a6c90d02b5e032ae33ff9e1b487ff15368f08dc
+        outcome:
+          actionId: align-score-deduction:11
+          attempt: 1
+          claimToken: portable-8fe8e48ce9cbca966d722838b9aad1be8f5976670e6d870552b66d57e0c94fce
+          inputHash: 5ab11f487e98f384d5faf1467a6c90d02b5e032ae33ff9e1b487ff15368f08dc
+          outcomeId: f127efc1-4658-493a-b8b3-eeef32ee324e
+          output:
+            designEvidence:
+              contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+              ref: docs/openspec/changes/align-score-deduction/design.md
+            plan: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+            planEvidence:
+              contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+              ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+            taskRevision: 1e9e30a9439214fbd4fd0aba8d2923a9fafabc7738d8f9a5561bb921dd612b56
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: e1573c670d66a59acbef41a82e338540e41822842a1297e06b5341bbf66c3df7
+            outcomeId: f127efc1-4658-493a-b8b3-eeef32ee324e
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.build.plan
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          sessionId: claude-code-align-score-20261110
+          token: portable-1b0fe046e54662dfea55ca9342eadd6641ab8f6e7ddec55321c8095a4f6e4232
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:13
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: b7c00e67103b9fd08430b030d353136b55ba4dc7d99aa1f74c25cfa7665d91ec
+        outcome:
+          actionId: align-score-deduction:13
+          attempt: 1
+          claimToken: portable-1b0fe046e54662dfea55ca9342eadd6641ab8f6e7ddec55321c8095a4f6e4232
+          inputHash: b7c00e67103b9fd08430b030d353136b55ba4dc7d99aa1f74c25cfa7665d91ec
+          outcomeId: ba0b4027-5e1a-4d44-a2d6-1268a6ebc916
+          output:
+            event: build-complete
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 99b69ff03a3edac7992c21226336a510d5145b6a0a2cca69849c7d784c36ff43
+            outcomeId: ba0b4027-5e1a-4d44-a2d6-1268a6ebc916
+        reconciliations: []
+        ref: comet-build
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.build.execute
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-fa198590e004b67248fdd0d8992494dac207a5441ecfe78f579fad5eea6da3d2
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:14
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: da2afd92c3334155854e3f60378c9bf551305e3ad64b1b352dd7ac6a91f8b2bb
+        outcome:
+          actionId: align-score-deduction:14
+          attempt: 1
+          claimToken: portable-fa198590e004b67248fdd0d8992494dac207a5441ecfe78f579fad5eea6da3d2
+          inputHash: da2afd92c3334155854e3f60378c9bf551305e3ad64b1b352dd7ac6a91f8b2bb
+          outcomeId: 95e098bd-b70b-4188-a665-5d226a8a83af
+          output:
+            argv:
+              - fvm
+              - flutter
+              - test
+            changedDuringExecution: []
+            checkEpoch: 2
+            contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+            cwd: .
+            environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+            exitCode: 0
+            inputAfter: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+            inputBefore: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+            manifestHash: 3827951794e7e104ac5f196560f9f5b8e4551f7dd591c05a9d0ae3c33ba245e1
+            manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/fabbaf48-1cd4-4b24-8384-8fb3e9f0ad01.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+            reusable: false
+            reused: false
+            scope: build
+            tier: full
+            timeoutMs: 300000
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 8cfef6edaecba6515d5c4941c41e27e25a17d823819ac93378a1d0102b08d92d
+            outcomeId: 95e098bd-b70b-4188-a665-5d226a8a83af
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.build.check
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-guard
+          token: portable-9076bd8fb06bd0176059b52817aaf7d6d4b9763c6a38918f549b4cb6e5be706c
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:16
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 04574cfd559f5d7e9998d20be2e6c2f9dd5661d43ae17a98769650457dd5fdce
+        outcome:
+          actionId: align-score-deduction:16
+          attempt: 1
+          claimToken: portable-9076bd8fb06bd0176059b52817aaf7d6d4b9763c6a38918f549b4cb6e5be706c
+          inputHash: 04574cfd559f5d7e9998d20be2e6c2f9dd5661d43ae17a98769650457dd5fdce
+          outcomeId: 3559a6fb-20c9-4160-8004-d6e3810ae17c
+          output:
+            event: verification-ready
+            verificationReport: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 6f2515064ee73b20c7f587986295815d924736551af3467a5d57e187a1655cc9
+            outcomeId: 3559a6fb-20c9-4160-8004-d6e3810ae17c
+        reconciliations: []
+        ref: comet-verify
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.verify.run
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-check
+          token: portable-42dcef37fd994bb336388dac7cf2324440ca81d340a79d983b0e0a2c9e1b452e
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:18
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: c70d81ffb876dba62478a180e348edb374a08efbdc38ba283d4da52013f8d120
+        outcome:
+          actionId: align-score-deduction:18
+          attempt: 1
+          claimToken: portable-42dcef37fd994bb336388dac7cf2324440ca81d340a79d983b0e0a2c9e1b452e
+          inputHash: c70d81ffb876dba62478a180e348edb374a08efbdc38ba283d4da52013f8d120
+          outcomeId: 6970d79c-b9ac-4d7e-a140-87c72570c482
+          output:
+            argv:
+              - fvm
+              - flutter
+              - test
+            changedDuringExecution: []
+            checkEpoch: 3
+            contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+            cwd: .
+            deliveryInputs:
+              CHANGELOG.md: git:5364c902d5efbd77cbe669933a3ae1f4adbed299
+              lib/features/home/home_page.dart: git:ce1ddb85fd67d9c63d8f52d54c22b4913eb90482
+              pubspec.lock: git:f0d3153ac46ed2580aa68b22e87b905769dd5163
+              pubspec.yaml: git:71048b68be85ba82c055dd3a7d85763f496691d6
+              test/core/services/drink_api_service_request_test.dart: git:24ae9863fcb74b46b5bcc4fdcaf9d0b60fce6de1
+            environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+            exitCode: 0
+            inputAfter: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+            inputBefore: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+            manifestHash: 830da0332b9c472c5621fb0b8f0e2ec742161b4cbe19c8597e7e69182dde5cf0
+            manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/6a3a164e-7fc0-4bf5-a952-d3640344b764.manifest
+            receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+            reusable: false
+            reused: false
+            scope: verify
+            tier: full
+            timeoutMs: 300000
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: e8c5d64c1796556f20c7707c9be2e5e177a36b9818bb4d6e087dad3ead64706c
+            outcomeId: 6970d79c-b9ac-4d7e-a140-87c72570c482
+        reconciliations: []
+        ref: classic-check
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.verify.check
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-state
+          token: portable-2c6273ab78d0c79956b85cca0ea0a14abff1063b1291be405bb43a0b9b28b62a
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:20
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 50a8f3cb186c75f516abc404bbe9520fe61ae35fe7045231fb629b10c2b367f7
+        outcome:
+          actionId: align-score-deduction:20
+          attempt: 1
+          claimToken: portable-2c6273ab78d0c79956b85cca0ea0a14abff1063b1291be405bb43a0b9b28b62a
+          inputHash: 50a8f3cb186c75f516abc404bbe9520fe61ae35fe7045231fb629b10c2b367f7
+          outcomeId: 2432489f-37b9-4fdb-b4ec-32b26e3145e4
+          output:
+            summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+              ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本 1.1.0
+              与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+            targetBranch: main
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 2026f452c711049eb33cc3c1145ae058f6fbd381b48296f8e481e7ee18cdffbe
+            outcomeId: 2432489f-37b9-4fdb-b4ec-32b26e3145e4
+        reconciliations: []
+        ref: comet-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.archive.prepare
+        type: invoke_skill
+      - attempt: 1
+        claim:
+          executorId: comet-classic-archive-preflight
+          token: portable-73357263b2efe2edab5ed886818a4bab13745298188ce1ff5b5502642882c967
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:24
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 3f0513991ea2f778c5a919c56139d05d27b9a4e509ba38edf383db0f87392aa1
+        outcome:
+          actionId: align-score-deduction:24
+          attempt: 1
+          claimToken: portable-73357263b2efe2edab5ed886818a4bab13745298188ce1ff5b5502642882c967
+          inputHash: 3f0513991ea2f778c5a919c56139d05d27b9a4e509ba38edf383db0f87392aa1
+          outcomeId: 49e3b0d8-260c-4bb3-9bb4-544fabae344c
+          output:
+            baseCommit: a6c4eec83400593ed1add0ad734f3616a49ead3c
+            deliveryAction: local
+            targetBranch: main
+            verifiedBranch: main
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: 541d03000ab7c99bc1471ea45659ddcbf113ccc14da18db25677eedfc4d8afe8
+            outcomeId: 49e3b0d8-260c-4bb3-9bb4-544fabae344c
+        reconciliations: []
+        ref: classic-archive-preflight
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.archive.preflight
+        type: call_tool
+      - attempt: 1
+        claim:
+          executorId: comet-classic-archive
+          token: portable-4cc576c6a351962835dd22583da3034e8ace6458dcd5a4dd781a08fea2363988
+        executionOrigin:
+          workflow:
+            hash: ee198afdb53add0c23f98202aae8cdbe4079b9f4ebf7a62ed4ab8411ed591db5
+            id: comet-classic-full
+            version: "1"
+        id: align-score-deduction:25
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 2e7c163eb6162e435418dfd19cd107dd883d8ac9fe158139efbb7c48a569a60b
+        outcome:
+          actionId: align-score-deduction:25
+          artifacts:
+            - sha256: 5aa4c5942ecab247107ac5a430f13de6bb644811d9ad0fd62feb7cc8fe70a6f0
+              uri: docs/openspec/changes/archive/2026-11-10-align-score-deduction/.comet/archive-manifest.json
+          attempt: 1
+          claimToken: portable-4cc576c6a351962835dd22583da3034e8ace6458dcd5a4dd781a08fea2363988
+          inputHash: 2e7c163eb6162e435418dfd19cd107dd883d8ac9fe158139efbb7c48a569a60b
+          outcomeId: 6016d7ac-8456-4a8a-96c2-9566f369969f
+          output:
+            archiveDirectory: docs/openspec/changes/archive/2026-11-10-align-score-deduction
+          status: succeeded
+        protocolVersion: 1
+        receipts:
+          - hash: fddbcd0c852688cccc9688c92517b6163ec2ae97f97ae5bb744040934da5e5c2
+            outcomeId: 6016d7ac-8456-4a8a-96c2-9566f369969f
+        reconciliations: []
+        ref: classic-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: succeeded
+        stepId: full.archive.execute
+        type: call_tool
+      - attempt: 1
+        id: align-score-deduction:26
+        input:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs: {}
+        inputHash: 6e7664fa07fa9ee30f592db7303f965c07b10abadf2f02d0792a0077dfb00c4b
+        protocolVersion: 1
+        receipts: []
+        reconciliations: []
+        ref: comet-archive
+        requiredCapabilities: []
+        retry: manual
+        runId: align-score-deduction
+        status: pending
+        stepId: full.archive.deliver
+        type: invoke_skill
+    actionContexts:
+      align-score-deduction:1:
+        results: {}
+        sequence: 1
+      align-score-deduction:11:
+        results: {}
+        sequence: 11
+      align-score-deduction:13:
+        results: {}
+        sequence: 13
+      align-score-deduction:14:
+        results: {}
+        sequence: 14
+      align-score-deduction:16:
+        results: {}
+        sequence: 16
+      align-score-deduction:18:
+        results: {}
+        sequence: 18
+      align-score-deduction:20:
+        results: {}
+        sequence: 20
+      align-score-deduction:24:
+        results: {}
+        sequence: 24
+      align-score-deduction:25:
+        results: {}
+        sequence: 25
+      align-score-deduction:26:
+        results: {}
+        sequence: 26
+      align-score-deduction:4:
+        results: {}
+        sequence: 4
+      align-score-deduction:5:
+        results: {}
+        sequence: 5
+      align-score-deduction:7:
+        results: {}
+        sequence: 7
+      align-score-deduction:9:
+        results: {}
+        sequence: 9
+    waits:
+      - id: align-score-deduction:3
+        stepId: full.open.confirm
+        sequence: 3
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+              ref: docs/openspec/changes/align-score-deduction
+        proposalHash: df7229b37c28577cb2dd33c5add78402c0a9dbec00d7dc69c4e5083db75cb62f
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-open-792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+          choice: approved
+          proposalHash: df7229b37c28577cb2dd33c5add78402c0a9dbec00d7dc69c4e5083db75cb62f
+      - id: align-score-deduction:6
+        stepId: full.design.confirm
+        sequence: 6
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+              handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+              proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+                DrinkApiService.setUseScore:POST acc/upt JSON body
+                {"useScore":1},Content-Type application/json,仅 Authorization 头,无
+                sign 无 ApplicationType(镜像 ilife798 参考,官方 iOS 无 ApplicationType
+                字符串)。同步成功才发送 dev/start;任何同步失败(网络错误或服务端非零
+                code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+                频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+                bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+                并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec
+                Patch: 无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+                sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm
+                flutter test 回归 + 真机验证抵扣链路。'
+              requirementsEvidence:
+                contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+                ref: docs/openspec/changes/align-score-deduction
+              sourceEvidence:
+                contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+                ref: docs/openspec/changes/align-score-deduction
+        proposalHash: ef7fa2afc6e058e16a27d81687f2cba2a14e838f630d8ca7d87c034ad891e7a3
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: classic-design-ef7fa2afc6e058e16a27d81687f2cba2a14e838f630d8ca7d87c034ad891e7a3-approved
+          choice: approved
+          proposalHash: ef7fa2afc6e058e16a27d81687f2cba2a14e838f630d8ca7d87c034ad891e7a3
+      - id: align-score-deduction:10
+        stepId: full.build.confirm
+        sequence: 10
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: direct
+              directOverride: true
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+        proposalHash: f326cb1ccde1c9595269bb752669f43d0eeabe2aa51e32b251485279bbaf5545
+        choices:
+          - approved
+          - rejected
+        results: {}
+        decision:
+          id: d5afa561-3154-44e5-805a-b45602599c0e
+          choice: approved
+          proposalHash: f326cb1ccde1c9595269bb752669f43d0eeabe2aa51e32b251485279bbaf5545
+      - id: align-score-deduction:21
+        stepId: full.archive.confirm
+        sequence: 21
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.archive.prepare:
+              summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+              targetBranch: main
+        proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+        choices:
+          - local
+          - push
+          - pr
+          - reverify
+          - later
+        results: {}
+        decision:
+          id: classic-archive-b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35-later
+          choice: later
+          proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+      - id: align-score-deduction:22
+        stepId: full.archive.confirm
+        sequence: 22
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.archive.prepare:
+              summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+              targetBranch: main
+        proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+        choices:
+          - local
+          - push
+          - pr
+          - reverify
+          - later
+        results: {}
+        decision:
+          id: classic-archive-b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35-later
+          choice: later
+          proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+      - id: align-score-deduction:23
+        stepId: full.archive.confirm
+        sequence: 23
+        status: resolved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.archive.prepare:
+              summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+              targetBranch: main
+        proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+        choices:
+          - local
+          - push
+          - pr
+          - reverify
+          - later
+        results: {}
+        decision:
+          id: classic-archive-b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35-local
+          choice: local
+          proposalHash: b5df82b8656aa210a09e11e35b44bad45c01a4710048f957dcf89edf20317a35
+    evidenceWaits:
+      - id: align-score-deduction:2
+        stepId: full.open.evidence
+        sequence: 2
+        kind: classic-open-artifacts
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-score-deduction
+          contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+          submissionId: 8681d539-1104-45f8-8c96-e88f39540545
+      - id: align-score-deduction:8
+        stepId: full.design.evidence
+        sequence: 8
+        kind: classic-design-document
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/openspec/changes/align-score-deduction/design.md
+          contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+          submissionId: 784619d3-4bdf-4a51-ae2f-a21921ea794b
+      - id: align-score-deduction:12
+        stepId: full.build.plan.evidence
+        sequence: 12
+        kind: classic-build-plan
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+          contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+          submissionId: 6a890813-4682-4664-94b8-3506eb61e0ae
+      - id: align-score-deduction:15
+        stepId: full.build.check.evidence
+        sequence: 15
+        kind: classic-build-check
+        status: resolved
+        results: {}
+        receipt:
+          ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+          contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+          submissionId: 392b9ff7-5c14-49cf-8672-75ed9e7c0b98
+      - id: align-score-deduction:17
+        stepId: full.verify.report.evidence
+        sequence: 17
+        kind: classic-verification-report
+        status: resolved
+        results: {}
+        receipt:
+          ref: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+          contentHash: bd987fbb4ea66f0bb0038229d0ae465f9be2bff1c790521a258beff6ac41893a
+          submissionId: cd3c2704-12f2-485b-bf9d-1517590cde39
+      - id: align-score-deduction:19
+        stepId: full.verify.check.evidence
+        sequence: 19
+        kind: classic-verify-check
+        status: resolved
+        results: {}
+        receipt:
+          ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+          contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+          submissionId: 7263523d-0328-46a3-8a18-320c8fde95e1
+    ready: []
+    joins: {}
+    outputs: {}
+    children: []
+    lineage: []
+  sourceRevision: 39
+  sourceHash: 3d7280c731178694f337d8677967a9f764ae5858144faf55a5a87c6ccae9cd37
+  pool:
+    version: 3
+    values:
+      - event: open-complete
+      - choice: approved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.open:
+              event: open-complete
+            full.open.evidence:
+              contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+              ref: docs/openspec/changes/align-score-deduction
+      - contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+        ref: docs/openspec/changes/align-score-deduction
+      - contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+      - choice: approved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.design.handoff:
+              handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+              handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+              proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+                DrinkApiService.setUseScore:POST acc/upt JSON body
+                {"useScore":1},Content-Type application/json,仅 Authorization 头,无
+                sign 无 ApplicationType(镜像 ilife798 参考,官方 iOS 无 ApplicationType
+                字符串)。同步成功才发送 dev/start;任何同步失败(网络错误或服务端非零
+                code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+                频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+                bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+                并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec
+                Patch: 无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+                sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm
+                flutter test 回归 + 真机验证抵扣链路。'
+              requirementsEvidence:
+                contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+                ref: docs/openspec/changes/align-score-deduction
+              sourceEvidence:
+                contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+                ref: docs/openspec/changes/align-score-deduction
+      - handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+        handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+        proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+          DrinkApiService.setUseScore:POST acc/upt JSON body
+          {"useScore":1},Content-Type application/json,仅 Authorization 头,无 sign
+          无 ApplicationType(镜像 ilife798 参考,官方 iOS 无 ApplicationType 字符串)。同步成功才发送
+          dev/start;任何同步失败(网络错误或服务端非零
+          code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+          频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+          bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+          并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec Patch:
+          无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+          sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm flutter
+          test 回归 + 真机验证抵扣链路。'
+        requirementsEvidence:
+          contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+          ref: docs/openspec/changes/align-score-deduction
+        sourceEvidence:
+          contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+          ref: docs/openspec/changes/align-score-deduction
+      - designDoc: docs/openspec/changes/align-score-deduction/design.md
+      - contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+        ref: docs/openspec/changes/align-score-deduction/design.md
+      - boundBranch: main
+        buildMode: direct
+        directOverride: true
+        isolation: current
+        reviewMode: standard
+        subagentDispatch: null
+        tddMode: tdd
+      - choice: approved
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.build.configure:
+              boundBranch: main
+              buildMode: direct
+              directOverride: true
+              isolation: current
+              reviewMode: standard
+              subagentDispatch: null
+              tddMode: tdd
+      - designEvidence:
+          contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+          ref: docs/openspec/changes/align-score-deduction/design.md
+        plan: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+        planEvidence:
+          contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+          ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+        taskRevision: 1e9e30a9439214fbd4fd0aba8d2923a9fafabc7738d8f9a5561bb921dd612b56
+      - contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+        ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+      - event: build-complete
+      - argv:
+          - fvm
+          - flutter
+          - test
+        changedDuringExecution: []
+        checkEpoch: 2
+        contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+        cwd: .
+        environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+        exitCode: 0
+        inputAfter: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+        inputBefore: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+        manifestHash: 3827951794e7e104ac5f196560f9f5b8e4551f7dd591c05a9d0ae3c33ba245e1
+        manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/fabbaf48-1cd4-4b24-8384-8fb3e9f0ad01.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+        reusable: false
+        reused: false
+        scope: build
+        tier: full
+        timeoutMs: 300000
+      - contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+        ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+      - contentHash: bd987fbb4ea66f0bb0038229d0ae465f9be2bff1c790521a258beff6ac41893a
+        ref: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+      - event: verification-ready
+        verificationReport: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+      - argv:
+          - fvm
+          - flutter
+          - test
+        changedDuringExecution: []
+        checkEpoch: 3
+        contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+        cwd: .
+        deliveryInputs:
+          CHANGELOG.md: git:5364c902d5efbd77cbe669933a3ae1f4adbed299
+          lib/features/home/home_page.dart: git:ce1ddb85fd67d9c63d8f52d54c22b4913eb90482
+          pubspec.lock: git:f0d3153ac46ed2580aa68b22e87b905769dd5163
+          pubspec.yaml: git:71048b68be85ba82c055dd3a7d85763f496691d6
+          test/core/services/drink_api_service_request_test.dart: git:24ae9863fcb74b46b5bcc4fdcaf9d0b60fce6de1
+        environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+        exitCode: 0
+        inputAfter: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+        inputBefore: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+        manifestHash: 830da0332b9c472c5621fb0b8f0e2ec742161b4cbe19c8597e7e69182dde5cf0
+        manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/6a3a164e-7fc0-4bf5-a952-d3640344b764.manifest
+        receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+        reusable: false
+        reused: false
+        scope: verify
+        tier: full
+        timeoutMs: 300000
+      - contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+        ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+      - choice: local
+        proposal:
+          input:
+            change: align-score-deduction
+            changeDir: docs/openspec/changes/align-score-deduction
+            workspaceBaseline:
+              ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+          outputs:
+            full.archive.prepare:
+              summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+              targetBranch: main
+      - summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+          ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本 1.1.0 与
+          CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+        targetBranch: main
+      - baseCommit: a6c4eec83400593ed1add0ad734f3616a49ead3c
+        deliveryAction: local
+        targetBranch: main
+        verifiedBranch: main
+      - archiveDirectory: docs/openspec/changes/archive/2026-11-10-align-score-deduction
+      - sequence: 9
+        value:
+          boundBranch: main
+          buildMode: direct
+          directOverride: true
+          isolation: current
+          reviewMode: standard
+          subagentDispatch: null
+          tddMode: tdd
+      - sequence: 10
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.build.configure:
+                boundBranch: main
+                buildMode: direct
+                directOverride: true
+                isolation: current
+                reviewMode: standard
+                subagentDispatch: null
+                tddMode: tdd
+      - sequence: 6
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.design.handoff:
+                handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+                handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+                proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+                  DrinkApiService.setUseScore:POST acc/upt JSON body
+                  {"useScore":1},Content-Type application/json,仅 Authorization
+                  头,无 sign 无 ApplicationType(镜像 ilife798 参考,官方 iOS 无
+                  ApplicationType 字符串)。同步成功才发送 dev/start;任何同步失败(网络错误或服务端非零
+                  code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+                  频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+                  bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+                  并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec
+                  Patch: 无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+                  sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm
+                  flutter test 回归 + 真机验证抵扣链路。'
+                requirementsEvidence:
+                  contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+                  ref: docs/openspec/changes/align-score-deduction
+                sourceEvidence:
+                  contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+                  ref: docs/openspec/changes/align-score-deduction
+      - sequence: 7
+        value:
+          designDoc: docs/openspec/changes/align-score-deduction/design.md
+      - sequence: 8
+        value:
+          contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+          ref: docs/openspec/changes/align-score-deduction/design.md
+      - sequence: 5
+        value:
+          handoffContext: docs/openspec/changes/align-score-deduction/.comet/handoff/design-context.json
+          handoffHash: 5deee17ff41733a483540e8ad9727940a6f9eede04b583c84dd5ba5f3147715b
+          proposal: '在 HomeController.startDrinking 的设备预检之后、唯一启动请求之前,调用新增的
+            DrinkApiService.setUseScore:POST acc/upt JSON body
+            {"useScore":1},Content-Type application/json,仅 Authorization 头,无
+            sign 无 ApplicationType(镜像 ilife798 参考,官方 iOS 无 ApplicationType
+            字符串)。同步成功才发送 dev/start;任何同步失败(网络错误或服务端非零
+            code)按用户确认的行为中止本次启动并展示专用提示,重试由用户发起;接管(设备忙)路径不发同步。不做自动重试(-98
+            频控也按失败中止,可观察优先)。关键取舍:每次启动前同步而非登录时一次(服务端标志可被其他客户端改写,这正是当前回归的成因);失败中止而非警告继续(避免把当前
+            bug 变成隐性复发)。风险与缓解:acc/upt 局部 body 可能影响其他账户字段→精确镜像参考 body
+            并真机核验账户资料/余额不变;启动前多一次往返→单次用户动作可接受;标志在同步与结算间被外部翻转→窗口极小,接受。Spec Patch:
+            无(delta spec 已在 Open 确认)。测试策略:请求形状测试(方法/路径/body/头,断言无
+            sign/ApplicationType)+ controller 测试(成功次序、失败中止、接管不同步)+ fvm flutter
+            test 回归 + 真机验证抵扣链路。'
+          requirementsEvidence:
+            contentHash: e697c7057359a9a7ee89aec36162325fce90c7b0bbd53ab0104307e99c48c281
+            ref: docs/openspec/changes/align-score-deduction
+          sourceEvidence:
+            contentHash: c31b43b2e1e32bd15222e2be64a8083e74295777a1a8a604d944602d544a86d7
+            ref: docs/openspec/changes/align-score-deduction
+      - sequence: 1
+        value:
+          event: open-complete
+      - sequence: 3
+        value:
+          choice: approved
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.open:
+                event: open-complete
+              full.open.evidence:
+                contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+                ref: docs/openspec/changes/align-score-deduction
+      - sequence: 2
+        value:
+          contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+          ref: docs/openspec/changes/align-score-deduction
+      - sequence: 4
+        value:
+          contentHash: 792e615a8d5c1c254800a319e20da37e1cc45880522a4481945a0feaec5c9016
+      - sequence: 11
+        value:
+          designEvidence:
+            contentHash: b620a13f508b2ab29531e7ef0801316fdab423b0e5016a988708532d847f1eac
+            ref: docs/openspec/changes/align-score-deduction/design.md
+          plan: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+          planEvidence:
+            contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+            ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+          taskRevision: 1e9e30a9439214fbd4fd0aba8d2923a9fafabc7738d8f9a5561bb921dd612b56
+      - sequence: 12
+        value:
+          contentHash: 62355c73bd4c4d09bb73471b92f3de70a4be832e486e9b3b5aaa7a3dac501483
+          ref: docs/superpowers/plans/2026-11-07-align-score-deduction.md
+      - sequence: 13
+        value:
+          event: build-complete
+      - sequence: 14
+        value:
+          argv:
+            - fvm
+            - flutter
+            - test
+          changedDuringExecution: []
+          checkEpoch: 2
+          contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+          cwd: .
+          environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+          exitCode: 0
+          inputAfter: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+          inputBefore: d09b5a92ee14ef6ef3c9db9bc7d5817f3f23f91c61b76574b2a9a4ac3918db28
+          manifestHash: 3827951794e7e104ac5f196560f9f5b8e4551f7dd591c05a9d0ae3c33ba245e1
+          manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/fabbaf48-1cd4-4b24-8384-8fb3e9f0ad01.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+          reusable: false
+          reused: false
+          scope: build
+          tier: full
+          timeoutMs: 300000
+      - sequence: 15
+        value:
+          contentHash: c5edb6730b773ee2793ad4511133abe951929033fcc9ace29820e28d04f3d253
+          ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/1360c16c-dd42-4c02-904a-a8f2b4b2cda6.log
+      - sequence: 17
+        value:
+          contentHash: bd987fbb4ea66f0bb0038229d0ae465f9be2bff1c790521a258beff6ac41893a
+          ref: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+      - sequence: 16
+        value:
+          event: verification-ready
+          verificationReport: docs/superpowers/reports/2026-11-10-align-score-deduction-verification.md
+      - sequence: 18
+        value:
+          argv:
+            - fvm
+            - flutter
+            - test
+          changedDuringExecution: []
+          checkEpoch: 3
+          contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+          cwd: .
+          deliveryInputs:
+            CHANGELOG.md: git:5364c902d5efbd77cbe669933a3ae1f4adbed299
+            lib/features/home/home_page.dart: git:ce1ddb85fd67d9c63d8f52d54c22b4913eb90482
+            pubspec.lock: git:f0d3153ac46ed2580aa68b22e87b905769dd5163
+            pubspec.yaml: git:71048b68be85ba82c055dd3a7d85763f496691d6
+            test/core/services/drink_api_service_request_test.dart: git:24ae9863fcb74b46b5bcc4fdcaf9d0b60fce6de1
+          environment: df19148c7f712a521ed161689db2bc7a9b0c911a18a050e62e9f214cff848869
+          exitCode: 0
+          inputAfter: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+          inputBefore: db7bc6789cc21ceb8a7bd493a8d8593fc0b9e5f5daacfa6f8ff0d1bccc3dd8b3
+          manifestHash: 830da0332b9c472c5621fb0b8f0e2ec742161b4cbe19c8597e7e69182dde5cf0
+          manifestRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/6a3a164e-7fc0-4bf5-a952-d3640344b764.manifest
+          receiptRef: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+          reusable: false
+          reused: false
+          scope: verify
+          tier: full
+          timeoutMs: 300000
+      - sequence: 19
+        value:
+          contentHash: 64eedee27f9a677bebe4f1953621d5d80baa6e8d9576f02290d0c595dd84c99e
+          ref: .comet/runtime/classic-sdk-checks/a6d124769fa2dc22802668fb5473492c55a65c5e2b5d769f8d9b92caf67ca725/2c513268-1952-4068-b985-6a69fe9c63f7.log
+      - sequence: 23
+        value:
+          choice: local
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.archive.prepare:
+                summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                  ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                  1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+                targetBranch: main
+      - sequence: 20
+        value:
+          summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+            ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本 1.1.0 与
+            CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+          targetBranch: main
+      - sequence: 24
+        value:
+          baseCommit: a6c4eec83400593ed1add0ad734f3616a49ead3c
+          deliveryAction: local
+          targetBranch: main
+          verifiedBranch: main
+      - sequence: 25
+        value:
+          archiveDirectory: docs/openspec/changes/archive/2026-11-10-align-score-deduction
+      - sequence: 21
+        value:
+          choice: later
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.archive.prepare:
+                summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                  ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                  1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+                targetBranch: main
+      - sequence: 22
+        value:
+          choice: later
+          proposal:
+            input:
+              change: align-score-deduction
+              changeDir: docs/openspec/changes/align-score-deduction
+              workspaceBaseline:
+                ref: 5f8eff33-603f-4b07-b9a6-b6e4e5342f72
+            outputs:
+              full.archive.prepare:
+                summary: 归档 align-score-deduction：接水前自动同步积分抵扣开关（acc/upt useScore=1，无签名无
+                  ApplicationType），失败即中止启动；独立审查通过、180/180 测试通过、真机验证积分实际扣减；随附版本
+                  1.1.0 与 CHANGELOG、验证报告与变更讲解页。交付方式待用户选择。
+                targetBranch: main
+    nodes:
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 1
+        height: 2
+      - key: full.open.revalidate
+        value: 3
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: 3
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 0
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 0
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 5
+        left: 6
+        right: 7
+        height: 2
+      - key: full.open.confirm
+        value: 1
+        left: 8
+        right: 4
+        height: 3
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 7
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 6
+        left: 10
+        right: 11
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 12
+        right: 7
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 13
+        right: 4
+        height: 4
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 16
+        height: 2
+      - key: full.design.handoff
+        value: 5
+        left: 11
+        right: 7
+        height: 2
+      - key: full.design.document
+        value: 6
+        left: 17
+        right: 18
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 19
+        right: 4
+        height: 4
+      - key: full.build.plan
+        value: 10
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 4
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 11
+        left: 21
+        right: 22
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 23
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 4
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 24
+        right: 25
+        height: 4
+      - key: full.build.execute
+        value: 12
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 9
+        left: 15
+        right: 27
+        height: 2
+      - key: full.build.plan.evidence
+        value: 11
+        left: null
+        right: 22
+        height: 2
+      - key: full.build.plan
+        value: 10
+        left: 28
+        right: 29
+        height: 3
+      - key: full.design.document
+        value: 6
+        left: 30
+        right: 25
+        height: 4
+      - key: full.build.check
+        value: 13
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 8
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 14
+        left: 32
+        right: 33
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 34
+        right: 27
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 35
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 25
+        height: 5
+      - key: full.open.evidence
+        value: 2
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 16
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 15
+        left: null
+        right: 39
+        height: 2
+      - key: full.open.revalidate
+        value: 3
+        left: 38
+        right: 40
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 41
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 42
+        height: 5
+      - key: full.open.revalidate
+        value: 3
+        left: 38
+        right: null
+        height: 2
+      - key: full.verify.check.evidence
+        value: 18
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 15
+        left: 45
+        right: 39
+        height: 2
+      - key: full.verify.check
+        value: 17
+        left: 44
+        right: 46
+        height: 3
+      - key: full.open.confirm
+        value: 1
+        left: 18
+        right: 47
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 36
+        right: 48
+        height: 5
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 13
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 20
+        left: 50
+        right: 51
+        height: 2
+      - key: full.build.confirm
+        value: 9
+        left: 33
+        right: 27
+        height: 2
+      - key: full.build.check.evidence
+        value: 14
+        left: 52
+        right: 53
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 54
+        right: 29
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 55
+        right: 48
+        height: 5
+      - key: full.archive.preflight
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: 57
+        height: 2
+      - key: full.archive.prepare
+        value: 20
+        left: 58
+        right: 51
+        height: 3
+      - key: full.build.plan
+        value: 10
+        left: 53
+        right: 29
+        height: 3
+      - key: full.build.check.evidence
+        value: 14
+        left: 59
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 61
+        right: 48
+        height: 5
+      - key: full.archive.confirm
+        value: 19
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.preflight
+        value: 21
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.execute
+        value: 22
+        left: 63
+        right: 64
+        height: 2
+      - key: full.archive.prepare
+        value: 20
+        left: 65
+        right: 51
+        height: 3
+      - key: full.build.check.evidence
+        value: 14
+        left: 66
+        right: 60
+        height: 4
+      - key: full.design.document
+        value: 6
+        left: 67
+        right: 48
+        height: 5
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 70
+        height: 2
+      - key: full.design.evidence
+        value: 27
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: 72
+        right: 73
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: 75
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 76
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 71
+        right: 77
+        height: 4
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: 79
+        right: 80
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 81
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 82
+        right: 77
+        height: 4
+      - key: full.build.execute
+        value: 35
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 69
+        right: 84
+        height: 2
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: 80
+        height: 2
+      - key: full.build.plan
+        value: 33
+        left: 85
+        right: 86
+        height: 3
+      - key: full.design.document
+        value: 26
+        left: 87
+        right: 77
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: 89
+        right: 90
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 91
+        right: 84
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 92
+        right: 86
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 77
+        height: 5
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: null
+        right: 96
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: 95
+        right: 97
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 98
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 99
+        height: 5
+      - key: full.open.revalidate
+        value: 32
+        left: 95
+        right: null
+        height: 2
+      - key: full.verify.check.evidence
+        value: 41
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: 102
+        right: 96
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 101
+        right: 103
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 74
+        right: 104
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 93
+        right: 105
+        height: 5
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 43
+        left: 107
+        right: 108
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 90
+        right: 84
+        height: 2
+      - key: full.build.check.evidence
+        value: 37
+        left: 109
+        right: 110
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 111
+        right: 86
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 112
+        right: 105
+        height: 5
+      - key: full.archive.preflight
+        value: 44
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: 114
+        height: 2
+      - key: full.archive.prepare
+        value: 43
+        left: 115
+        right: 108
+        height: 3
+      - key: full.build.plan
+        value: 33
+        left: 110
+        right: 86
+        height: 3
+      - key: full.build.check.evidence
+        value: 37
+        left: 116
+        right: 117
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 118
+        right: 105
+        height: 5
+      - key: full.archive.confirm
+        value: 42
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.preflight
+        value: 44
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.execute
+        value: 45
+        left: 120
+        right: 121
+        height: 2
+      - key: full.archive.prepare
+        value: 43
+        left: 122
+        right: 108
+        height: 3
+      - key: full.build.check.evidence
+        value: 37
+        left: 123
+        right: 117
+        height: 4
+      - key: full.design.document
+        value: 26
+        left: 124
+        right: 105
+        height: 5
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 30
+        left: 126
+        right: 127
+        height: 2
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: 129
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 126
+        right: 130
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: 132
+        right: 133
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: 134
+        right: 130
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: 136
+        right: 137
+        height: 2
+      - key: full.design.handoff
+        value: 28
+        left: 138
+        right: 133
+        height: 3
+      - key: full.open.confirm
+        value: 30
+        left: 139
+        right: 130
+        height: 4
+      - key: full.open.evidence
+        value: 31
+        left: null
+        right: null
+        height: 1
+      - key: full.open
+        value: 29
+        left: null
+        right: 141
+        height: 2
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.open.confirm
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 144
+        right: 145
+        height: 2
+      - key: full.open
+        value: 29
+        left: 143
+        right: 146
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: 149
+        right: 150
+        height: 2
+      - key: full.design.confirm
+        value: 25
+        left: 148
+        right: 151
+        height: 3
+      - key: full.open
+        value: 29
+        left: 152
+        right: 146
+        height: 4
+      - key: full.archive.prepare
+        value: 43
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check
+        value: 36
+        left: 154
+        right: 155
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: 158
+        height: 2
+      - key: full.build.execute
+        value: 35
+        left: 157
+        right: 159
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: 156
+        right: 160
+        height: 4
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 144
+        right: 162
+        height: 2
+      - key: full.verify.check.evidence
+        value: 41
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.report.evidence
+        value: 38
+        left: 164
+        right: 165
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 163
+        right: 166
+        height: 3
+      - key: full.open
+        value: 29
+        left: 151
+        right: 167
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 161
+        right: 168
+        height: 5
+      - key: full.archive.confirm
+        value: 46
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 43
+        left: 170
+        right: null
+        height: 2
+      - key: full.build.check
+        value: 36
+        left: 171
+        right: 155
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: 172
+        right: 160
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 173
+        right: 168
+        height: 5
+      - key: full.archive.confirm
+        value: 47
+        left: null
+        right: null
+        height: 1
+      - key: full.archive.prepare
+        value: 43
+        left: 175
+        right: null
+        height: 2
+      - key: full.build.check
+        value: 36
+        left: 176
+        right: 155
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: 177
+        right: 160
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 178
+        right: 168
+        height: 5
+      - key: full.open
+        value: 29
+        left: null
+        right: null
+        height: 1
+      - key: full.design.confirm
+        value: 25
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.document
+        value: 26
+        left: 181
+        right: 182
+        height: 2
+      - key: full.open.confirm
+        value: 30
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 184
+        right: 185
+        height: 2
+      - key: full.open
+        value: 29
+        left: 183
+        right: 186
+        height: 3
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: null
+        right: null
+        height: 1
+      - key: full.build.confirm
+        value: 24
+        left: 188
+        right: 189
+        height: 2
+      - key: full.design.document
+        value: 26
+        left: null
+        right: null
+        height: 1
+      - key: full.design.handoff
+        value: 28
+        left: null
+        right: null
+        height: 1
+      - key: full.design.evidence
+        value: 27
+        left: 191
+        right: 192
+        height: 2
+      - key: full.design.confirm
+        value: 25
+        left: 190
+        right: 193
+        height: 3
+      - key: full.open
+        value: 29
+        left: 194
+        right: 186
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: 196
+        right: null
+        height: 2
+      - key: full.build.execute
+        value: 35
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan.evidence
+        value: 34
+        left: null
+        right: null
+        height: 1
+      - key: full.build.plan
+        value: 33
+        left: 198
+        right: 199
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 197
+        right: 200
+        height: 3
+      - key: full.open
+        value: 29
+        left: 193
+        right: 186
+        height: 3
+      - key: full.design.confirm
+        value: 25
+        left: 201
+        right: 202
+        height: 4
+      - key: full.build.check
+        value: 36
+        left: null
+        right: null
+        height: 1
+      - key: full.build.configure
+        value: 23
+        left: null
+        right: null
+        height: 1
+      - key: full.build.check.evidence
+        value: 37
+        left: 204
+        right: 205
+        height: 2
+      - key: full.build.confirm
+        value: 24
+        left: 206
+        right: 200
+        height: 3
+      - key: full.verify.run
+        value: 39
+        left: null
+        right: null
+        height: 1
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: 208
+        height: 2
+      - key: full.open.evidence
+        value: 31
+        left: 184
+        right: 209
+        height: 3
+      - key: full.open
+        value: 29
+        left: 193
+        right: 210
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 207
+        right: 211
+        height: 5
+      - key: full.open.revalidate
+        value: 32
+        left: null
+        right: null
+        height: 1
+      - key: full.open.evidence
+        value: 31
+        left: 184
+        right: 213
+        height: 2
+      - key: full.verify.report.evidence
+        value: 38
+        left: null
+        right: null
+        height: 1
+      - key: full.verify.run
+        value: 39
+        left: 215
+        right: null
+        height: 2
+      - key: full.verify.check
+        value: 40
+        left: 214
+        right: 216
+        height: 3
+      - key: full.open
+        value: 29
+        left: 193
+        right: 217
+        height: 4
+      - key: full.design.confirm
+        value: 25
+        left: 207
+        right: 218
+        height: 5
+    maps:
+      - null
+      - 2
+      - 5
+      - 9
+      - 14
+      - 20
+      - 26
+      - 31
+      - 37
+      - 43
+      - 49
+      - 56
+      - 62
+      - 68
+      - 78
+      - 83
+      - 88
+      - 94
+      - 100
+      - 106
+      - 113
+      - 119
+      - 125
+      - 128
+      - 131
+      - 135
+      - 140
+      - 142
+      - 147
+      - 153
+      - 169
+      - 174
+      - 179
+      - 180
+      - 187
+      - 195
+      - 203
+      - 212
+      - 219
+    bindings:
+      - path:
+          - actions
+          - "0"
+          - input
+          - outputs
+        map: 0
+      - path:
+          - actions
+          - "1"
+          - input
+          - outputs
+        map: 1
+      - path:
+          - actions
+          - "2"
+          - input
+          - outputs
+        map: 2
+      - path:
+          - actions
+          - "3"
+          - input
+          - outputs
+        map: 3
+      - path:
+          - actions
+          - "4"
+          - input
+          - outputs
+        map: 4
+      - path:
+          - actions
+          - "5"
+          - input
+          - outputs
+        map: 5
+      - path:
+          - actions
+          - "6"
+          - input
+          - outputs
+        map: 6
+      - path:
+          - actions
+          - "7"
+          - input
+          - outputs
+        map: 7
+      - path:
+          - actions
+          - "8"
+          - input
+          - outputs
+        map: 8
+      - path:
+          - actions
+          - "9"
+          - input
+          - outputs
+        map: 9
+      - path:
+          - actions
+          - "10"
+          - input
+          - outputs
+        map: 10
+      - path:
+          - actions
+          - "11"
+          - input
+          - outputs
+        map: 11
+      - path:
+          - actions
+          - "12"
+          - input
+          - outputs
+        map: 12
+      - path:
+          - actions
+          - "13"
+          - input
+          - outputs
+        map: 13
+      - path:
+          - actionContexts
+          - align-score-deduction:1
+          - results
+        map: 0
+      - path:
+          - actionContexts
+          - align-score-deduction:11
+          - results
+        map: 14
+      - path:
+          - actionContexts
+          - align-score-deduction:13
+          - results
+        map: 15
+      - path:
+          - actionContexts
+          - align-score-deduction:14
+          - results
+        map: 16
+      - path:
+          - actionContexts
+          - align-score-deduction:16
+          - results
+        map: 17
+      - path:
+          - actionContexts
+          - align-score-deduction:18
+          - results
+        map: 18
+      - path:
+          - actionContexts
+          - align-score-deduction:20
+          - results
+        map: 19
+      - path:
+          - actionContexts
+          - align-score-deduction:24
+          - results
+        map: 20
+      - path:
+          - actionContexts
+          - align-score-deduction:25
+          - results
+        map: 21
+      - path:
+          - actionContexts
+          - align-score-deduction:26
+          - results
+        map: 22
+      - path:
+          - actionContexts
+          - align-score-deduction:4
+          - results
+        map: 23
+      - path:
+          - actionContexts
+          - align-score-deduction:5
+          - results
+        map: 24
+      - path:
+          - actionContexts
+          - align-score-deduction:7
+          - results
+        map: 25
+      - path:
+          - actionContexts
+          - align-score-deduction:9
+          - results
+        map: 26
+      - path:
+          - outputs
+        map: 22
+      - path:
+          - waits
+          - "0"
+          - results
+        map: 27
+      - path:
+          - waits
+          - "1"
+          - results
+        map: 28
+      - path:
+          - waits
+          - "2"
+          - results
+        map: 29
+      - path:
+          - waits
+          - "3"
+          - results
+        map: 30
+      - path:
+          - waits
+          - "4"
+          - results
+        map: 31
+      - path:
+          - waits
+          - "5"
+          - results
+        map: 32
+      - path:
+          - evidenceWaits
+          - "0"
+          - results
+        map: 33
+      - path:
+          - evidenceWaits
+          - "1"
+          - results
+        map: 34
+      - path:
+          - evidenceWaits
+          - "2"
+          - results
+        map: 35
+      - path:
+          - evidenceWaits
+          - "3"
+          - results
+        map: 36
+      - path:
+          - evidenceWaits
+          - "4"
+          - results
+        map: 37
+      - path:
+          - evidenceWaits
+          - "5"
+          - results
+        map: 38
+  storageHash: 6563f9ac22bce96e1ee26959e02a8d00ad80edc5675da6f127e09daa0fc4cefd
+check_epoch: 6

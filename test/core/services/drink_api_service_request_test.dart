@@ -88,10 +88,7 @@ void main() {
       await api.isLoggedIn();
       await api.startDrinking(deviceId: 'device123', ptype: 21);
 
-      expect(
-        adapter.captured?.queryParameters['ptype'],
-        21,
-      );
+      expect(adapter.captured?.queryParameters['ptype'], 21);
     });
     test('startDrinking 不带 sign', () async {
       // 实测服务端不校验该接口签名：不带 sign 返回 code:0，
@@ -126,10 +123,10 @@ void main() {
       expect(headers!.containsKey('VersionCode'), isTrue);
       expect(headers.containsKey('User-Agent'), isTrue);
       expect(headers.containsKey('Authorization'), isTrue);
-    expect(headers.containsKey('ApplicationType'), isFalse);
-    expect(headers.containsKey('Accept-Encoding'), isFalse);
-    expect(headers.containsKey('Connection'), isFalse);
-  });
+      expect(headers.containsKey('ApplicationType'), isFalse);
+      expect(headers.containsKey('Accept-Encoding'), isFalse);
+      expect(headers.containsKey('Connection'), isFalse);
+    });
   });
 
   group('DrinkApiService.setUseScore 请求形状', () {
@@ -155,18 +152,20 @@ void main() {
       expect(adapter.captured?.data, {'useScore': 1});
     });
 
-    test('携带 Authorization 与 application/json,不带 ApplicationType 与 sign',
-        () async {
-      final api = DrinkApiService();
-      await api.isLoggedIn();
-      await api.setUseScore();
+    test(
+      '携带 Authorization 与 application/json,不带 ApplicationType 与 sign',
+      () async {
+        final api = DrinkApiService();
+        await api.isLoggedIn();
+        await api.setUseScore();
 
-      final headers = adapter.captured?.headers;
-      expect(headers?['Authorization'], 'abcdefgh12345678');
-      expect(adapter.captured?.contentType, contains('application/json'));
-      expect(headers?.containsKey('ApplicationType'), isFalse);
-      expect((adapter.captured?.data as Map).containsKey('sign'), isFalse);
-    });
+        final headers = adapter.captured?.headers;
+        expect(headers?['Authorization'], 'abcdefgh12345678');
+        expect(adapter.captured?.contentType, contains('application/json'));
+        expect(headers?.containsKey('ApplicationType'), isFalse);
+        expect((adapter.captured?.data as Map).containsKey('sign'), isFalse);
+      },
+    );
 
     test('服务端非零 code 返回失败结果', () async {
       adapter.responseBody = '{"code":-98,"msg":"操作频繁"}';
@@ -237,7 +236,10 @@ void main() {
         phone: '22644212509',
       );
 
-      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
+      expect(
+        adapter.captured?.uri.queryParameters.containsKey('sign'),
+        isFalse,
+      );
     });
 
     test('login 使用官方签名与 iOS 身份', () async {
@@ -251,8 +253,10 @@ void main() {
         options.uri.queryParameters['sign'],
         DrinkApiSigner.loginSign({'authCode': '123456', 'un': '22644212509'}),
       );
-      expect(options.headers['User-Agent'],
-          'iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9');
+      expect(
+        options.headers['User-Agent'],
+        'iLife798/3.1.9 (iPhone; iOS 17.0; Scale/3.00) iOS_ilife798_3.1.9',
+      );
       expect(options.headers['VersionCode'], '3.1.9');
       expect(options.headers.containsKey('ApplicationType'), isFalse);
       expect((options.data as Map).keys.toSet(), {'authCode', 'un'});
@@ -263,9 +267,14 @@ void main() {
       await api.isLoggedIn();
 
       await api.sendSmsCode(
-        doubleRandom: 'rand', captcha: 'abcd', phone: '22644212509',
+        doubleRandom: 'rand',
+        captcha: 'abcd',
+        phone: '22644212509',
       );
-      expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isFalse);
+      expect(
+        adapter.captured?.uri.queryParameters.containsKey('sign'),
+        isFalse,
+      );
 
       await api.login(phone: '22644212509', smsCode: '123456');
       expect(adapter.captured?.uri.queryParameters.containsKey('sign'), isTrue);
@@ -382,8 +391,7 @@ void main() {
     });
 
     test('resolveQrDevice 从 qr/use 提取设备 ID', () async {
-      adapter.responseBody =
-          '{"code":0,"data":{"dev":{"id":"dev-9"}}}';
+      adapter.responseBody = '{"code":0,"data":{"dev":{"id":"dev-9"}}}';
 
       final api = DrinkApiService();
       await api.isLoggedIn();

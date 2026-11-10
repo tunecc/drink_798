@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'"><title>Change walkthrough · 接水前自动同步积分抵扣开关，服务端结算级联（积分 → 钱包 → 支付宝）从此真正扣积分；开关同步失败即中止本次接水。</title>
+<style>
+:root {
+  color-scheme: light dark;
+  --page: #fafbfc;
+  --ink: #202a35;
+  --muted: #566575;
+  --line: #dbe2e8;
+  --accent: #245b85;
+  --highlight: #edf3f7;
+  --hover: #e9eef3;
+  --code-bg: #edf0f4;
+  --code-ink: #263443;
+  --success: #236d4f;
+  --failure: #a83131;
+  --text: 15px;
+  --small: 13px;
+  --label: 12px;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --page: #181d23;
+    --ink: #e4eaf0;
+    --muted: #a4b1be;
+    --line: #35404b;
+    --accent: #94c6ec;
+    --highlight: #222e39;
+    --hover: #27323d;
+    --code-bg: #10161d;
+    --code-ink: #e0e8f0;
+    --success: #8ed8b5;
+    --failure: #ffb0a8;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--page);
+  color: var(--ink);
+  font: var(--text)/1.65 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+main { max-width: 1040px; margin: auto; padding: 32px 32px 48px; }
+.eyebrow { color: var(--accent); font-size: var(--label); font-weight: 500; letter-spacing: .08em; }
+h1 { margin: 8px 0 12px; max-width: 32em; font-size: 28px; font-weight: 500; line-height: 1.4; letter-spacing: -.02em; overflow-wrap: anywhere; }
+h2 { margin: 0; font-size: 18px; font-weight: 500; line-height: 1.5; overflow-wrap: anywhere; }
+h3 { margin: 0 0 4px; color: var(--muted); font-size: var(--label); font-weight: 500; }
+p { margin: 0; white-space: pre-wrap; overflow-wrap: anywhere; }
+strong { font-weight: 500; }
+.meta { margin-bottom: 24px; color: var(--muted); font-size: var(--small); overflow-wrap: anywhere; }
+.meta p + p { margin-top: 2px; }
+article { padding: 20px 0 12px; border-top: 1px solid var(--line); }
+article header { display: flex; align-items: baseline; gap: 12px; margin-bottom: 12px; }
+.number { color: var(--muted); font: var(--label)/1.5 ui-monospace, Consolas, monospace; font-variant-numeric: tabular-nums; }
+.comparison { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.comparison section { min-width: 0; padding: 12px; }
+.after { background: var(--highlight); border-radius: 4px; }
+.after h3 { color: var(--accent); }
+.reason { margin-top: 12px; font-size: var(--small); color: var(--muted); }
+.reason strong { margin-right: 8px; color: var(--ink); }
+summary { min-height: 44px; padding: 10px 4px; cursor: pointer; font-size: var(--small); font-weight: 500; border-radius: 4px; }
+summary:hover { background: var(--hover); }
+summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.count, .tag { color: var(--muted); font-size: var(--label); font-weight: 400; }
+.count { margin-left: 4px; font-variant-numeric: tabular-nums; }
+.file { min-width: 0; padding: 0 0 16px; scroll-margin-top: 20px; }
+.file:target { outline: 2px solid var(--accent); outline-offset: 4px; }
+.file-heading { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.file-heading code { min-width: 0; font-size: var(--small); overflow-wrap: anywhere; }
+.tag { white-space: nowrap; }
+pre { margin: 8px 0 0; padding: 12px 16px; overflow: auto; background: var(--code-bg); color: var(--code-ink); border-radius: 4px; font: var(--small)/1.65 ui-monospace, Consolas, monospace; tab-size: 2; }
+footer { margin-top: 12px; padding-top: 20px; border-top: 1px solid var(--line); }
+footer h2 { margin-bottom: 8px; }
+.check { display: grid; grid-template-columns: 72px minmax(0, 1fr); gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.status { padding-top: 2px; font-size: var(--label); font-weight: 500; }
+.passed { color: var(--success); }
+.failed { color: var(--failure); }
+.not-run, .unknown { color: var(--muted); }
+.check p { margin-top: 2px; color: var(--muted); font-size: var(--small); }
+.more { border-top: 1px solid var(--line); }
+.more > summary { padding-block: 12px; }
+.diagram { margin: 0; padding: 20px 0; border-top: 1px solid var(--line); }
+.diagram figcaption { margin-bottom: 12px; font-size: 18px; font-weight: 500; overflow-wrap: anywhere; }
+.diagram-svg { display: block; max-width: 100%; height: auto; margin: auto; overflow: visible; font: 13px system-ui, -apple-system, "Segoe UI", sans-serif; }
+.diagram-svg text { fill: var(--ink); }
+.diagram-edge { fill: none; stroke: var(--muted); stroke-width: 1.5; }
+.diagram-svg marker path { fill: var(--muted); }
+.diagram-edge-label { fill: var(--page); }
+.diagram-svg .diagram-edge-text { fill: var(--muted); font-size: 12px; }
+.diagram-node rect { fill: var(--page); stroke: var(--line); stroke-width: 1.5; }
+.diagram-node.modified rect { fill: var(--highlight); stroke: var(--accent); }
+.diagram-node.added rect { stroke: var(--success); }
+.diagram-node.deleted rect { stroke: var(--failure); stroke-dasharray: 4 3; }
+.diagram-svg .diagram-kind { fill: var(--muted); font-size: 11px; }
+.diagram-node[href] { cursor: pointer; }
+.diagram-node[href]:hover rect, .diagram-node[href]:focus-visible rect { stroke: var(--accent); stroke-width: 2.5; }
+.diagram-node[href]:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.diagram-hint { margin-top: 12px; color: var(--muted); font-size: var(--small); text-align: center; }
+.diagram-comparison { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 16px; }
+.diagram-comparison > section { min-width: 0; padding: 12px; border: 1px solid var(--line); border-radius: 4px; }
+.diagram-comparison > section > h3 { margin-bottom: 12px; }
+.diagram-compact { display: none; }
+@media (max-width: 999px) {
+  .diagram-wide { display: none; }
+  .diagram-compact { display: block; }
+}
+@media (max-width: 640px) {
+  main { padding: 24px 16px 32px; }
+  h1 { font-size: 24px; }
+  .meta { margin-bottom: 20px; }
+  article { padding-top: 16px; }
+  article header { gap: 8px; }
+  .comparison { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .check { grid-template-columns: 60px minmax(0, 1fr); gap: 8px; }
+  pre { padding: 12px; }
+  .diagram-comparison { grid-template-columns: minmax(0,1fr); }
+  .diagram-comparison > section { padding: 12px 0; border: 0; }
+}
+</style></head><body><main><div class="eyebrow">COMET / Change walkthrough</div><h1>接水前自动同步积分抵扣开关，服务端结算级联（积分 → 钱包 → 支付宝）从此真正扣积分；开关同步失败即中止本次接水。</h1><div class="meta"><p>Comparison scope · base e61f6f4 → a6c4eec 两个已提交 feature + 工作区版本号 1.1.0 与 CHANGELOG；真机验证已由用户完成。</p><p>Generated · 2026-11-10T01:11:53.353Z</p></div><figure class="diagram"><figcaption>开始接水路径</figcaption><div class="diagram-wide"><svg class="diagram-svg" width="546" height="208" viewBox="0 0 546 208" role="group" aria-labelledby="walkthrough-diagram-0-wide-title walkthrough-diagram-0-wide-description"><title id="walkthrough-diagram-0-wide-title">开始接水路径</title><desc id="walkthrough-diagram-0-wide-description">设备预检 → 占用→接管结算(不同步) (设备使用中); 设备预检 → setUseScore 开关同步; setUseScore 开关同步 → dev/start ptype=91 (成功); setUseScore 开关同步 → 失败→专用提示中止 (失败)</desc><defs><marker id="walkthrough-diagram-0-wide-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 z"/></marker></defs><path class="diagram-edge" d="M 132 104 C 172.5 104, 172.5 50, 210 50" marker-end="url(#walkthrough-diagram-0-wide-arrow)"/><rect class="diagram-edge-label" x="136" y="66" width="73" height="22"/><text class="diagram-edge-text" x="172.5" y="81" text-anchor="middle"><tspan x="172.5" dy="0">设备使用中</tspan></text><path class="diagram-edge" d="M 132 104 C 172.5 104, 172.5 158, 210 158" marker-end="url(#walkthrough-diagram-0-wide-arrow)"/><path class="diagram-edge" d="M 333 158 C 373.5 158, 373.5 50, 411 50" marker-end="url(#walkthrough-diagram-0-wide-arrow)"/><rect class="diagram-edge-label" x="356.5" y="93" width="34" height="22"/><text class="diagram-edge-text" x="373.5" y="108" text-anchor="middle"><tspan x="373.5" dy="0">成功</tspan></text><path class="diagram-edge" d="M 333 158 C 373.5 158, 373.5 158, 411 158" marker-end="url(#walkthrough-diagram-0-wide-arrow)"/><rect class="diagram-edge-label" x="356.5" y="147" width="34" height="22"/><text class="diagram-edge-text" x="373.5" y="162" text-anchor="middle"><tspan x="373.5" dy="0">失败</tspan></text><g class="diagram-node "><rect x="12" y="66" width="120" height="76" rx="5"/><text class="" x="72" y="108" text-anchor="middle"><tspan x="72" dy="0">设备预检</tspan></text></g><g class="diagram-node "><rect x="213" y="12" width="120" height="76" rx="5"/><text class="" x="273" y="45" text-anchor="middle"><tspan x="273" dy="0">占用→接管结算</tspan><tspan x="273" dy="18">(不同步)</tspan></text></g><a class="diagram-node added" href="#walkthrough-file-0-0" aria-label="setUseScore 开关同步 · lib/core/services/drink_api_service.dart:435"><rect x="213" y="120" width="120" height="76" rx="5"/><text class="diagram-kind" x="273" y="137" text-anchor="middle"><tspan x="273" dy="0">Added</tspan></text><text class="" x="273" y="155" text-anchor="middle"><tspan x="273" dy="0">setUseScore</tspan><tspan x="273" dy="18">开关同步</tspan></text></a><g class="diagram-node "><rect x="414" y="12" width="120" height="76" rx="5"/><text class="" x="474" y="45" text-anchor="middle"><tspan x="474" dy="0">dev/start</tspan><tspan x="474" dy="18">ptype=91</tspan></text></g><g class="diagram-node "><rect x="414" y="120" width="120" height="76" rx="5"/><text class="" x="474" y="153" text-anchor="middle"><tspan x="474" dy="0">失败→专用提示</tspan><tspan x="474" dy="18">中止</tspan></text></g></svg></div><div class="diagram-compact"><svg class="diagram-svg" width="272" height="324" viewBox="0 0 272 324" role="group" aria-labelledby="walkthrough-diagram-0-compact-title walkthrough-diagram-0-compact-description"><title id="walkthrough-diagram-0-compact-title">开始接水路径</title><desc id="walkthrough-diagram-0-compact-description">设备预检 → 占用→接管结算(不同步) (设备使用中); 设备预检 → setUseScore 开关同步; setUseScore 开关同步 → dev/start ptype=91 (成功); setUseScore 开关同步 → 失败→专用提示中止 (失败)</desc><defs><marker id="walkthrough-diagram-0-compact-arrow" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="6" markerHeight="6" orient="auto"><path d="M 0 0 L 8 4 L 0 8 z"/></marker></defs><path class="diagram-edge" d="M 136 88 C 136 106, 68 106, 68 121" marker-end="url(#walkthrough-diagram-0-compact-arrow)"/><rect class="diagram-edge-label" x="65.5" y="95" width="73" height="22"/><text class="diagram-edge-text" x="102" y="110" text-anchor="middle"><tspan x="102" dy="0">设备使用中</tspan></text><path class="diagram-edge" d="M 136 88 C 136 106, 204 106, 204 121" marker-end="url(#walkthrough-diagram-0-compact-arrow)"/><path class="diagram-edge" d="M 204 200 C 204 218, 68 218, 68 233" marker-end="url(#walkthrough-diagram-0-compact-arrow)"/><rect class="diagram-edge-label" x="119" y="207" width="34" height="22"/><text class="diagram-edge-text" x="136" y="222" text-anchor="middle"><tspan x="136" dy="0">成功</tspan></text><path class="diagram-edge" d="M 204 200 C 204 218, 204 218, 204 233" marker-end="url(#walkthrough-diagram-0-compact-arrow)"/><rect class="diagram-edge-label" x="187" y="207" width="34" height="22"/><text class="diagram-edge-text" x="204" y="222" text-anchor="middle"><tspan x="204" dy="0">失败</tspan></text><g class="diagram-node "><rect x="80" y="12" width="112" height="76" rx="5"/><text class="" x="136" y="54" text-anchor="middle"><tspan x="136" dy="0">设备预检</tspan></text></g><g class="diagram-node "><rect x="12" y="124" width="112" height="76" rx="5"/><text class="" x="68" y="157" text-anchor="middle"><tspan x="68" dy="0">占用→接管结</tspan><tspan x="68" dy="18">算(不同步)</tspan></text></g><a class="diagram-node added" href="#walkthrough-file-0-0" aria-label="setUseScore 开关同步 · lib/core/services/drink_api_service.dart:435"><rect x="148" y="124" width="112" height="76" rx="5"/><text class="diagram-kind" x="204" y="141" text-anchor="middle"><tspan x="204" dy="0">Added</tspan></text><text class="" x="204" y="159" text-anchor="middle"><tspan x="204" dy="0">setUseScore</tspan><tspan x="204" dy="18">开关同步</tspan></text></a><g class="diagram-node "><rect x="12" y="236" width="112" height="76" rx="5"/><text class="" x="68" y="269" text-anchor="middle"><tspan x="68" dy="0">dev/start</tspan><tspan x="68" dy="18">ptype=91</tspan></text></g><g class="diagram-node "><rect x="148" y="236" width="112" height="76" rx="5"/><text class="" x="204" y="269" text-anchor="middle"><tspan x="204" dy="0">失败→专用提</tspan><tspan x="204" dy="18">示中止</tspan></text></g></svg></div><p class="diagram-hint">Follow linked nodes to the related code.</p></figure><article><header><span class="number">01</span><h2>新增 setUseScore API</h2></header><div class="comparison"><section><h3>Before</h3><p>应用从不发送 acc/upt，账号积分抵扣开关无法控制，开关关闭时积分全程不动</p></section><section class="after"><h3>After</h3><p>POST acc/upt，JSON body 恰为 {&quot;useScore&quot;:1}，仅 Authorization（无 sign、无 ApplicationType）</p></section></div><p class="reason"><strong>Why</strong> 服务端级联只在开关开启时扣积分；镜像官方与参考客户端行为</p><details><summary>Files and key code <span class="count">1</span></summary><div class="file" id="walkthrough-file-0-0"><div class="file-heading"><span class="tag">Added</span><code>lib/core/services/drink_api_service.dart:435</code></div><pre><code>Future&lt;DrinkResult&gt; setUseScore({int value = 1}) async {
+  Response response = await _dio.post(&quot;$_baseUrl/acc/upt&quot;,
+    data: {&quot;useScore&quot;: value}, options: await _authOptions());
+  return _toResult(response.data);
+}</code></pre></div></details></article><article><header><span class="number">02</span><h2>启动前同步开关，失败即中止</h2></header><div class="comparison"><section><h3>Before</h3><p>预检通过后直接发 dev/start（ptype=91），开关关闭时账单全额走钱包/支付宝</p></section><section class="after"><h3>After</h3><p>预检通过、发出唯一开始请求之前先 setUseScore；失败给专用提示并不发送 dev/start，不自动重试；设备占用的接管路径提前 return，不同步</p></section></div><p class="reason"><strong>Why</strong> 绝不让用户在积分不抵扣的情况下被静默扣款</p><details><summary>Files and key code <span class="count">1</span></summary><div class="file" id="walkthrough-file-1-0"><div class="file-heading"><span class="tag">Modified</span><code>lib/features/home/home_controller.dart:407</code></div><pre><code>final switchSync = await _apiService.setUseScore();
+if (!switchSync.success) {
+  _err(&#39;积分抵扣开关同步失败（$reason），本次未开始接水&#39;);
+  return;
+}
+// 之后才是唯一的 dev/start</code></pre></div></details></article><article><header><span class="number">03</span><h2>版本 1.1.0 + 更新日志</h2></header><div class="comparison"><section><h3>Before</h3><p>1.0.9+9</p></section><section class="after"><h3>After</h3><p>1.1.0+10，CHANGELOG 按 Keep a Changelog 新增 1.1.0 条目，关于对话框版本同步</p></section></div><p class="reason"><strong>Why</strong> 发版准备</p><details><summary>Files and key code <span class="count">2</span></summary><div class="file" id="walkthrough-file-2-0"><div class="file-heading"><span class="tag">Modified</span><code>pubspec.yaml:5</code></div><pre><code>version: 1.1.0+10</code></pre></div><div class="file" id="walkthrough-file-2-1"><div class="file-heading"><span class="tag">Modified</span><code>lib/features/home/home_page.dart:1375</code></div><pre><code>const Text(&#39;版本: 1.1.0&#39;)</code></pre></div></details></article><footer><h2>Actual verification</h2><div class="check"><span class="status passed">Passed</span><div><strong>Builder 自检</strong><p>fvm flutter test 180/180 通过（Build 与 Verify Guard 各实跑一次）</p></div></div><div class="check"><span class="status passed">Passed</span><div><strong>Runtime Build 检查</strong><p>comet guard build --apply：ALL CHECKS PASSED，收据已提交</p></div></div><div class="check"><span class="status passed">Passed</span><div><strong>独立最终集成审查</strong><p>独立审查代理实测 180/180；无 Critical/Important；Minor 缩进已格式化修复</p></div></div><div class="check"><span class="status passed">Passed</span><div><strong>真机验证（用户）</strong><p>2026-11-10：账单带积分抵扣（promo.type=4/discount），积分余额减少</p></div></div><div class="check"><span class="status passed">Passed</span><div><strong>Runtime Verify 检查</strong><p>comet guard verify --report --apply：ALL CHECKS PASSED，报告收据已提交</p></div></div></footer></main><template id="walkthrough-data">eyJzdW1tYXJ5Ijoi5o6l5rC05YmN6Ieq5Yqo5ZCM5q2l56ev5YiG5oq15omj5byA5YWz77yM5pyN5Yqh56uv57uT566X57qn6IGU77yI56ev5YiGIOKGkiDpkrHljIUg4oaSIOaUr+S7mOWune+8ieS7juatpOecn+ato+aJo+enr+WIhu+8m+W8gOWFs+WQjOatpeWksei0peWNs+S4reatouacrOasoeaOpeawtOOAgiIsInNjb3BlIjoiYmFzZSBlNjFmNmY0IOKGkiBhNmM0ZWVjIOS4pOS4quW3suaPkOS6pCBmZWF0dXJlICsg5bel5L2c5Yy654mI5pys5Y+3IDEuMS4wIOS4jiBDSEFOR0VMT0fvvJvnnJ/mnLrpqozor4Hlt7LnlLHnlKjmiLflrozmiJDjgIIiLCJjaGFuZ2VzIjpbeyJ0aXRsZSI6IuaWsOWiniBzZXRVc2VTY29yZSBBUEkiLCJiZWZvcmUiOiLlupTnlKjku47kuI3lj5HpgIEgYWNjL3VwdO+8jOi0puWPt+enr+WIhuaKteaJo+W8gOWFs+aXoOazleaOp+WItu+8jOW8gOWFs+WFs+mXreaXtuenr+WIhuWFqOeoi+S4jeWKqCIsImFmdGVyIjoiUE9TVCBhY2MvdXB077yMSlNPTiBib2R5IOaBsOS4uiB7XCJ1c2VTY29yZVwiOjF977yM5LuFIEF1dGhvcml6YXRpb27vvIjml6Agc2lnbuOAgeaXoCBBcHBsaWNhdGlvblR5cGXvvIkiLCJyZWFzb24iOiLmnI3liqHnq6/nuqfogZTlj6rlnKjlvIDlhbPlvIDlkK/ml7bmiaPnp6/liIbvvJvplZzlg4/lrpjmlrnkuI7lj4LogIPlrqLmiLfnq6/ooYzkuLoiLCJmaWxlcyI6W3sicGF0aCI6ImxpYi9jb3JlL3NlcnZpY2VzL2RyaW5rX2FwaV9zZXJ2aWNlLmRhcnQ6NDM1Iiwia2luZCI6ImFkZGVkIiwiY29kZSI6IkZ1dHVyZTxEcmlua1Jlc3VsdD4gc2V0VXNlU2NvcmUoe2ludCB2YWx1ZSA9IDF9KSBhc3luYyB7XG4gIFJlc3BvbnNlIHJlc3BvbnNlID0gYXdhaXQgX2Rpby5wb3N0KFwiJF9iYXNlVXJsL2FjYy91cHRcIixcbiAgICBkYXRhOiB7XCJ1c2VTY29yZVwiOiB2YWx1ZX0sIG9wdGlvbnM6IGF3YWl0IF9hdXRoT3B0aW9ucygpKTtcbiAgcmV0dXJuIF90b1Jlc3VsdChyZXNwb25zZS5kYXRhKTtcbn0ifV19LHsidGl0bGUiOiLlkK/liqjliY3lkIzmraXlvIDlhbPvvIzlpLHotKXljbPkuK3mraIiLCJiZWZvcmUiOiLpooTmo4DpgJrov4flkI7nm7TmjqXlj5EgZGV2L3N0YXJ077yIcHR5cGU9OTHvvInvvIzlvIDlhbPlhbPpl63ml7botKbljZXlhajpop3otbDpkrHljIUv5pSv5LuY5a6dIiwiYWZ0ZXIiOiLpooTmo4DpgJrov4fjgIHlj5Hlh7rllK/kuIDlvIDlp4vor7fmsYLkuYvliY3lhYggc2V0VXNlU2NvcmXvvJvlpLHotKXnu5nkuJPnlKjmj5DnpLrlubbkuI3lj5HpgIEgZGV2L3N0YXJ077yM5LiN6Ieq5Yqo6YeN6K+V77yb6K6+5aSH5Y2g55So55qE5o6l566h6Lev5b6E5o+Q5YmNIHJldHVybu+8jOS4jeWQjOatpSIsInJlYXNvbiI6Iue7neS4jeiuqeeUqOaIt+WcqOenr+WIhuS4jeaKteaJo+eahOaDheWGteS4i+iiq+mdmem7mOaJo+asviIsImZpbGVzIjpbeyJwYXRoIjoibGliL2ZlYXR1cmVzL2hvbWUvaG9tZV9jb250cm9sbGVyLmRhcnQ6NDA3Iiwia2luZCI6Im1vZGlmaWVkIiwiY29kZSI6ImZpbmFsIHN3aXRjaFN5bmMgPSBhd2FpdCBfYXBpU2VydmljZS5zZXRVc2VTY29yZSgpO1xuaWYgKCFzd2l0Y2hTeW5jLnN1Y2Nlc3MpIHtcbiAgX2Vycign56ev5YiG5oq15omj5byA5YWz5ZCM5q2l5aSx6LSl77yIJHJlYXNvbu+8ie+8jOacrOasoeacquW8gOWni+aOpeawtCcpO1xuICByZXR1cm47XG59XG4vLyDkuYvlkI7miY3mmK/llK/kuIDnmoQgZGV2L3N0YXJ0In1dfSx7InRpdGxlIjoi54mI5pysIDEuMS4wICsg5pu05paw5pel5b+XIiwiYmVmb3JlIjoiMS4wLjkrOSIsImFmdGVyIjoiMS4xLjArMTDvvIxDSEFOR0VMT0cg5oyJIEtlZXAgYSBDaGFuZ2Vsb2cg5paw5aKeIDEuMS4wIOadoeebru+8jOWFs+S6juWvueivneahhueJiOacrOWQjOatpSIsInJlYXNvbiI6IuWPkeeJiOWHhuWkhyIsImZpbGVzIjpbeyJwYXRoIjoicHVic3BlYy55YW1sOjUiLCJraW5kIjoibW9kaWZpZWQiLCJjb2RlIjoidmVyc2lvbjogMS4xLjArMTAifSx7InBhdGgiOiJsaWIvZmVhdHVyZXMvaG9tZS9ob21lX3BhZ2UuZGFydDoxMzc1Iiwia2luZCI6Im1vZGlmaWVkIiwiY29kZSI6ImNvbnN0IFRleHQoJ+eJiOacrDogMS4xLjAnKSJ9XX1dLCJ2ZXJpZmljYXRpb24iOlt7ImxhYmVsIjoiQnVpbGRlciDoh6rmo4AiLCJzdGF0dXMiOiJwYXNzZWQiLCJkZXRhaWwiOiJmdm0gZmx1dHRlciB0ZXN0IDE4MC8xODAg6YCa6L+H77yIQnVpbGQg5LiOIFZlcmlmeSBHdWFyZCDlkITlrp7ot5HkuIDmrKHvvIkifSx7ImxhYmVsIjoiUnVudGltZSBCdWlsZCDmo4Dmn6UiLCJzdGF0dXMiOiJwYXNzZWQiLCJkZXRhaWwiOiJjb21ldCBndWFyZCBidWlsZCAtLWFwcGx577yaQUxMIENIRUNLUyBQQVNTRUTvvIzmlLbmja7lt7Lmj5DkuqQifSx7ImxhYmVsIjoi54us56uL5pyA57uI6ZuG5oiQ5a6h5p+lIiwic3RhdHVzIjoicGFzc2VkIiwiZGV0YWlsIjoi54us56uL5a6h5p+l5Luj55CG5a6e5rWLIDE4MC8xODDvvJvml6AgQ3JpdGljYWwvSW1wb3J0YW5077ybTWlub3Ig57yp6L+b5bey5qC85byP5YyW5L+u5aSNIn0seyJsYWJlbCI6Iuecn+acuumqjOivge+8iOeUqOaIt++8iSIsInN0YXR1cyI6InBhc3NlZCIsImRldGFpbCI6IjIwMjYtMTEtMTDvvJrotKbljZXluKbnp6/liIbmirXmiaPvvIhwcm9tby50eXBlPTQvZGlzY291bnTvvInvvIznp6/liIbkvZnpop3lh4/lsJEifSx7ImxhYmVsIjoiUnVudGltZSBWZXJpZnkg5qOA5p+lIiwic3RhdHVzIjoicGFzc2VkIiwiZGV0YWlsIjoiY29tZXQgZ3VhcmQgdmVyaWZ5IC0tcmVwb3J0IC0tYXBwbHnvvJpBTEwgQ0hFQ0tTIFBBU1NFRO+8jOaKpeWRiuaUtuaNruW3suaPkOS6pCJ9XSwiZGlhZ3JhbXMiOlt7InR5cGUiOiJmbG93IiwidGl0bGUiOiLlvIDlp4vmjqXmsLTot6/lvoQiLCJub2RlcyI6W3siaWQiOiJwcmVjaGVjayIsImxhYmVsIjoi6K6+5aSH6aKE5qOAIn0seyJpZCI6ImFkb3B0IiwibGFiZWwiOiLljaDnlKjihpLmjqXnrqHnu5Pnrpco5LiN5ZCM5q2lKSJ9LHsiaWQiOiJzeW5jIiwibGFiZWwiOiJzZXRVc2VTY29yZSDlvIDlhbPlkIzmraUiLCJmaWxlIjoibGliL2NvcmUvc2VydmljZXMvZHJpbmtfYXBpX3NlcnZpY2UuZGFydDo0MzUiLCJraW5kIjoiYWRkZWQifSx7ImlkIjoic3RhcnQiLCJsYWJlbCI6ImRldi9zdGFydCBwdHlwZT05MSJ9LHsiaWQiOiJhYm9ydCIsImxhYmVsIjoi5aSx6LSl4oaS5LiT55So5o+Q56S65Lit5q2iIn1dLCJlZGdlcyI6W3siZnJvbSI6InByZWNoZWNrIiwidG8iOiJhZG9wdCIsImxhYmVsIjoi6K6+5aSH5L2/55So5LitIn0seyJmcm9tIjoicHJlY2hlY2siLCJ0byI6InN5bmMifSx7ImZyb20iOiJzeW5jIiwidG8iOiJzdGFydCIsImxhYmVsIjoi5oiQ5YqfIn0seyJmcm9tIjoic3luYyIsInRvIjoiYWJvcnQiLCJsYWJlbCI6IuWksei0pSJ9XX1dfQ==</template></body></html>
